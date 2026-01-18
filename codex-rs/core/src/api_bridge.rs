@@ -6,6 +6,7 @@ use codex_api::error::ApiError;
 use codex_api::rate_limits::parse_rate_limit;
 use http::HeaderMap;
 use serde::Deserialize;
+use std::time::Duration;
 
 use crate::auth::CodexAuth;
 use crate::error::CodexErr;
@@ -66,10 +67,16 @@ pub(crate) fn map_api_error(err: ApiError) -> CodexErr {
                         }
                     }
 
-                    CodexErr::RetryLimit(RetryLimitReachedError {
-                        status,
-                        request_id: extract_request_id(headers.as_ref()),
-                    })
+                    let delay = retry_after_delay(headers.as_ref());
+                    let request_id = extract_request_id(headers.as_ref());
+                    let mut message = format!("rate limited (status {status})");
+                    if !body_text.trim().is_empty() {
+                        message.push_str(&format!(": {body_text}"));
+                    }
+                    if let Some(id) = &request_id {
+                        message.push_str(&format!(", request id: {id}"));
+                    }
+                    CodexErr::Stream(message, delay)
                 } else {
                     CodexErr::UnexpectedStatus(UnexpectedResponseError {
                         status,
@@ -101,6 +108,15 @@ fn extract_request_id(headers: Option<&HeaderMap>) -> Option<String> {
                     .and_then(|v| v.to_str().ok())
                     .map(str::to_string)
             })
+    })
+}
+
+fn retry_after_delay(headers: Option<&HeaderMap>) -> Option<Duration> {
+    headers.and_then(|map| {
+        map.get("retry-after")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|raw| raw.parse::<u64>().ok())
+            .map(Duration::from_secs)
     })
 }
 
