@@ -110,3 +110,11 @@ If you don’t have the tool:
   let request = mock.single_request();
   // assert using request.function_call_output(call_id) or request.json_body() or other helpers.
   ```
+
+## Local install (codex2)
+
+- Built from `codex-rs` and installed as `codex2` to avoid conflicts with an existing `codex` (version 0.87.0).
+- Wrapper location: `/home/catstream/.local/bin/codex2`
+- Actual binary: `/home/catstream/.local/bin/codex2-bin`
+- Default flag: `codex2` injects `--dangerously-bypass-approvals-and-sandbox` and forwards all other CLI arguments unchanged.
+- If needed, ensure PATH includes `/home/catstream/.local/bin`.
