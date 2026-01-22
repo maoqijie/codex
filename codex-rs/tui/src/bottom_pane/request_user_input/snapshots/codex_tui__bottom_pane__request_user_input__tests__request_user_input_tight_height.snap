@@ -2,11 +2,11 @@
 source: tui/src/bottom_pane/request_user_input/mod.rs
 expression: "render_snapshot(&overlay, area)"
 ---
-Question 1/1                                                
+问 题  1/1                                                    
 Area                                                        
 Choose an option.                                           
 (x) Option 1  First choice.                                 
 ( ) Option 2  Second choice.                                
 ( ) Option 3  Third choice.                                 
-Notes: Add notes (optional)                                 
-Option 1 of 3 | ↑/↓ scroll | enter next question | esc inter
+备 注 ：    添 加 备 注 （ 可 选 ）                                    
+选 项  1/3 | ↑/↓ 滚 动  | enter 下 一 题  | esc 中 断

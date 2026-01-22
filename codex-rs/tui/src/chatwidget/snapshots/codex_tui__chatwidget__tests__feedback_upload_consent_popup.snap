@@ -2,13 +2,12 @@
 source: tui/src/chatwidget/tests.rs
 expression: popup
 ---
-  Upload logs?
+  上 传 日 志 ？
 
-  The following files will be sent:
+  将 发 送 以 下 文 件 ：
     • codex-logs.log
 
-› 1. Yes  Share the current Codex session logs with the team for
-          troubleshooting.
-  2. No
+› 1. 是   与 团 队 共 享 当 前  Codex 会 话 日 志 以 便 排 查 问 题 。
+  2. 否   不 上 传 日 志 。
 
-  Press enter to confirm or esc to go back
+  按  enter 确 认 ， 或 按  esc 返 回

@@ -60,7 +60,7 @@ pub fn review_prompt(target: &ReviewTarget, cwd: &Path) -> anyhow::Result<String
         ReviewTarget::Custom { instructions } => {
             let prompt = instructions.trim();
             if prompt.is_empty() {
-                anyhow::bail!("Review prompt cannot be empty");
+                anyhow::bail!("审查提示不能为空");
             }
             Ok(prompt.to_string())
         }
@@ -69,14 +69,14 @@ pub fn review_prompt(target: &ReviewTarget, cwd: &Path) -> anyhow::Result<String
 
 pub fn user_facing_hint(target: &ReviewTarget) -> String {
     match target {
-        ReviewTarget::UncommittedChanges => "current changes".to_string(),
-        ReviewTarget::BaseBranch { branch } => format!("changes against '{branch}'"),
+        ReviewTarget::UncommittedChanges => "当前改动".to_string(),
+        ReviewTarget::BaseBranch { branch } => format!("针对 '{branch}' 的改动"),
         ReviewTarget::Commit { sha, title } => {
             let short_sha: String = sha.chars().take(7).collect();
             if let Some(title) = title {
-                format!("commit {short_sha}: {title}")
+                format!("提交 {short_sha}：{title}")
             } else {
-                format!("commit {short_sha}")
+                format!("提交 {short_sha}")
             }
         }
         ReviewTarget::Custom { instructions } => instructions.trim().to_string(),

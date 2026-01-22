@@ -316,15 +316,15 @@ fn supported_reasoning_level_low_medium_high() -> Vec<ReasoningEffortPreset> {
     vec![
         ReasoningEffortPreset {
             effort: ReasoningEffort::Low,
-            description: "Fast responses with lighter reasoning".to_string(),
+            description: "更轻量的推理，响应更快。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::Medium,
-            description: "Balances speed and reasoning depth for everyday tasks".to_string(),
+            description: "为日常任务在速度与推理深度之间取得平衡。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::High,
-            description: "Greater reasoning depth for complex problems".to_string(),
+            description: "适用于复杂问题的更深推理。".to_string(),
         },
     ]
 }
@@ -333,15 +333,15 @@ fn supported_reasoning_level_low_medium_high_non_codex() -> Vec<ReasoningEffortP
     vec![
         ReasoningEffortPreset {
             effort: ReasoningEffort::Low,
-            description: "Balances speed with some reasoning; useful for straightforward queries and short explanations".to_string(),
+            description: "兼顾速度与一定推理，适合直接问题和简短说明。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::Medium,
-            description: "Provides a solid balance of reasoning depth and latency for general-purpose tasks".to_string(),
+            description: "为通用任务在推理深度与延迟之间取得稳妥平衡。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::High,
-            description: "Maximizes reasoning depth for complex or ambiguous problems".to_string(),
+            description: "为复杂或模糊问题提供最深推理。".to_string(),
         },
     ]
 }
@@ -350,19 +350,19 @@ fn supported_reasoning_level_low_medium_high_xhigh() -> Vec<ReasoningEffortPrese
     vec![
         ReasoningEffortPreset {
             effort: ReasoningEffort::Low,
-            description: "Fast responses with lighter reasoning".to_string(),
+            description: "更轻量的推理，响应更快。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::Medium,
-            description: "Balances speed and reasoning depth for everyday tasks".to_string(),
+            description: "为日常任务在速度与推理深度之间取得平衡。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::High,
-            description: "Greater reasoning depth for complex problems".to_string(),
+            description: "适用于复杂问题的更深推理。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::XHigh,
-            description: "Extra high reasoning depth for complex problems".to_string(),
+            description: "适用于复杂问题的超高推理深度。".to_string(),
         },
     ]
 }
@@ -371,19 +371,19 @@ fn supported_reasoning_level_low_medium_high_xhigh_non_codex() -> Vec<ReasoningE
     vec![
         ReasoningEffortPreset {
             effort: ReasoningEffort::Low,
-            description: "Balances speed with some reasoning; useful for straightforward queries and short explanations".to_string(),
+            description: "兼顾速度与一定推理，适合直接问题和简短说明。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::Medium,
-            description: "Provides a solid balance of reasoning depth and latency for general-purpose tasks".to_string(),
+            description: "为通用任务在推理深度与延迟之间取得稳妥平衡。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::High,
-            description: "Maximizes reasoning depth for complex or ambiguous problems".to_string(),
+            description: "为复杂或模糊问题提供最深推理。".to_string(),
         },
         ReasoningEffortPreset {
             effort: ReasoningEffort::XHigh,
-            description: "Extra high reasoning for complex problems".to_string(),
+            description: "适用于复杂问题的超高推理强度。".to_string(),
         },
     ]
 }

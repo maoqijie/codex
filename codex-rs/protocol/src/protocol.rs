@@ -2014,9 +2014,9 @@ pub enum McpAuthStatus {
 impl fmt::Display for McpAuthStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let text = match self {
-            McpAuthStatus::Unsupported => "Unsupported",
-            McpAuthStatus::NotLoggedIn => "Not logged in",
-            McpAuthStatus::BearerToken => "Bearer token",
+            McpAuthStatus::Unsupported => "不支持",
+            McpAuthStatus::NotLoggedIn => "未登录",
+            McpAuthStatus::BearerToken => "Bearer 令牌",
             McpAuthStatus::OAuth => "OAuth",
         };
         f.write_str(text)

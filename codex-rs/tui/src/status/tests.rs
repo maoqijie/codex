@@ -64,10 +64,10 @@ fn sanitize_directory(lines: Vec<String>) -> Vec<String> {
     lines
         .into_iter()
         .map(|line| {
-            if let (Some(dir_pos), Some(pipe_idx)) = (line.find("Directory: "), line.rfind('│')) {
-                let prefix = &line[..dir_pos + "Directory: ".len()];
+            if let (Some(dir_pos), Some(pipe_idx)) = (line.find("目录: "), line.rfind('│')) {
+                let prefix = &line[..dir_pos + "目录: ".len()];
                 let suffix = &line[pipe_idx..];
-                let content_width = pipe_idx.saturating_sub(dir_pos + "Directory: ".len());
+                let content_width = pipe_idx.saturating_sub(dir_pos + "目录: ".len());
                 let replacement = "[[workspace]]";
                 let mut rebuilt = prefix.to_string();
                 rebuilt.push_str(replacement);
@@ -318,8 +318,8 @@ async fn status_snapshot_shows_unlimited_credits() {
     assert!(
         rendered
             .iter()
-            .any(|line| line.contains("Credits:") && line.contains("Unlimited")),
-        "expected Credits: Unlimited line, got {rendered:?}"
+            .any(|line| line.contains("积分:") && line.contains("不限")),
+        "expected credits line, got {rendered:?}"
     );
 }
 
@@ -364,8 +364,8 @@ async fn status_snapshot_shows_positive_credits() {
     assert!(
         rendered
             .iter()
-            .any(|line| line.contains("Credits:") && line.contains("13 credits")),
-        "expected Credits line with rounded credits, got {rendered:?}"
+            .any(|line| line.contains("积分:") && line.contains("13 积分")),
+        "expected credits line with rounded credits, got {rendered:?}"
     );
 }
 
@@ -408,8 +408,8 @@ async fn status_snapshot_hides_zero_credits() {
     );
     let rendered = render_lines(&composite.display_lines(120));
     assert!(
-        rendered.iter().all(|line| !line.contains("Credits:")),
-        "expected no Credits line, got {rendered:?}"
+        rendered.iter().all(|line| !line.contains("积分:")),
+        "expected no credits line, got {rendered:?}"
     );
 }
 
@@ -452,8 +452,8 @@ async fn status_snapshot_hides_when_has_no_credits_flag() {
     );
     let rendered = render_lines(&composite.display_lines(120));
     assert!(
-        rendered.iter().all(|line| !line.contains("Credits:")),
-        "expected no Credits line when has_credits is false, got {rendered:?}"
+        rendered.iter().all(|line| !line.contains("积分:")),
+        "expected no credits line when has_credits is false, got {rendered:?}"
     );
 }
 
@@ -911,11 +911,11 @@ async fn status_context_window_uses_last_usage() {
     let rendered_lines = render_lines(&composite.display_lines(80));
     let context_line = rendered_lines
         .into_iter()
-        .find(|line| line.contains("Context window"))
+        .find(|line| line.contains("上下文窗口"))
         .expect("context line");
 
     assert!(
-        context_line.contains("13.7K used / 272K"),
+        context_line.contains("13.7K 已用 / 272K"),
         "expected context line to reflect last usage tokens, got: {context_line}"
     );
     assert!(

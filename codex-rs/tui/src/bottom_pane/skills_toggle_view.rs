@@ -31,7 +31,7 @@ use super::scroll_state::ScrollState;
 use super::selection_popup_common::GenericDisplayRow;
 use super::selection_popup_common::render_rows_single_line;
 
-const SEARCH_PLACEHOLDER: &str = "Type to search skills";
+const SEARCH_PLACEHOLDER: &str = "输入以搜索技能";
 const SEARCH_PROMPT_PREFIX: &str = "> ";
 
 pub(crate) struct SkillsToggleItem {
@@ -56,10 +56,8 @@ pub(crate) struct SkillsToggleView {
 impl SkillsToggleView {
     pub(crate) fn new(items: Vec<SkillsToggleItem>, app_event_tx: AppEventSender) -> Self {
         let mut header = ColumnRenderable::new();
-        header.push(Line::from("Enable/Disable Skills".bold()));
-        header.push(Line::from(
-            "Turn skills on or off. Your changes are saved automatically.".dim(),
-        ));
+        header.push(Line::from("启用/禁用技能".bold()));
+        header.push(Line::from("开启或关闭技能。更改会自动保存。".dim()));
 
         let mut view = Self {
             items,
@@ -354,7 +352,7 @@ impl Renderable for SkillsToggleView {
                 &rows,
                 &self.state,
                 render_area.height as usize,
-                "no matches",
+                "无匹配结果",
             );
         }
 
@@ -370,13 +368,13 @@ impl Renderable for SkillsToggleView {
 
 fn skills_toggle_hint_line() -> Line<'static> {
     Line::from(vec![
-        "Press ".into(),
+        "按 ".into(),
         key_hint::plain(KeyCode::Char(' ')).into(),
-        " or ".into(),
+        " 或 ".into(),
         key_hint::plain(KeyCode::Enter).into(),
-        " to toggle; ".into(),
+        " 切换；按 ".into(),
         key_hint::plain(KeyCode::Esc).into(),
-        " to close".into(),
+        " 关闭".into(),
     ])
 }
 

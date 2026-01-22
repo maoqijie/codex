@@ -113,15 +113,14 @@ impl ApprovalOverlay {
                 ..
             } => (
                 exec_options(proposed_execpolicy_amendment.clone(), features),
-                "Would you like to run the following command?".to_string(),
+                "是否执行以下命令？".to_string(),
             ),
-            ApprovalVariant::ApplyPatch { .. } => (
-                patch_options(),
-                "Would you like to make the following edits?".to_string(),
-            ),
+            ApprovalVariant::ApplyPatch { .. } => {
+                (patch_options(), "是否应用以下修改？".to_string())
+            }
             ApprovalVariant::McpElicitation { server_name, .. } => (
                 elicitation_options(),
-                format!("{server_name} needs your approval."),
+                format!("{server_name} 需要你的确认。"),
             ),
         };
 
@@ -145,11 +144,11 @@ impl ApprovalOverlay {
 
         let params = SelectionViewParams {
             footer_hint: Some(Line::from(vec![
-                "Press ".into(),
+                "按 ".into(),
                 key_hint::plain(KeyCode::Enter).into(),
-                " to confirm or ".into(),
+                " 确认，或按 ".into(),
                 key_hint::plain(KeyCode::Esc).into(),
-                " to cancel".into(),
+                " 取消".into(),
             ])),
             items,
             header,
@@ -346,7 +345,7 @@ impl From<ApprovalRequest> for ApprovalRequestState {
             } => {
                 let mut header: Vec<Line<'static>> = Vec::new();
                 if let Some(reason) = reason {
-                    header.push(Line::from(vec!["Reason: ".into(), reason.italic()]));
+                    header.push(Line::from(vec!["原因：".into(), reason.italic()]));
                     header.push(Line::from(""));
                 }
                 let full_cmd = strip_bash_lc_and_escape(&command);
@@ -375,7 +374,7 @@ impl From<ApprovalRequest> for ApprovalRequestState {
                     && !reason.is_empty()
                 {
                     header.push(Box::new(
-                        Paragraph::new(Line::from_iter(["Reason: ".into(), reason.italic()]))
+                        Paragraph::new(Line::from_iter(["原因：".into(), reason.italic()]))
                             .wrap(Wrap { trim: false }),
                     ));
                     header.push(Box::new(Line::from("")));
@@ -392,7 +391,7 @@ impl From<ApprovalRequest> for ApprovalRequestState {
                 message,
             } => {
                 let header = Paragraph::new(vec![
-                    Line::from(vec!["Server: ".into(), server_name.clone().bold()]),
+                    Line::from(vec!["服务器：".into(), server_name.clone().bold()]),
                     Line::from(""),
                     Line::from(message),
                 ])
@@ -452,7 +451,7 @@ fn exec_options(
     features: &Features,
 ) -> Vec<ApprovalOption> {
     vec![ApprovalOption {
-        label: "Yes, proceed".to_string(),
+        label: "是，继续".to_string(),
         decision: ApprovalDecision::Review(ReviewDecision::Approved),
         display_shortcut: None,
         additional_shortcuts: vec![key_hint::plain(KeyCode::Char('y'))],
@@ -468,9 +467,7 @@ fn exec_options(
                 }
 
                 Some(ApprovalOption {
-                    label: format!(
-                        "Yes, and don't ask again for commands that start with `{rendered_prefix}`"
-                    ),
+                    label: format!("是，并且不再询问以 `{rendered_prefix}` 开头的命令"),
                     decision: ApprovalDecision::Review(
                         ReviewDecision::ApprovedExecpolicyAmendment {
                             proposed_execpolicy_amendment: prefix,
@@ -482,7 +479,7 @@ fn exec_options(
             }),
     )
     .chain([ApprovalOption {
-        label: "No, and tell Codex what to do differently".to_string(),
+        label: "否，并告诉 Codex 需要如何调整".to_string(),
         decision: ApprovalDecision::Review(ReviewDecision::Abort),
         display_shortcut: Some(key_hint::plain(KeyCode::Esc)),
         additional_shortcuts: vec![key_hint::plain(KeyCode::Char('n'))],
@@ -493,19 +490,19 @@ fn exec_options(
 fn patch_options() -> Vec<ApprovalOption> {
     vec![
         ApprovalOption {
-            label: "Yes, proceed".to_string(),
+            label: "是，继续".to_string(),
             decision: ApprovalDecision::Review(ReviewDecision::Approved),
             display_shortcut: None,
             additional_shortcuts: vec![key_hint::plain(KeyCode::Char('y'))],
         },
         ApprovalOption {
-            label: "Yes, and don't ask again for these files".to_string(),
+            label: "是，并且不再询问这些文件".to_string(),
             decision: ApprovalDecision::Review(ReviewDecision::ApprovedForSession),
             display_shortcut: None,
             additional_shortcuts: vec![key_hint::plain(KeyCode::Char('a'))],
         },
         ApprovalOption {
-            label: "No, and tell Codex what to do differently".to_string(),
+            label: "否，并告诉 Codex 需要如何调整".to_string(),
             decision: ApprovalDecision::Review(ReviewDecision::Abort),
             display_shortcut: Some(key_hint::plain(KeyCode::Esc)),
             additional_shortcuts: vec![key_hint::plain(KeyCode::Char('n'))],
@@ -516,19 +513,19 @@ fn patch_options() -> Vec<ApprovalOption> {
 fn elicitation_options() -> Vec<ApprovalOption> {
     vec![
         ApprovalOption {
-            label: "Yes, provide the requested info".to_string(),
+            label: "是，提供所需信息".to_string(),
             decision: ApprovalDecision::McpElicitation(ElicitationAction::Accept),
             display_shortcut: None,
             additional_shortcuts: vec![key_hint::plain(KeyCode::Char('y'))],
         },
         ApprovalOption {
-            label: "No, but continue without it".to_string(),
+            label: "否，但继续执行".to_string(),
             decision: ApprovalDecision::McpElicitation(ElicitationAction::Decline),
             display_shortcut: None,
             additional_shortcuts: vec![key_hint::plain(KeyCode::Char('n'))],
         },
         ApprovalOption {
-            label: "Cancel this request".to_string(),
+            label: "取消此请求".to_string(),
             decision: ApprovalDecision::McpElicitation(ElicitationAction::Cancel),
             display_shortcut: Some(key_hint::plain(KeyCode::Esc)),
             additional_shortcuts: vec![key_hint::plain(KeyCode::Char('c'))],
@@ -695,10 +692,10 @@ mod tests {
             })
             .collect();
         let expected = vec![
-            "✔ You approved codex to run".to_string(),
-            "  git add tui/src/render/".to_string(),
-            "  mod.rs tui/src/render/".to_string(),
-            "  renderable.rs this time".to_string(),
+            "✔ 已批准 Codex 本次运行 git".to_string(),
+            "  add tui/src/render/mod.rs".to_string(),
+            "  tui/src/render/".to_string(),
+            "  renderable.rs".to_string(),
         ];
         assert_eq!(rendered, expected);
     }

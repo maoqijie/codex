@@ -1,14 +1,13 @@
 ---
 source: tui/src/resume_picker.rs
-assertion_line: 1438
 expression: snapshot
 ---
-Resume a previous session
-Type to search
-  Updated  Branch  CWD  Conversation
-No sessions yet
+恢复之前的会话
+输入以搜索
+  更新    分支    目录    对话
+暂无会话记录
 
 
 
 
-enter to resume     esc to start new     ctrl + c to quit
+enter 恢复     esc 新建     ctrl + c 退出

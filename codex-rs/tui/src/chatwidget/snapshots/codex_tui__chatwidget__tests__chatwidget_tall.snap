@@ -3,7 +3,7 @@ source: tui/src/chatwidget/tests.rs
 expression: term.backend().vt100().screen().contents()
 ---
 
-• Working (0s • esc to interrupt)
+• 处理中 (0s • esc 中断)
 
   ↳ Hello, world! 0
   ↳ Hello, world! 1
@@ -25,4 +25,4 @@ expression: term.backend().vt100().screen().contents()
 
 › Ask Codex to do anything
 
-  100% context left · ? for shortcuts
+  上下文剩余 100% · ? 查看快捷键

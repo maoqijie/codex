@@ -52,9 +52,9 @@ impl RequestUserInputOverlay {
         let progress_line = if self.question_count() > 0 {
             let idx = self.current_index() + 1;
             let total = self.question_count();
-            Line::from(format!("Question {idx}/{total}").dim())
+            Line::from(format!("问题 {idx}/{total}").dim())
         } else {
-            Line::from("No questions".dim())
+            Line::from("没有问题".dim())
         };
         Paragraph::new(progress_line).render(sections.progress_area, buf);
 
@@ -63,7 +63,7 @@ impl RequestUserInputOverlay {
         let header_line = if let Some(header) = question_header {
             Line::from(header.bold())
         } else {
-            Line::from("No questions".dim())
+            Line::from("没有问题".dim())
         };
         Paragraph::new(header_line).render(sections.header_area, buf);
 
@@ -86,7 +86,7 @@ impl RequestUserInputOverlay {
         }
 
         if sections.answer_title_area.height > 0 {
-            let answer_label = "Answer";
+            let answer_label = "回答";
             let answer_title = if self.focus_is_options() || self.focus_is_notes_without_options() {
                 answer_label.cyan().bold()
             } else {
@@ -134,7 +134,7 @@ impl RequestUserInputOverlay {
                     &option_rows,
                     &option_state,
                     option_rows.len().max(1),
-                    "No options",
+                    "没有选项",
                 );
             }
         }
@@ -146,12 +146,12 @@ impl RequestUserInputOverlay {
                     .is_some_and(|answer| answer.selected.is_some())
             {
                 if let Some(label) = self.current_option_label() {
-                    format!("Notes for {label} (optional)")
+                    format!("{label} 的备注（可选）")
                 } else {
-                    "Notes (optional)".to_string()
+                    "备注（可选）".to_string()
                 }
             } else {
-                "Notes (optional)".to_string()
+                "备注（可选）".to_string()
             };
             let notes_title = if self.focus_is_notes() {
                 notes_label.as_str().cyan().bold()
@@ -171,10 +171,7 @@ impl RequestUserInputOverlay {
             .saturating_add(sections.notes_area.height);
         if sections.footer_lines == 2 {
             // Status line for unanswered count when any question is empty.
-            let warning = format!(
-                "Unanswered: {} | Will submit as skipped",
-                self.unanswered_count()
-            );
+            let warning = format!("未回答：{} | 将按跳过提交", self.unanswered_count());
             Paragraph::new(Line::from(warning.dim())).render(
                 Rect {
                     x: area.x,
@@ -192,7 +189,7 @@ impl RequestUserInputOverlay {
             let options_len = self.options_len();
             let option_index = self.selected_option_index().map_or(0, |idx| idx + 1);
             hint_spans.extend(vec![
-                format!("Option {option_index} of {options_len}").into(),
+                format!("选项 {option_index}/{options_len}").into(),
                 " | ".into(),
             ]);
         }
@@ -200,22 +197,19 @@ impl RequestUserInputOverlay {
             key_hint::plain(KeyCode::Up).into(),
             "/".into(),
             key_hint::plain(KeyCode::Down).into(),
-            " scroll | ".into(),
+            " 滚动 | ".into(),
             key_hint::plain(KeyCode::Enter).into(),
-            " next question | ".into(),
+            " 下一题 | ".into(),
         ]);
         if self.question_count() > 1 {
             hint_spans.extend(vec![
                 key_hint::plain(KeyCode::PageUp).into(),
-                " prev | ".into(),
+                " 上一题 | ".into(),
                 key_hint::plain(KeyCode::PageDown).into(),
-                " next | ".into(),
+                " 下一题 | ".into(),
             ]);
         }
-        hint_spans.extend(vec![
-            key_hint::plain(KeyCode::Esc).into(),
-            " interrupt".into(),
-        ]);
+        hint_spans.extend(vec![key_hint::plain(KeyCode::Esc).into(), " 中断".into()]);
         Paragraph::new(Line::from(hint_spans).dim()).render(
             Rect {
                 x: area.x,
@@ -371,5 +365,5 @@ impl RequestUserInputOverlay {
 }
 
 fn notes_prefix() -> &'static str {
-    "Notes: "
+    "备注："
 }

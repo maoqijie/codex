@@ -116,10 +116,10 @@ pub(crate) fn compose_rate_limit_data(
                 let label: String = primary
                     .window_minutes
                     .map(get_limits_duration)
-                    .unwrap_or_else(|| "5h".to_string());
+                    .unwrap_or_else(|| "5小时".to_string());
                 let label = capitalize_first(&label);
                 rows.push(StatusRateLimitRow {
-                    label: format!("{label} limit"),
+                    label: format!("{label} 限额"),
                     value: StatusRateLimitValue::Window {
                         percent_used: primary.used_percent,
                         resets_at: primary.resets_at.clone(),
@@ -131,10 +131,10 @@ pub(crate) fn compose_rate_limit_data(
                 let label: String = secondary
                     .window_minutes
                     .map(get_limits_duration)
-                    .unwrap_or_else(|| "weekly".to_string());
+                    .unwrap_or_else(|| "每周".to_string());
                 let label = capitalize_first(&label);
                 rows.push(StatusRateLimitRow {
-                    label: format!("{label} limit"),
+                    label: format!("{label} 限额"),
                     value: StatusRateLimitValue::Window {
                         percent_used: secondary.used_percent,
                         resets_at: secondary.resets_at.clone(),
@@ -176,7 +176,7 @@ pub(crate) fn render_status_limit_progress_bar(percent_remaining: f64) -> String
 }
 
 pub(crate) fn format_status_limit_summary(percent_remaining: f64) -> String {
-    format!("{percent_remaining:.0}% left")
+    format!("剩余 {percent_remaining:.0}%")
 }
 
 /// Builds a single `StatusRateLimitRow` for credits when the snapshot indicates
@@ -189,15 +189,15 @@ fn credit_status_row(credits: &CreditsSnapshotDisplay) -> Option<StatusRateLimit
     }
     if credits.unlimited {
         return Some(StatusRateLimitRow {
-            label: "Credits".to_string(),
-            value: StatusRateLimitValue::Text("Unlimited".to_string()),
+            label: "积分".to_string(),
+            value: StatusRateLimitValue::Text("不限".to_string()),
         });
     }
     let balance = credits.balance.as_ref()?;
     let display_balance = format_credit_balance(balance)?;
     Some(StatusRateLimitRow {
-        label: "Credits".to_string(),
-        value: StatusRateLimitValue::Text(format!("{display_balance} credits")),
+        label: "积分".to_string(),
+        value: StatusRateLimitValue::Text(format!("{display_balance} 积分")),
     })
 }
 

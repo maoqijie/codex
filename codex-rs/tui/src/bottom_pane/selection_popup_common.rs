@@ -125,7 +125,7 @@ fn compute_desc_col(
         .map(|(_, r)| {
             let mut spans: Vec<Span> = vec![r.name.clone().into()];
             if r.disabled_reason.is_some() {
-                spans.push(" (disabled)".dim());
+                spans.push("（已禁用）".dim());
             }
             Line::from(spans).width()
         })
@@ -156,9 +156,9 @@ fn wrap_indent(row: &GenericDisplayRow, desc_col: usize, max_width: u16) -> usiz
 /// dims the description.
 fn build_full_line(row: &GenericDisplayRow, desc_col: usize) -> Line<'static> {
     let combined_description = match (&row.description, &row.disabled_reason) {
-        (Some(desc), Some(reason)) => Some(format!("{desc} (disabled: {reason})")),
+        (Some(desc), Some(reason)) => Some(format!("{desc}（已禁用：{reason}）")),
         (Some(desc), None) => Some(desc.clone()),
-        (None, Some(reason)) => Some(format!("disabled: {reason}")),
+        (None, Some(reason)) => Some(format!("已禁用：{reason}")),
         (None, None) => None,
     };
 
@@ -211,7 +211,7 @@ fn build_full_line(row: &GenericDisplayRow, desc_col: usize) -> Line<'static> {
     }
 
     if row.disabled_reason.is_some() {
-        name_spans.push(" (disabled)".dim());
+        name_spans.push("（已禁用）".dim());
     }
 
     let this_name_width = Line::from(name_spans.clone()).width();

@@ -118,7 +118,7 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::task::JoinHandle;
 use tracing::debug;
 
-const DEFAULT_MODEL_DISPLAY_NAME: &str = "loading";
+const DEFAULT_MODEL_DISPLAY_NAME: &str = "加载中";
 
 use crate::app_event::AppEvent;
 use crate::app_event::ExitMode;
@@ -194,8 +194,8 @@ use codex_protocol::openai_models::ReasoningEffort as ReasoningEffortConfig;
 use codex_protocol::plan_tool::UpdatePlanArgs;
 use strum::IntoEnumIterator;
 
-const USER_SHELL_COMMAND_HELP_TITLE: &str = "Prefix a command with ! to run it locally";
-const USER_SHELL_COMMAND_HELP_HINT: &str = "Example: !ls";
+const USER_SHELL_COMMAND_HELP_TITLE: &str = "在命令前加 ! 可在本地执行";
+const USER_SHELL_COMMAND_HELP_HINT: &str = "示例：!ls";
 const DEFAULT_OPENAI_BASE_URL: &str = "https://api.openai.com/v1";
 // Track information about an in-flight exec command.
 struct RunningCommand {
@@ -297,10 +297,10 @@ impl RateLimitWarningState {
             if let Some(threshold) = highest_secondary {
                 let limit_label = secondary_window_minutes
                     .map(get_limits_duration)
-                    .unwrap_or_else(|| "weekly".to_string());
+                    .unwrap_or_else(|| "每周".to_string());
                 let remaining_percent = 100.0 - threshold;
                 warnings.push(format!(
-                    "Heads up, you have less than {remaining_percent:.0}% of your {limit_label} limit left. Run /status for a breakdown."
+                    "提醒：你的{limit_label}限额剩余不足 {remaining_percent:.0}%。运行 /status 查看明细。"
                 ));
             }
         }
@@ -316,10 +316,10 @@ impl RateLimitWarningState {
             if let Some(threshold) = highest_primary {
                 let limit_label = primary_window_minutes
                     .map(get_limits_duration)
-                    .unwrap_or_else(|| "5h".to_string());
+                    .unwrap_or_else(|| "5小时".to_string());
                 let remaining_percent = 100.0 - threshold;
                 warnings.push(format!(
-                    "Heads up, you have less than {remaining_percent:.0}% of your {limit_label} limit left. Run /status for a breakdown."
+                    "提醒：你的{limit_label}限额剩余不足 {remaining_percent:.0}%。运行 /status 查看明细。"
                 ));
             }
         }
@@ -340,13 +340,13 @@ pub(crate) fn get_limits_duration(windows_minutes: i64) -> String {
     if windows_minutes <= MINUTES_PER_DAY.saturating_add(ROUNDING_BIAS_MINUTES) {
         let adjusted = windows_minutes.saturating_add(ROUNDING_BIAS_MINUTES);
         let hours = std::cmp::max(1, adjusted / MINUTES_PER_HOUR);
-        format!("{hours}h")
+        format!("{hours}小时")
     } else if windows_minutes <= MINUTES_PER_WEEK.saturating_add(ROUNDING_BIAS_MINUTES) {
-        "weekly".to_string()
+        "每周".to_string()
     } else if windows_minutes <= MINUTES_PER_MONTH.saturating_add(ROUNDING_BIAS_MINUTES) {
-        "monthly".to_string()
+        "每月".to_string()
     } else {
-        "annual".to_string()
+        "每年".to_string()
     }
 }
 
@@ -669,7 +669,7 @@ impl ChatWidget {
         if let Some(header) = extract_first_bold(&self.reasoning_buffer) {
             self.set_status_header(header);
         } else if self.bottom_pane.is_task_running() {
-            self.set_status_header(String::from("Working"));
+            self.set_status_header(String::from("处理中"));
         }
     }
 
@@ -863,7 +863,7 @@ impl ChatWidget {
         self.update_task_running_state();
         self.retry_status_header = None;
         self.bottom_pane.set_interrupt_hint_visible(true);
-        self.set_status_header(String::from("Working"));
+        self.set_status_header(String::from("处理中"));
         self.full_reasoning_buffer.clear();
         self.reasoning_buffer.clear();
         self.request_redraw();
@@ -1071,11 +1071,11 @@ impl ChatWidget {
                 }
                 let header = if total > 1 {
                     format!(
-                        "Starting MCP servers ({completed}/{total}): {}",
+                        "正在启动 MCP 服务器（{completed}/{total}）：{}",
                         to_show.join(", ")
                     )
                 } else {
-                    format!("Booting MCP server: {first}")
+                    format!("正在启动 MCP 服务器：{first}")
                 };
                 self.set_status_header(header);
             }
@@ -1087,16 +1087,16 @@ impl ChatWidget {
         let mut parts = Vec::new();
         if !ev.failed.is_empty() {
             let failed_servers: Vec<_> = ev.failed.iter().map(|f| f.server.clone()).collect();
-            parts.push(format!("failed: {}", failed_servers.join(", ")));
+            parts.push(format!("失败：{}", failed_servers.join(", ")));
         }
         if !ev.cancelled.is_empty() {
             self.on_warning(format!(
-                "MCP startup interrupted. The following servers were not initialized: {}",
+                "MCP 启动被中断，以下服务器未初始化：{}",
                 ev.cancelled.join(", ")
             ));
         }
         if !parts.is_empty() {
-            self.on_warning(format!("MCP startup incomplete ({})", parts.join("; ")));
+            self.on_warning(format!("MCP 启动未完成（{}）", parts.join("; ")));
         }
 
         self.mcp_startup_status = None;
@@ -1114,7 +1114,7 @@ impl ChatWidget {
 
         if reason != TurnAbortReason::ReviewEnded {
             self.add_to_history(history_cell::new_error_event(
-                "Conversation interrupted - tell the model what to do differently. Something went wrong? Hit `/feedback` to report the issue.".to_owned(),
+                "对话已中断——请告诉模型需要如何调整。出现问题？使用 `/feedback` 反馈。".to_owned(),
             ));
         }
 
@@ -1269,9 +1269,9 @@ impl ChatWidget {
             self.bottom_pane.ensure_status_indicator();
             self.bottom_pane.set_interrupt_hint_visible(true);
             let header = if let Some(command) = &command_display {
-                format!("Waiting for background terminal · {command}")
+                format!("等待后台终端 · {command}")
             } else {
-                "Waiting for background terminal".to_string()
+                "等待后台终端".to_string()
             };
             self.set_status_header(header);
             match &mut self.unified_exec_wait_streak {
@@ -1457,9 +1457,7 @@ impl ChatWidget {
     fn on_undo_started(&mut self, event: UndoStartedEvent) {
         self.bottom_pane.ensure_status_indicator();
         self.bottom_pane.set_interrupt_hint_visible(false);
-        let message = event
-            .message
-            .unwrap_or_else(|| "Undo in progress...".to_string());
+        let message = event.message.unwrap_or_else(|| "正在撤销...".to_string());
         self.set_status_header(message);
     }
 
@@ -1468,9 +1466,9 @@ impl ChatWidget {
         self.bottom_pane.hide_status_indicator();
         let message = message.unwrap_or_else(|| {
             if success {
-                "Undo completed successfully.".to_string()
+                "撤销成功。".to_string()
             } else {
-                "Undo failed.".to_string()
+                "撤销失败。".to_string()
             }
         });
         if success {
@@ -1909,7 +1907,7 @@ impl ChatWidget {
             interrupts: InterruptManager::new(),
             reasoning_buffer: String::new(),
             full_reasoning_buffer: String::new(),
-            current_status_header: String::from("Working"),
+            current_status_header: String::from("处理中"),
             retry_status_header: None,
             thread_id: None,
             forked_from: None,
@@ -2027,7 +2025,7 @@ impl ChatWidget {
             interrupts: InterruptManager::new(),
             reasoning_buffer: String::new(),
             full_reasoning_buffer: String::new(),
-            current_status_header: String::from("Working"),
+            current_status_header: String::from("处理中"),
             retry_status_header: None,
             thread_id: None,
             forked_from: None,
@@ -2104,7 +2102,7 @@ impl ChatWidget {
                     Err(err) => {
                         tracing::warn!("failed to paste image: {err}");
                         self.add_to_history(history_cell::new_error_event(format!(
-                            "Failed to paste image: {err}",
+                            "粘贴图片失败：{err}",
                         )));
                     }
                 }
@@ -2168,7 +2166,7 @@ impl ChatWidget {
                         // Reset any reasoning header only when we are actually submitting a turn.
                         self.reasoning_buffer.clear();
                         self.full_reasoning_buffer.clear();
-                        self.set_status_header(String::from("Working"));
+                        self.set_status_header(String::from("处理中"));
                         self.submit_user_message(user_message);
                     } else {
                         self.queue_user_message(user_message);
@@ -2231,10 +2229,7 @@ impl ChatWidget {
 
     fn dispatch_command(&mut self, cmd: SlashCommand) {
         if !cmd.available_during_task() && self.bottom_pane.is_task_running() {
-            let message = format!(
-                "'/{}' is disabled while a task is in progress.",
-                cmd.command()
-            );
+            let message = format!("任务进行中，/{} 已禁用。", cmd.command());
             self.add_to_history(history_cell::new_error_event(message));
             self.request_redraw();
             return;
@@ -2266,7 +2261,7 @@ impl ChatWidget {
                 let init_target = self.config.cwd.join(DEFAULT_PROJECT_DOC_FILENAME);
                 if init_target.exists() {
                     let message = format!(
-                        "{DEFAULT_PROJECT_DOC_FILENAME} already exists here. Skipping /init to avoid overwriting it."
+                        "此处已存在 {DEFAULT_PROJECT_DOC_FILENAME}，为避免覆盖已跳过 /init。"
                     );
                     self.add_info_message(message, None);
                     return;
@@ -2315,9 +2310,7 @@ impl ChatWidget {
                     else {
                         // Avoid panicking in interactive UI; treat this as a recoverable
                         // internal error.
-                        self.add_error_message(
-                            "Internal error: missing the 'auto' approval preset.".to_string(),
-                        );
+                        self.add_error_message("内部错误：缺少 'auto' 审批预设。".to_string());
                         return;
                     };
 
@@ -2367,10 +2360,10 @@ impl ChatWidget {
                             if is_git_repo {
                                 diff_text
                             } else {
-                                "`/diff` — _not inside a git repository_".to_string()
+                                "`/diff` — _当前不在 git 仓库中_".to_string()
                             }
                         }
-                        Err(e) => format!("Failed to compute diff: {e}"),
+                        Err(e) => format!("生成 diff 失败：{e}"),
                     };
                     tx.send(AppEvent::DiffResult(text));
                 });
@@ -2392,12 +2385,9 @@ impl ChatWidget {
             }
             SlashCommand::Rollout => {
                 if let Some(path) = self.rollout_path() {
-                    self.add_info_message(
-                        format!("Current rollout path: {}", path.display()),
-                        None,
-                    );
+                    self.add_info_message(format!("当前 rollout 路径：{}", path.display()), None);
                 } else {
-                    self.add_info_message("Rollout path is not available yet.".to_string(), None);
+                    self.add_info_message("rollout 路径暂不可用。".to_string(), None);
                 }
             }
             SlashCommand::TestApproval => {
@@ -2709,9 +2699,7 @@ impl ChatWidget {
                 TurnAbortReason::Interrupted => {
                     self.on_interrupted_turn(ev.reason);
                 }
-                TurnAbortReason::Replaced => {
-                    self.on_error("Turn aborted: replaced by a new task".to_owned())
-                }
+                TurnAbortReason::Replaced => self.on_error("任务已中止：已被新任务替换".to_owned()),
                 TurnAbortReason::ReviewEnded => {
                     self.on_interrupted_turn(ev.reason);
                 }
@@ -2773,7 +2761,7 @@ impl ChatWidget {
                 self.on_entered_review_mode(review_request, from_replay)
             }
             EventMsg::ExitedReviewMode(review) => self.on_exited_review_mode(review),
-            EventMsg::ContextCompacted(_) => self.on_agent_message("Context compacted".to_owned()),
+            EventMsg::ContextCompacted(_) => self.on_agent_message("上下文已压缩".to_owned()),
             EventMsg::CollabAgentSpawnBegin(_) => {}
             EventMsg::CollabAgentSpawnEnd(ev) => self.on_collab_event(collab::spawn_end(ev)),
             EventMsg::CollabAgentInteractionBegin(_) => {}
@@ -2807,7 +2795,7 @@ impl ChatWidget {
         let hint = review
             .user_facing_hint
             .unwrap_or_else(|| codex_core::review_prompts::user_facing_hint(&review.target));
-        let banner = format!(">> Code review started: {hint} <<");
+        let banner = format!(">> 代码审查开始：{hint} <<");
         self.add_to_history(history_cell::new_review_status_line(banner));
         self.request_redraw();
     }
@@ -2824,7 +2812,7 @@ impl ChatWidget {
                 if explanation.is_empty() {
                     tracing::error!("Reviewer failed to output a response.");
                     self.add_to_history(history_cell::new_error_event(
-                        "Reviewer failed to output a response.".to_owned(),
+                        "审查器未能输出回复。".to_owned(),
                     ));
                 } else {
                     // Show explanation when there are no structured findings.
@@ -2842,7 +2830,7 @@ impl ChatWidget {
         self.restore_pre_review_token_info();
         // Append a finishing banner at the end of this turn.
         self.add_to_history(history_cell::new_review_status_line(
-            "<< Code review finished >>".to_string(),
+            "<< 代码审查已完成 >>".to_string(),
         ));
         self.request_redraw();
     }
@@ -3070,14 +3058,14 @@ impl ChatWidget {
             tx.send(AppEvent::PersistRateLimitSwitchPromptHidden);
         })];
         let description = if preset.description.is_empty() {
-            Some("Uses fewer credits for upcoming turns.".to_string())
+            Some("后续回合消耗积分更少。".to_string())
         } else {
             Some(preset.description)
         };
 
         let items = vec![
             SelectionItem {
-                name: format!("Switch to {display_name}"),
+                name: format!("切换到 {display_name}"),
                 description,
                 selected_description: None,
                 is_current: false,
@@ -3086,7 +3074,7 @@ impl ChatWidget {
                 ..Default::default()
             },
             SelectionItem {
-                name: "Keep current model".to_string(),
+                name: "保持当前模型".to_string(),
                 description: None,
                 selected_description: None,
                 is_current: false,
@@ -3095,10 +3083,8 @@ impl ChatWidget {
                 ..Default::default()
             },
             SelectionItem {
-                name: "Keep current model (never show again)".to_string(),
-                description: Some(
-                    "Hide future rate limit reminders about switching models.".to_string(),
-                ),
+                name: "保持当前模型（不再提示）".to_string(),
+                description: Some("不再提醒切换模型以避免触及限额。".to_string()),
                 selected_description: None,
                 is_current: false,
                 actions: never_actions,
@@ -3108,8 +3094,8 @@ impl ChatWidget {
         ];
 
         self.bottom_pane.show_selection_view(SelectionViewParams {
-            title: Some("Approaching rate limits".to_string()),
-            subtitle: Some(format!("Switch to {display_name} for lower credit usage?")),
+            title: Some("即将触及限额".to_string()),
+            subtitle: Some(format!("是否切换到 {display_name} 以降低积分消耗？")),
             footer_hint: Some(standard_popup_hint_line()),
             items,
             ..Default::default()
@@ -3120,20 +3106,14 @@ impl ChatWidget {
     /// opens the full picker with every available preset.
     pub(crate) fn open_model_popup(&mut self) {
         if !self.is_session_configured() {
-            self.add_info_message(
-                "Model selection is disabled until startup completes.".to_string(),
-                None,
-            );
+            self.add_info_message("启动完成前无法选择模型。".to_string(), None);
             return;
         }
 
         let presets: Vec<ModelPreset> = match self.models_manager.try_list_models(&self.config) {
             Ok(models) => models,
             Err(_) => {
-                self.add_info_message(
-                    "Models are being updated; please try /model again in a moment.".to_string(),
-                    None,
-                );
+                self.add_info_message("模型正在更新，请稍后再试 /model。".to_string(), None);
                 return;
             }
         };
@@ -3155,7 +3135,7 @@ impl ChatWidget {
     fn model_menu_warning_line(&self) -> Option<Line<'static>> {
         let base_url = self.custom_openai_base_url()?;
         let warning = format!(
-            "Warning: OPENAI_BASE_URL is set to {base_url}. Selecting models may not be supported or work properly."
+            "警告：OPENAI_BASE_URL 已设为 {base_url}，选择模型可能不被支持或无法正常工作。"
         );
         Some(Line::from(warning.red()))
     }
@@ -3234,12 +3214,10 @@ impl ChatWidget {
             })];
 
             let is_current = !items.iter().any(|item| item.is_current);
-            let description = Some(format!(
-                "Choose a specific model and reasoning level (current: {current_label})"
-            ));
+            let description = Some(format!("选择具体模型和推理强度（当前：{current_label}）"));
 
             items.push(SelectionItem {
-                name: "All models".to_string(),
+                name: "全部模型".to_string(),
                 description,
                 is_current,
                 actions,
@@ -3248,10 +3226,7 @@ impl ChatWidget {
             });
         }
 
-        let header = self.model_menu_header(
-            "Select Model",
-            "Pick a quick auto mode or browse all models.",
-        );
+        let header = self.model_menu_header("选择模型", "选择自动模式，或浏览全部模型。");
         self.bottom_pane.show_selection_view(SelectionViewParams {
             footer_hint: Some(standard_popup_hint_line()),
             items,
@@ -3275,10 +3250,7 @@ impl ChatWidget {
 
     pub(crate) fn open_all_models_popup(&mut self, presets: Vec<ModelPreset>) {
         if presets.is_empty() {
-            self.add_info_message(
-                "No additional models are available right now.".to_string(),
-                None,
-            );
+            self.add_info_message("当前没有更多可用模型。".to_string(), None);
             return;
         }
 
@@ -3307,11 +3279,11 @@ impl ChatWidget {
         }
 
         let header = self.model_menu_header(
-            "Select Model and Effort",
-            "Access legacy models by running codex -m <model_name> or in your config.toml",
+            "选择模型与推理强度",
+            "可通过 codex -m <model_name> 或在 config.toml 中使用旧版模型",
         );
         self.bottom_pane.show_selection_view(SelectionViewParams {
-            footer_hint: Some("Press enter to select reasoning effort, or esc to dismiss.".into()),
+            footer_hint: Some("按 Enter 选择推理强度，按 Esc 关闭。".into()),
             items,
             header,
             ..Default::default()
@@ -3321,10 +3293,7 @@ impl ChatWidget {
     pub(crate) fn open_collaboration_modes_popup(&mut self) {
         let presets = self.models_manager.list_collaboration_modes();
         if presets.is_empty() {
-            self.add_info_message(
-                "No collaboration modes are available right now.".to_string(),
-                None,
-            );
+            self.add_info_message("当前没有可用的协作模式。".to_string(), None);
             return;
         }
 
@@ -3332,10 +3301,10 @@ impl ChatWidget {
             .into_iter()
             .map(|preset| {
                 let name = match preset {
-                    CollaborationMode::Plan(_) => "Plan",
-                    CollaborationMode::PairProgramming(_) => "Pair Programming",
-                    CollaborationMode::Execute(_) => "Execute",
-                    CollaborationMode::Custom(_) => "Custom",
+                    CollaborationMode::Plan(_) => "计划",
+                    CollaborationMode::PairProgramming(_) => "结对编程",
+                    CollaborationMode::Execute(_) => "执行",
+                    CollaborationMode::Custom(_) => "自定义",
                 };
                 let is_current =
                     collaboration_modes::same_variant(&self.stored_collaboration_mode, &preset);
@@ -3353,8 +3322,8 @@ impl ChatWidget {
             .collect();
 
         self.bottom_pane.show_selection_view(SelectionViewParams {
-            title: Some("Select Collaboration Mode".to_string()),
-            subtitle: Some("Pick a collaboration preset.".to_string()),
+            title: Some("选择协作模式".to_string()),
+            subtitle: Some("选择一个协作预设。".to_string()),
             footer_hint: Some(standard_popup_hint_line()),
             items,
             ..Default::default()
@@ -3412,7 +3381,7 @@ impl ChatWidget {
         };
         let warning_text = warn_effort.map(|effort| {
             let effort_label = Self::reasoning_effort_label(effort);
-            format!("⚠ {effort_label} reasoning effort can quickly consume Plus plan rate limits.")
+            format!("⚠ {effort_label} 推理强度可能会快速消耗 Plus 计划的速率额度。")
         });
         let warn_for_model = preset.model.starts_with("gpt-5.1-codex")
             || preset.model.starts_with("gpt-5.1-codex-max")
@@ -3475,7 +3444,7 @@ impl ChatWidget {
             let effort = choice.display;
             let mut effort_label = Self::reasoning_effort_label(effort).to_string();
             if choice.stored == default_choice {
-                effort_label.push_str(" (default)");
+                effort_label.push_str("（默认）");
             }
 
             let description = choice
@@ -3515,9 +3484,7 @@ impl ChatWidget {
         }
 
         let mut header = ColumnRenderable::new();
-        header.push(Line::from(
-            format!("Select Reasoning Level for {model_slug}").bold(),
-        ));
+        header.push(Line::from(format!("选择 {model_slug} 的推理强度").bold()));
 
         self.bottom_pane.show_selection_view(SelectionViewParams {
             header: Box::new(header),
@@ -3530,12 +3497,12 @@ impl ChatWidget {
 
     fn reasoning_effort_label(effort: ReasoningEffortConfig) -> &'static str {
         match effort {
-            ReasoningEffortConfig::None => "None",
-            ReasoningEffortConfig::Minimal => "Minimal",
-            ReasoningEffortConfig::Low => "Low",
-            ReasoningEffortConfig::Medium => "Medium",
-            ReasoningEffortConfig::High => "High",
-            ReasoningEffortConfig::XHigh => "Extra high",
+            ReasoningEffortConfig::None => "无",
+            ReasoningEffortConfig::Minimal => "最低",
+            ReasoningEffortConfig::Low => "低",
+            ReasoningEffortConfig::Medium => "中",
+            ReasoningEffortConfig::High => "高",
+            ReasoningEffortConfig::XHigh => "超高",
         }
     }
 
@@ -3600,7 +3567,7 @@ impl ChatWidget {
             let is_current =
                 Self::preset_matches_current(current_approval, current_sandbox, &preset);
             let name = if preset.id == "auto" && windows_degraded_sandbox_enabled {
-                "Default (non-elevated sandbox)".to_string()
+                "默认（非提升沙箱）".to_string()
             } else {
                 preset.label.to_string()
             };
@@ -3682,15 +3649,16 @@ impl ChatWidget {
 
         let footer_note = show_elevate_sandbox_hint.then(|| {
             vec![
-                "The non-elevated sandbox protects your files and prevents network access under most circumstances. However, it carries greater risk if prompt injected. To upgrade to the elevated sandbox, run ".dim(),
+                "非提升沙箱在大多数情况下会保护你的文件并阻止网络访问，但在提示注入时风险更高。要升级到提升沙箱，请运行 "
+                    .dim(),
                 "/setup-elevated-sandbox".cyan(),
-                ".".dim(),
+                "。".dim(),
             ]
             .into()
         });
 
         self.bottom_pane.show_selection_view(SelectionViewParams {
-            title: Some("Update Model Permissions".to_string()),
+            title: Some("更新模型权限".to_string()),
             footer_note,
             footer_hint: Some(standard_popup_hint_line()),
             items,
@@ -3798,12 +3766,11 @@ impl ChatWidget {
         let approval = preset.approval;
         let sandbox = preset.sandbox;
         let mut header_children: Vec<Box<dyn Renderable>> = Vec::new();
-        let title_line = Line::from("Enable full access?").bold();
+        let title_line = Line::from("启用完全访问？").bold();
         let info_line = Line::from(vec![
-            "When Codex runs with full access, it can edit any file on your computer and run commands with network, without your approval. "
+            "当 Codex 以完全访问模式运行时，它可以在无需批准的情况下编辑你电脑上的任意文件并执行带网络访问的命令。"
                 .into(),
-            "Exercise caution when enabling full access. This significantly increases the risk of data loss, leaks, or unexpected behavior."
-                .fg(Color::Red),
+            "启用完全访问需谨慎，这会显著增加数据丢失、泄露或意外行为的风险。".fg(Color::Red),
         ]);
         header_children.push(Box::new(title_line));
         header_children.push(Box::new(
@@ -3832,22 +3799,22 @@ impl ChatWidget {
 
         let items = vec![
             SelectionItem {
-                name: "Yes, continue anyway".to_string(),
-                description: Some("Apply full access for this session".to_string()),
+                name: "是，仍要继续".to_string(),
+                description: Some("仅在本次会话启用完全访问".to_string()),
                 actions: accept_actions,
                 dismiss_on_select: true,
                 ..Default::default()
             },
             SelectionItem {
-                name: "Yes, and don't ask again".to_string(),
-                description: Some("Enable full access and remember this choice".to_string()),
+                name: "是，并且不再询问".to_string(),
+                description: Some("启用完全访问并记住此选择".to_string()),
                 actions: accept_and_remember_actions,
                 dismiss_on_select: true,
                 ..Default::default()
             },
             SelectionItem {
-                name: "Cancel".to_string(),
-                description: Some("Go back without enabling full access".to_string()),
+                name: "取消".to_string(),
+                description: Some("不启用完全访问并返回".to_string()),
                 actions: deny_actions,
                 dismiss_on_select: true,
                 ..Default::default()
@@ -3876,9 +3843,9 @@ impl ChatWidget {
         };
         let mut header_children: Vec<Box<dyn Renderable>> = Vec::new();
         let describe_policy = |policy: &SandboxPolicy| match policy {
-            SandboxPolicy::WorkspaceWrite { .. } => "Agent mode",
-            SandboxPolicy::ReadOnly => "Read-Only mode",
-            _ => "Agent mode",
+            SandboxPolicy::WorkspaceWrite { .. } => "代理模式",
+            SandboxPolicy::ReadOnly => "只读模式",
+            _ => "代理模式",
         };
         let mode_label = preset
             .as_ref()
@@ -3886,15 +3853,13 @@ impl ChatWidget {
             .unwrap_or_else(|| describe_policy(self.config.sandbox_policy.get()));
         let info_line = if failed_scan {
             Line::from(vec![
-                "We couldn't complete the world-writable scan, so protections cannot be verified. "
-                    .into(),
-                format!("The Windows sandbox cannot guarantee protection in {mode_label}.")
-                    .fg(Color::Red),
+                "无法完成对所有人可写目录的扫描，因此无法验证保护状态。".into(),
+                format!("Windows 沙箱无法保证在 {mode_label} 下的保护。").fg(Color::Red),
             ])
         } else {
             Line::from(vec![
-                "The Windows sandbox cannot protect writes to folders that are writable by Everyone.".into(),
-                " Consider removing write access for Everyone from the following folders:".into(),
+                "Windows 沙箱无法保护对“所有人可写”目录的写入。".into(),
+                " 建议从以下目录移除 Everyone 的写权限：".into(),
             ])
         };
         header_children.push(Box::new(
@@ -3909,7 +3874,7 @@ impl ChatWidget {
                 lines.push(Line::from(format!("  - {p}")));
             }
             if extra_count > 0 {
-                lines.push(Line::from(format!("and {extra_count} more")));
+                lines.push(Line::from(format!("还有 {extra_count} 个")));
             }
             header_children.push(Box::new(Paragraph::new(lines).wrap(Wrap { trim: false })));
         }
@@ -3940,15 +3905,15 @@ impl ChatWidget {
 
         let items = vec![
             SelectionItem {
-                name: "Continue".to_string(),
-                description: Some(format!("Apply {mode_label} for this session")),
+                name: "继续".to_string(),
+                description: Some(format!("本次会话使用{mode_label}")),
                 actions: accept_actions,
                 dismiss_on_select: true,
                 ..Default::default()
             },
             SelectionItem {
-                name: "Continue and don't warn again".to_string(),
-                description: Some(format!("Enable {mode_label} and remember this choice")),
+                name: "继续且不再提示".to_string(),
+                description: Some(format!("启用{mode_label}并记住此选择")),
                 actions: accept_and_remember_actions,
                 dismiss_on_select: true,
                 ..Default::default()
@@ -3983,8 +3948,8 @@ impl ChatWidget {
             let mut header = ColumnRenderable::new();
             header.push(*Box::new(
                 Paragraph::new(vec![
-                    line!["Agent mode on Windows uses an experimental sandbox to limit network and filesystem access.".bold()],
-                    line!["Learn more: https://developers.openai.com/codex/windows"],
+                    line!["Windows 上的代理模式使用实验性沙箱来限制网络和文件系统访问。".bold()],
+                    line!["了解更多：https://developers.openai.com/codex/windows"],
                 ])
                 .wrap(Wrap { trim: false }),
             ));
@@ -3992,7 +3957,7 @@ impl ChatWidget {
             let preset_clone = preset;
             let items = vec![
                 SelectionItem {
-                    name: "Enable experimental sandbox".to_string(),
+                    name: "启用实验性沙箱".to_string(),
                     description: None,
                     actions: vec![Box::new(move |tx| {
                         tx.send(AppEvent::EnableWindowsSandboxForAgentMode {
@@ -4004,7 +3969,7 @@ impl ChatWidget {
                     ..Default::default()
                 },
                 SelectionItem {
-                    name: "Go back".to_string(),
+                    name: "返回".to_string(),
                     description: None,
                     actions: vec![Box::new(|tx| {
                         tx.send(AppEvent::OpenApprovalsPopup);
@@ -4039,18 +4004,18 @@ impl ChatWidget {
         let mut header = ColumnRenderable::new();
         header.push(*Box::new(
             Paragraph::new(vec![
-                line!["Set Up Agent Sandbox".bold()],
+                line!["设置代理沙箱".bold()],
                 line![""],
-                line!["Agent mode uses an experimental Windows sandbox that protects your files and prevents network access by default."],
-                line!["Learn more: https://developers.openai.com/codex/windows"],
+                line!["代理模式使用实验性的 Windows 沙箱，可保护文件并默认阻止网络访问。"],
+                line!["了解更多：https://developers.openai.com/codex/windows"],
             ])
             .wrap(Wrap { trim: false }),
         ));
 
         let stay_label = if stay_full_access {
-            "Stay in Agent Full Access".to_string()
+            "保持代理完全访问".to_string()
         } else {
-            "Stay in Read-Only".to_string()
+            "保持只读".to_string()
         };
         let mut stay_actions = if stay_full_access {
             Vec::new()
@@ -4076,7 +4041,7 @@ impl ChatWidget {
         let accept_otel = self.otel_manager.clone();
         let items = vec![
             SelectionItem {
-                name: "Set up agent sandbox (requires elevation)".to_string(),
+                name: "设置代理沙箱（需要提升权限）".to_string(),
                 description: None,
                 actions: vec![Box::new(move |tx| {
                     accept_otel.counter("codex.windows_sandbox.elevated_prompt_accept", 1, &[]);
@@ -4128,13 +4093,13 @@ impl ChatWidget {
                 Self::preset_matches_current(current_approval, current_sandbox, preset)
             });
         let mut lines = Vec::new();
-        lines.push(line!["Use Non-Elevated Sandbox?".bold()]);
+        lines.push(line!["使用非提升沙箱？".bold()]);
         lines.push(line![""]);
         lines.push(line![
-            "Elevation failed. You can also use a non-elevated sandbox, which protects your files and prevents network access under most circumstances. However, it carries greater risk if prompt injected."
+            "提升权限失败。你也可以使用非提升沙箱，它在大多数情况下会保护文件并阻止网络访问，但在提示注入时风险更高。"
         ]);
         lines.push(line![
-            "Learn more: https://developers.openai.com/codex/windows"
+            "了解更多：https://developers.openai.com/codex/windows"
         ]);
 
         let mut header = ColumnRenderable::new();
@@ -4143,9 +4108,9 @@ impl ChatWidget {
         let elevated_preset = preset.clone();
         let legacy_preset = preset;
         let stay_label = if stay_full_access {
-            "Stay in Agent Full Access".to_string()
+            "保持代理完全访问".to_string()
         } else {
-            "Stay in Read-Only".to_string()
+            "保持只读".to_string()
         };
         let mut stay_actions = if stay_full_access {
             Vec::new()
@@ -4169,7 +4134,7 @@ impl ChatWidget {
         );
         let items = vec![
             SelectionItem {
-                name: "Try elevated agent sandbox setup again".to_string(),
+                name: "重新尝试提升的代理沙箱设置".to_string(),
                 description: None,
                 actions: vec![Box::new({
                     let otel = self.otel_manager.clone();
@@ -4185,7 +4150,7 @@ impl ChatWidget {
                 ..Default::default()
             },
             SelectionItem {
-                name: "Use non-elevated agent sandbox".to_string(),
+                name: "使用非提升的代理沙箱".to_string(),
                 description: None,
                 actions: vec![Box::new({
                     let otel = self.otel_manager.clone();
@@ -4246,13 +4211,11 @@ impl ChatWidget {
     pub(crate) fn show_windows_sandbox_setup_status(&mut self) {
         // While elevated sandbox setup runs, prevent typing so the user doesn't
         // accidentally queue messages that will run under an unexpected mode.
-        self.bottom_pane.set_composer_input_enabled(
-            false,
-            Some("Input disabled until setup completes.".to_string()),
-        );
+        self.bottom_pane
+            .set_composer_input_enabled(false, Some("设置完成前禁用输入。".to_string()));
         self.bottom_pane.ensure_status_indicator();
         self.bottom_pane.set_interrupt_hint_visible(false);
-        self.set_status_header("Setting up agent sandbox. This can take a minute.".to_string());
+        self.set_status_header("正在设置代理沙箱，可能需要一点时间。".to_string());
         self.request_redraw();
     }
 
@@ -4408,9 +4371,9 @@ impl ChatWidget {
             return None;
         }
         match &self.stored_collaboration_mode {
-            CollaborationMode::Plan(_) => Some("Plan"),
-            CollaborationMode::PairProgramming(_) => Some("Pair Programming"),
-            CollaborationMode::Execute(_) => Some("Execute"),
+            CollaborationMode::Plan(_) => Some("计划"),
+            CollaborationMode::PairProgramming(_) => Some("结对编程"),
+            CollaborationMode::Execute(_) => Some("执行"),
             CollaborationMode::Custom(_) => None,
         }
     }
@@ -4446,7 +4409,7 @@ impl ChatWidget {
                 label.bold(),
                 " (".dim(),
                 key_hint::shift(KeyCode::Tab).into(),
-                " to change mode)".dim(),
+                " 切换模式)".dim(),
             ]);
             const FLASH_DURATION: Duration = Duration::from_secs(2);
             self.bottom_pane.flash_footer_hint(flash, FLASH_DURATION);
@@ -4702,8 +4665,8 @@ impl ChatWidget {
         let mut items: Vec<SelectionItem> = Vec::new();
 
         items.push(SelectionItem {
-            name: "Review against a base branch".to_string(),
-            description: Some("(PR Style)".into()),
+            name: "对比基准分支进行审查".to_string(),
+            description: Some("（PR 风格）".into()),
             actions: vec![Box::new({
                 let cwd = self.config.cwd.clone();
                 move |tx| {
@@ -4715,7 +4678,7 @@ impl ChatWidget {
         });
 
         items.push(SelectionItem {
-            name: "Review uncommitted changes".to_string(),
+            name: "审查未提交更改".to_string(),
             actions: vec![Box::new(move |tx: &AppEventSender| {
                 tx.send(AppEvent::CodexOp(Op::Review {
                     review_request: ReviewRequest {
@@ -4730,7 +4693,7 @@ impl ChatWidget {
 
         // New: Review a specific commit (opens commit picker)
         items.push(SelectionItem {
-            name: "Review a commit".to_string(),
+            name: "审查某个提交".to_string(),
             actions: vec![Box::new({
                 let cwd = self.config.cwd.clone();
                 move |tx| {
@@ -4742,7 +4705,7 @@ impl ChatWidget {
         });
 
         items.push(SelectionItem {
-            name: "Custom review instructions".to_string(),
+            name: "自定义审查指令".to_string(),
             actions: vec![Box::new(move |tx| {
                 tx.send(AppEvent::OpenReviewCustomPrompt);
             })],
@@ -4751,7 +4714,7 @@ impl ChatWidget {
         });
 
         self.bottom_pane.show_selection_view(SelectionViewParams {
-            title: Some("Select a review preset".into()),
+            title: Some("选择审查预设".into()),
             footer_hint: Some(standard_popup_hint_line()),
             items,
             ..Default::default()
@@ -4786,11 +4749,11 @@ impl ChatWidget {
         }
 
         self.bottom_pane.show_selection_view(SelectionViewParams {
-            title: Some("Select a base branch".to_string()),
+            title: Some("选择基准分支".to_string()),
             footer_hint: Some(standard_popup_hint_line()),
             items,
             is_searchable: true,
-            search_placeholder: Some("Type to search branches".to_string()),
+            search_placeholder: Some("输入以搜索分支".to_string()),
             ..Default::default()
         });
     }
@@ -4824,11 +4787,11 @@ impl ChatWidget {
         }
 
         self.bottom_pane.show_selection_view(SelectionViewParams {
-            title: Some("Select a commit to review".to_string()),
+            title: Some("选择要审查的提交".to_string()),
             footer_hint: Some(standard_popup_hint_line()),
             items,
             is_searchable: true,
-            search_placeholder: Some("Type to search commits".to_string()),
+            search_placeholder: Some("输入以搜索提交".to_string()),
             ..Default::default()
         });
     }
@@ -4836,8 +4799,8 @@ impl ChatWidget {
     pub(crate) fn show_review_custom_prompt(&mut self) {
         let tx = self.app_event_tx.clone();
         let view = CustomPromptView::new(
-            "Custom review instructions".to_string(),
-            "Type instructions and press Enter".to_string(),
+            "自定义审查指令".to_string(),
+            "输入指令并按 Enter".to_string(),
             None,
             Box::new(move |prompt: String| {
                 let trimmed = prompt.trim().to_string();
@@ -4961,24 +4924,24 @@ impl Notification {
         match self {
             Notification::AgentTurnComplete { response } => {
                 Notification::agent_turn_preview(response)
-                    .unwrap_or_else(|| "Agent turn complete".to_string())
+                    .unwrap_or_else(|| "代理回合完成".to_string())
             }
             Notification::ExecApprovalRequested { command } => {
-                format!("Approval requested: {}", truncate_text(command, 30))
+                format!("请求审批：{}", truncate_text(command, 30))
             }
             Notification::EditApprovalRequested { cwd, changes } => {
                 format!(
-                    "Codex wants to edit {}",
+                    "Codex 想要编辑 {}",
                     if changes.len() == 1 {
                         #[allow(clippy::unwrap_used)]
                         display_path_for(changes.first().unwrap(), cwd)
                     } else {
-                        format!("{} files", changes.len())
+                        format!("{} 个文件", changes.len())
                     }
                 )
             }
             Notification::ElicitationRequested { server_name } => {
-                format!("Approval requested by {server_name}")
+                format!("{server_name} 请求审批")
             }
         }
     }
@@ -5019,14 +4982,14 @@ impl Notification {
 const AGENT_NOTIFICATION_PREVIEW_GRAPHEMES: usize = 200;
 
 const PLACEHOLDERS: [&str; 8] = [
-    "Explain this codebase",
-    "Summarize recent commits",
-    "Implement {feature}",
-    "Find and fix a bug in @filename",
-    "Write tests for @filename",
-    "Improve documentation in @filename",
-    "Run /review on my current changes",
-    "Use /skills to list available skills",
+    "解释这个代码库",
+    "总结最近的提交",
+    "实现 {feature}",
+    "在 @filename 中查找并修复 bug",
+    "为 @filename 编写测试",
+    "改进 @filename 的文档",
+    "对当前改动运行 /review",
+    "使用 /skills 列出可用技能",
 ];
 
 // Extract the first bold (Markdown) element in the form **...** from `s`.
@@ -5124,11 +5087,11 @@ pub(crate) fn show_review_commit_picker_with_entries(
     }
 
     chat.bottom_pane.show_selection_view(SelectionViewParams {
-        title: Some("Select a commit to review".to_string()),
+        title: Some("选择要审查的提交".to_string()),
         footer_hint: Some(standard_popup_hint_line()),
         items,
         is_searchable: true,
-        search_placeholder: Some("Type to search commits".to_string()),
+        search_placeholder: Some("输入以搜索提交".to_string()),
         ..Default::default()
     });
 }

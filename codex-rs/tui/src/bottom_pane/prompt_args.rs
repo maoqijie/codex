@@ -23,10 +23,10 @@ impl PromptArgsError {
     fn describe(&self, command: &str) -> String {
         match self {
             PromptArgsError::MissingAssignment { token } => format!(
-                "Could not parse {command}: expected key=value but found '{token}'. Wrap values in double quotes if they contain spaces."
+                "无法解析 {command}：需要 key=value，但找到了 '{token}'。如果值包含空格，请用双引号包裹。"
             ),
             PromptArgsError::MissingKey { token } => {
-                format!("Could not parse {command}: expected a name before '=' in '{token}'.")
+                format!("无法解析 {command}：在 '{token}' 的 '=' 前缺少名称。")
             }
         }
     }
@@ -51,7 +51,7 @@ impl PromptExpansionError {
             PromptExpansionError::MissingArgs { command, missing } => {
                 let list = missing.join(", ");
                 format!(
-                    "Missing required args for {command}: {list}. Provide as key=value (quote values with spaces)."
+                    "缺少 {command} 的必填参数：{list}。请使用 key=value（值含空格需加双引号）。"
                 )
             }
         }
@@ -622,7 +622,7 @@ mod tests {
         let err = expand_custom_prompt("/prompts:my-prompt USER=Alice stray", &[], &prompts)
             .unwrap_err()
             .user_message();
-        assert!(err.contains("expected key=value"));
+        assert!(err.contains("key=value"));
     }
 
     #[test]
@@ -637,7 +637,7 @@ mod tests {
         let err = expand_custom_prompt("/prompts:my-prompt USER=Alice", &[], &prompts)
             .unwrap_err()
             .user_message();
-        assert!(err.to_lowercase().contains("missing required args"));
+        assert!(err.contains("必填参数"));
         assert!(err.contains("BRANCH"));
     }
 

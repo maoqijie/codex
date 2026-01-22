@@ -1,18 +1,18 @@
-Use /compact when the conversation gets long to summarize history and free up context.
-Start a fresh idea with /new; the previous session stays in history.
-Use /feedback to send logs to the maintainers when something looks off.
-Switch models or reasoning effort quickly with /model.
-Use /approvals to control when Codex asks for confirmation.
-Run /review to get a code review of your current changes.
-Use /skills to list available skills or ask Codex to use one.
-Use /status to see the current model, approvals, and token usage.
-Use /fork to branch the current chat into a new thread.
-Use /init to create an AGENTS.md with project-specific guidance.
-Use /mcp to list configured MCP tools.
-You can run any shell command from Codex using `!` (e.g. `!ls`)
-Type / to open the command popup; Tab autocompletes slash commands and saved prompts.
-You can define your own `/` commands with custom prompts. More info: https://developers.openai.com/codex/guides/slash-commands#create-your-own-slash-commands-with-custom-prompts
-When the composer is empty, press Esc to step back and edit your last message; Enter confirms.
-Press Tab to queue a message instead of sending it immediately; Enter always sends immediately.
-Paste an image with Ctrl+V to attach it to your next message.
-You can resume a previous conversation by running `codex resume`
+对话变长时使用 /compact，总结历史并释放上下文。
+用 /new 开启新想法；之前的会话会保留在历史中。
+出现异常时用 /feedback 将日志发送给维护者。
+用 /model 快速切换模型或推理强度。
+用 /approvals 控制 Codex 何时请求确认。
+运行 /review 获取当前改动的代码审查。
+用 /skills 查看可用技能，或让 Codex 使用其中一个。
+用 /status 查看当前模型、审批设置和 token 用量。
+用 /fork 将当前聊天分叉成新线程。
+用 /init 创建包含项目指引的 AGENTS.md。
+用 /mcp 列出已配置的 MCP 工具。
+使用 `!` 可从 Codex 运行任意 shell 命令（例如 `!ls`）。
+输入 / 打开命令弹窗；Tab 可自动补全斜杠命令和已保存的提示。
+可用自定义提示定义自己的 `/` 命令。更多信息：https://developers.openai.com/codex/guides/slash-commands#create-your-own-slash-commands-with-custom-prompts
+输入框为空时，按 Esc 回退并编辑上一条消息；按 Enter 确认。
+按 Tab 将消息加入队列而非立即发送；Enter 始终立即发送。
+使用 Ctrl+V 粘贴图片，可附加到下一条消息。
+运行 `codex resume` 可恢复之前的对话。

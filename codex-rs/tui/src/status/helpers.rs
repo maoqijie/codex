@@ -22,14 +22,24 @@ pub(crate) fn compose_model_display(
 ) -> (String, Vec<String>) {
     let mut details: Vec<String> = Vec::new();
     if let Some((_, effort)) = entries.iter().find(|(k, _)| *k == "reasoning effort") {
-        details.push(format!("reasoning {}", effort.to_ascii_lowercase()));
+        details.push(format!("推理 {}", effort.to_ascii_lowercase()));
     }
     if let Some((_, summary)) = entries.iter().find(|(k, _)| *k == "reasoning summaries") {
         let summary = summary.trim();
-        if summary.eq_ignore_ascii_case("none") || summary.eq_ignore_ascii_case("off") {
-            details.push("summaries off".to_string());
+        if summary.eq_ignore_ascii_case("none")
+            || summary.eq_ignore_ascii_case("off")
+            || summary == "无"
+        {
+            details.push("摘要已关闭".to_string());
         } else if !summary.is_empty() {
-            details.push(format!("summaries {}", summary.to_ascii_lowercase()));
+            let lowered = summary.to_ascii_lowercase();
+            let localized = match lowered.as_str() {
+                "auto" => "自动".to_string(),
+                "concise" => "精简".to_string(),
+                "detailed" => "详细".to_string(),
+                _ => summary.to_string(),
+            };
+            details.push(format!("摘要 {localized}"));
         }
     }
 
@@ -44,7 +54,7 @@ pub(crate) fn compose_agents_summary(config: &Config) -> String {
                 let file_name = p
                     .file_name()
                     .map(|name| name.to_string_lossy().to_string())
-                    .unwrap_or_else(|| "<unknown>".to_string());
+                    .unwrap_or_else(|| "未知".to_string());
                 let display = if let Some(parent) = p.parent() {
                     if parent == config.cwd {
                         file_name.clone()
@@ -75,12 +85,12 @@ pub(crate) fn compose_agents_summary(config: &Config) -> String {
                 rels.push(display);
             }
             if rels.is_empty() {
-                "<none>".to_string()
+                "无".to_string()
             } else {
                 rels.join(", ")
             }
         }
-        Err(_) => "<none>".to_string(),
+        Err(_) => "无".to_string(),
     }
 }
 
@@ -95,7 +105,7 @@ pub(crate) fn compose_account_display(
             let email = auth.get_account_email();
             let plan = plan
                 .map(|plan_type| title_case(format!("{plan_type:?}").as_str()))
-                .or_else(|| Some("Unknown".to_string()));
+                .or_else(|| Some("未知".to_string()));
             Some(StatusAccountDisplay::ChatGpt { email, plan })
         }
         AuthMode::ApiKey => Some(StatusAccountDisplay::ApiKey),
@@ -171,7 +181,9 @@ pub(crate) fn format_reset_timestamp(dt: DateTime<Local>, captured_at: DateTime<
     if dt.date_naive() == captured_at.date_naive() {
         time
     } else {
-        format!("{time} on {}", dt.format("%-d %b"))
+        let month = dt.format("%-m");
+        let day = dt.format("%-d");
+        format!("{time} 于 {month}月{day}日")
     }
 }
 

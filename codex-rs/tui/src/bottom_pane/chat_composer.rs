@@ -1626,9 +1626,8 @@ impl ChatComposer {
                     })
                     .unwrap_or(false);
                 if !is_builtin && !is_known_prompt {
-                    let message = format!(
-                        r#"Unrecognized command '/{name}'. Type "/" for a list of supported commands."#
-                    );
+                    let message =
+                        format!("无法识别的命令 '/{name}'。输入 \"/\" 查看支持的命令列表。");
                     self.app_event_tx.send(AppEvent::InsertHistoryCell(Box::new(
                         history_cell::new_info_event(message, None),
                     )));
@@ -2545,7 +2544,7 @@ impl Renderable for ChatComposer {
             } else {
                 self.input_disabled_placeholder
                     .as_deref()
-                    .unwrap_or("Input disabled.")
+                    .unwrap_or("输入已禁用。")
                     .to_string()
             };
             let placeholder = Span::from(text).dim();
@@ -2634,13 +2633,8 @@ mod tests {
     fn footer_hint_row_is_separated_from_composer() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let area = Rect::new(0, 0, 40, 6);
         let mut buf = Buffer::empty(area);
@@ -2657,7 +2651,7 @@ mod tests {
         let mut hint_row: Option<(u16, String)> = None;
         for y in 0..area.height {
             let row = row_to_string(y);
-            if row.contains("? for shortcuts") {
+            if row.contains("查 看 快 捷 键") {
                 hint_row = Some((y, row));
                 break;
             }
@@ -2688,13 +2682,8 @@ mod tests {
     fn footer_flash_overrides_footer_hint_override() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_footer_hint_override(Some(vec![("K".to_string(), "label".to_string())]));
         composer.show_footer_flash(Line::from("FLASH"), Duration::from_secs(10));
 
@@ -2726,13 +2715,8 @@ mod tests {
     fn footer_flash_expires_and_falls_back_to_hint_override() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_footer_hint_override(Some(vec![("K".to_string(), "label".to_string())]));
         composer.show_footer_flash(Line::from("FLASH"), Duration::from_secs(10));
         composer.footer_flash.as_mut().unwrap().expires_at =
@@ -2776,7 +2760,7 @@ mod tests {
             true,
             sender,
             enhanced_keys_supported,
-            "Ask Codex to do anything".to_string(),
+            "让 Codex 做点什么".to_string(),
             false,
         );
         setup(&mut composer);
@@ -2851,13 +2835,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            true,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, true, "让 Codex 做点什么".to_string(), false);
 
         type_chars_humanlike(&mut composer, &['d']);
 
@@ -2876,13 +2855,8 @@ mod tests {
     fn clear_for_ctrl_c_records_cleared_draft() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -2909,13 +2883,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -2958,13 +2927,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -2995,13 +2959,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -3176,13 +3135,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -3211,13 +3165,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -3239,13 +3188,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         composer
             .paste_burst
@@ -3272,13 +3216,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         composer
             .paste_burst
@@ -3320,13 +3259,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Force an active burst so the test doesn't depend on timing heuristics.
         composer
@@ -3357,13 +3291,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -3414,13 +3343,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         composer.textarea.set_text_clearing_elements("/diff");
         composer.textarea.set_cursor("/diff".len());
@@ -3443,13 +3367,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Force an active burst so we can deterministically buffer characters without relying on
         // timing.
@@ -3478,13 +3397,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // First ASCII char is normally held briefly. Flip the config mid-stream and ensure the
         // held char is not dropped.
@@ -3511,13 +3425,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -3543,13 +3452,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
         composer.set_steer_enabled(true);
@@ -3575,13 +3479,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         let large = "x".repeat(LARGE_PASTE_CHAR_THRESHOLD + 10);
@@ -3613,13 +3512,8 @@ mod tests {
         let large = "y".repeat(LARGE_PASTE_CHAR_THRESHOLD + 1);
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.handle_paste(large);
@@ -3659,7 +3553,7 @@ mod tests {
                 true,
                 sender.clone(),
                 false,
-                "Ask Codex to do anything".to_string(),
+                "让 Codex 做点什么".to_string(),
                 false,
             );
 
@@ -3710,13 +3604,8 @@ mod tests {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
 
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         // Type "/mo" humanlike so paste-burst doesn’t interfere.
@@ -3739,13 +3628,8 @@ mod tests {
         use super::super::command_popup::CommandItem;
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         type_chars_humanlike(&mut composer, &['/', 'm', 'o']);
 
@@ -3771,13 +3655,8 @@ mod tests {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
 
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         // Type "/res" humanlike so paste-burst doesn’t interfere.
@@ -3797,13 +3676,8 @@ mod tests {
         use super::super::command_popup::CommandItem;
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         type_chars_humanlike(&mut composer, &['/', 'r', 'e', 's']);
 
         match &composer.active_popup {
@@ -3845,13 +3719,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Type the slash command.
         type_chars_humanlike(&mut composer, &['/', 'i', 'n', 'i', 't']);
@@ -3926,13 +3795,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         type_chars_humanlike(&mut composer, &['/', 'c']);
 
@@ -3947,13 +3811,8 @@ mod tests {
     fn slash_tab_then_enter_dispatches_builtin_command() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Type a prefix and complete with Tab, which inserts a trailing space
         // and moves the cursor beyond the '/name' token (hides the popup).
@@ -3989,13 +3848,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         type_chars_humanlike(&mut composer, &['/', 'm', 'e', 'n', 't', 'i', 'o', 'n']);
 
@@ -4032,13 +3886,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         // Define test cases: (paste content, is_large)
@@ -4112,13 +3961,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Define test cases: (content, is_large)
         let test_cases = [
@@ -4186,13 +4030,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let paste = "x".repeat(LARGE_PASTE_CHAR_THRESHOLD + 4);
         let placeholder_base = format!("[Pasted Content {} chars]", paste.chars().count());
@@ -4225,13 +4064,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let paste = "x".repeat(LARGE_PASTE_CHAR_THRESHOLD + 4);
         let base = format!("[Pasted Content {} chars]", paste.chars().count());
@@ -4265,13 +4099,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Define test cases: (cursor_position_from_end, expected_pending_count)
         let test_cases = [
@@ -4313,13 +4142,8 @@ mod tests {
     fn attach_image_and_submit_includes_local_image_paths() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         let path = PathBuf::from("/tmp/image1.png");
         composer.attach_image(path.clone());
@@ -4352,13 +4176,8 @@ mod tests {
     fn set_text_content_reattaches_images_without_placeholder_metadata() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let placeholder = local_image_label_text(1);
         let text = format!("{placeholder} restored");
@@ -4374,13 +4193,8 @@ mod tests {
     fn large_paste_preserves_image_text_elements_on_submit() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         let large_content = "x".repeat(LARGE_PASTE_CHAR_THRESHOLD + 5);
@@ -4418,13 +4232,8 @@ mod tests {
     fn large_paste_with_leading_whitespace_trims_and_shifts_elements() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         let large_content = format!("  {}", "x".repeat(LARGE_PASTE_CHAR_THRESHOLD + 5));
@@ -4462,13 +4271,8 @@ mod tests {
     fn pasted_crlf_normalizes_newlines_for_elements() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         let pasted = "line1\r\nline2\r\n".to_string();
@@ -4506,13 +4310,8 @@ mod tests {
     fn suppressed_submission_restores_pending_paste_payload() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.textarea.set_text_clearing_elements("/unknown ");
@@ -4553,13 +4352,8 @@ mod tests {
     fn attach_image_without_text_submits_empty_text_and_images() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
         let path = PathBuf::from("/tmp/image2.png");
         composer.attach_image(path.clone());
@@ -4593,13 +4387,8 @@ mod tests {
     fn duplicate_image_placeholders_get_suffix() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         let path = PathBuf::from("/tmp/image_dup.png");
         composer.attach_image(path.clone());
         composer.handle_paste(" ".into());
@@ -4616,13 +4405,8 @@ mod tests {
     fn image_placeholder_backspace_behaves_like_text_placeholder() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         let path = PathBuf::from("/tmp/image3.png");
         composer.attach_image(path.clone());
         let placeholder = composer.attached_images[0].placeholder.clone();
@@ -4657,13 +4441,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Insert an image placeholder at the start
         let path = PathBuf::from("/tmp/image_multibyte.png");
@@ -4683,13 +4462,8 @@ mod tests {
     fn deleting_one_of_duplicate_image_placeholders_removes_one_entry() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let path1 = PathBuf::from("/tmp/image_dup1.png");
         let path2 = PathBuf::from("/tmp/image_dup2.png");
@@ -4743,13 +4517,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let path1 = PathBuf::from("/tmp/image_first.png");
         let path2 = PathBuf::from("/tmp/image_second.png");
@@ -4806,13 +4575,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let path1 = PathBuf::from("/tmp/image_first.png");
         let path2 = PathBuf::from("/tmp/image_second.png");
@@ -4844,13 +4608,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let needs_redraw = composer.handle_paste(tmp_path.to_string_lossy().to_string());
         assert!(needs_redraw);
@@ -4866,13 +4625,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         // Inject prompts as if received via event.
@@ -4906,13 +4660,8 @@ mod tests {
     fn custom_prompt_submission_expands_arguments() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -4942,13 +4691,8 @@ mod tests {
     fn custom_prompt_submission_accepts_quoted_values() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -4982,13 +4726,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5038,13 +4777,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5095,13 +4829,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5144,13 +4873,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         // Create a custom prompt with positional args (no named args like $USER)
@@ -5209,13 +4933,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5268,13 +4987,8 @@ mod tests {
 
         let (tx, mut rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer
@@ -5305,13 +5019,8 @@ mod tests {
 
         let (tx, mut rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer
@@ -5338,13 +5047,8 @@ mod tests {
     fn custom_prompt_invalid_args_reports_error() {
         let (tx, mut rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         composer.set_custom_prompts(vec![CustomPrompt {
             name: "my-prompt".to_string(),
@@ -5376,7 +5080,7 @@ mod tests {
                     .map(|line| line.to_string())
                     .collect::<Vec<_>>()
                     .join("\n");
-                assert!(message.contains("expected key=value"));
+                assert!(message.contains("key=value"));
                 found_error = true;
                 break;
             }
@@ -5388,13 +5092,8 @@ mod tests {
     fn custom_prompt_missing_required_args_reports_error() {
         let (tx, mut rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         composer.set_custom_prompts(vec![CustomPrompt {
             name: "my-prompt".to_string(),
@@ -5424,7 +5123,7 @@ mod tests {
                     .map(|line| line.to_string())
                     .collect::<Vec<_>>()
                     .join("\n");
-                assert!(message.to_lowercase().contains("missing required args"));
+                assert!(message.contains("缺少"));
                 assert!(message.contains("BRANCH"));
                 found_error = true;
                 break;
@@ -5443,13 +5142,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5482,13 +5176,8 @@ mod tests {
     fn popup_prompt_submission_prunes_unused_image_attachments() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5521,13 +5210,8 @@ mod tests {
     fn numeric_prompt_auto_submit_prunes_unused_image_attachments() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5565,13 +5249,8 @@ mod tests {
     fn numeric_prompt_auto_submit_expands_pending_pastes() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5606,13 +5285,8 @@ mod tests {
     fn queued_prompt_submission_prunes_unused_image_attachments() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(false);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5679,13 +5353,8 @@ mod tests {
         // key=value parsing errors when given positional arguments.
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5716,13 +5385,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         composer.set_custom_prompts(vec![CustomPrompt {
             name: "p".to_string(),
@@ -5752,13 +5416,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5791,13 +5450,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
         composer.set_steer_enabled(true);
 
         composer.set_custom_prompts(vec![CustomPrompt {
@@ -5835,13 +5489,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let _ = composer.handle_key_event(KeyEvent::new(KeyCode::Char('h'), KeyModifiers::NONE));
         assert!(composer.is_in_paste_burst());
@@ -5864,13 +5513,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let count = 32;
         let mut now = Instant::now();
@@ -5911,13 +5555,8 @@ mod tests {
     fn burst_paste_fast_large_inserts_placeholder_on_flush() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let count = LARGE_PASTE_CHAR_THRESHOLD + 1; // > threshold to trigger placeholder
         let mut now = Instant::now();
@@ -5950,13 +5589,8 @@ mod tests {
     fn humanlike_typing_1000_chars_appears_live_no_placeholder() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let count = LARGE_PASTE_CHAR_THRESHOLD; // 1000 in current config
         let chars: Vec<char> = vec!['z'; count];
@@ -5975,13 +5609,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Simulate history-like content: "/ test"
         composer.set_text_content("/ test".to_string(), Vec::new(), Vec::new());
@@ -6005,13 +5634,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         // Case 1: bare "/"
         composer.set_text_content("/".to_string(), Vec::new(), Vec::new());
@@ -6048,13 +5672,8 @@ mod tests {
     fn apply_external_edit_rebuilds_text_and_attachments() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let placeholder = "[image 10x10]".to_string();
         composer.textarea.insert_element(&placeholder);
@@ -6082,13 +5701,8 @@ mod tests {
     fn apply_external_edit_drops_missing_attachments() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let placeholder = "[image 10x10]".to_string();
         composer.textarea.insert_element(&placeholder);
@@ -6107,13 +5721,8 @@ mod tests {
     fn current_text_with_pending_expands_placeholders() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let placeholder = "[Pasted Content 5 chars]".to_string();
         composer.textarea.insert_element(&placeholder);
@@ -6132,13 +5741,8 @@ mod tests {
     fn apply_external_edit_limits_duplicates_to_occurrences() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         let placeholder = "[image 10x10]".to_string();
         composer.textarea.insert_element(&placeholder);
@@ -6164,13 +5768,8 @@ mod tests {
 
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
-        let mut composer = ChatComposer::new(
-            true,
-            sender,
-            false,
-            "Ask Codex to do anything".to_string(),
-            false,
-        );
+        let mut composer =
+            ChatComposer::new(true, sender, false, "让 Codex 做点什么".to_string(), false);
 
         composer.set_text_content("hello".to_string(), Vec::new(), Vec::new());
         composer.set_input_enabled(false, Some("Input disabled for test.".to_string()));

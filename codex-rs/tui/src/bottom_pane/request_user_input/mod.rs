@@ -29,9 +29,9 @@ use codex_protocol::request_user_input::RequestUserInputAnswer;
 use codex_protocol::request_user_input::RequestUserInputEvent;
 use codex_protocol::request_user_input::RequestUserInputResponse;
 
-const NOTES_PLACEHOLDER: &str = "Add notes (optional)";
-const ANSWER_PLACEHOLDER: &str = "Type your answer (optional)";
-const SELECT_OPTION_PLACEHOLDER: &str = "Select an option to add notes (optional)";
+const NOTES_PLACEHOLDER: &str = "添加备注（可选）";
+const ANSWER_PLACEHOLDER: &str = "输入回答（可选）";
+const SELECT_OPTION_PLACEHOLDER: &str = "选择一个选项以添加备注（可选）";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Focus {

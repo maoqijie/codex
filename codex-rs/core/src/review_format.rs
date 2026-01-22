@@ -11,7 +11,7 @@ fn format_location(item: &ReviewFinding) -> String {
     format!("{path}:{start}-{end}")
 }
 
-const REVIEW_FALLBACK_MESSAGE: &str = "Reviewer failed to output a response.";
+const REVIEW_FALLBACK_MESSAGE: &str = "审查器未能输出回复。";
 
 /// Format a full review findings block as plain text lines.
 ///
@@ -29,9 +29,9 @@ pub fn format_review_findings_block(
 
     // Header
     if findings.len() > 1 {
-        lines.push("Full review comments:".to_string());
+        lines.push("完整审查意见：".to_string());
     } else {
-        lines.push("Review comment:".to_string());
+        lines.push("审查意见：".to_string());
     }
 
     for (idx, item) in findings.iter().enumerate() {

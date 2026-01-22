@@ -2,10 +2,9 @@
 source: tui/src/chatwidget/tests.rs
 expression: popup
 ---
-  How was this?
+  这 次 体 验 如 何 ？
 
-› 1. bug          Crash, error message, hang, or broken UI/behavior.
-  2. bad result   Output was off-target, incorrect, incomplete, or unhelpful.
-  3. good result  Helpful, correct, high‑quality, or delightful result worth
-                  celebrating.
-  4. other        Slowness, feature suggestion, UX feedback, or anything else.
+› 1. 故 障       崩 溃 、 报 错 、 卡 死 或 界 面 /行 为 异 常 。
+  2. 结 果 不 佳   输 出 不 符 合 预 期 、 错 误 、 不 完 整 或 无 帮 助 。
+  3. 结 果 很 好   有 帮 助 、 正 确 、 高 质 量 或 令 人 惊 喜 的 结 果 。
+  4. 其 他       变 慢 、 功 能 建 议 、 体 验 反 馈 或 其 他 问 题 。

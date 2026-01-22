@@ -2,7 +2,7 @@
 source: tui/src/bottom_pane/request_user_input/mod.rs
 expression: "render_snapshot(&overlay, area)"
 ---
-Question 1/1                                                        
+问 题  1/1                                                            
 Next Step                                                           
 What would you like to do next?                                     
 ( ) Discuss a code change (Recommended)  Walk through a plan and    
@@ -10,5 +10,5 @@ What would you like to do next?
 ( ) Run tests                            Pick a crate and run its   
                                          tests.                     
 ( ) Review a diff                        Summarize or review current
-Notes: Add notes (optional)                                         
-Option 4 of 5 | ↑/↓ scroll | enter next question | esc interrupt
+备 注 ：    添 加 备 注 （ 可 选 ）                                            
+选 项  4/5 | ↑/↓ 滚 动  | enter 下 一 题  | esc 中 断

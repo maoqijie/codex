@@ -48,10 +48,8 @@ pub(crate) struct ExperimentalFeaturesView {
 impl ExperimentalFeaturesView {
     pub(crate) fn new(features: Vec<BetaFeatureItem>, app_event_tx: AppEventSender) -> Self {
         let mut header = ColumnRenderable::new();
-        header.push(Line::from("Experimental features".bold()));
-        header.push(Line::from(
-            "Toggle beta features. Changes are saved to config.toml.".dim(),
-        ));
+        header.push(Line::from("实验功能".bold()));
+        header.push(Line::from("切换测试功能。更改会保存到 config.toml。".dim()));
 
         let mut view = Self {
             features,
@@ -252,7 +250,7 @@ impl Renderable for ExperimentalFeaturesView {
                 &rows,
                 &self.state,
                 MAX_POPUP_ROWS,
-                "  No experimental features available for now",
+                "  暂无可用的实验功能",
             );
         }
 
@@ -283,10 +281,10 @@ impl Renderable for ExperimentalFeaturesView {
 
 fn experimental_popup_hint_line() -> Line<'static> {
     Line::from(vec![
-        "Press ".into(),
+        "按 ".into(),
         key_hint::plain(KeyCode::Enter).into(),
-        " to toggle or ".into(),
+        " 切换，或按 ".into(),
         key_hint::plain(KeyCode::Esc).into(),
-        " to save for next conversation".into(),
+        " 保存并在下次对话生效".into(),
     ])
 }

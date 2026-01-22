@@ -2,11 +2,11 @@
 source: tui/src/bottom_pane/request_user_input/mod.rs
 expression: "render_snapshot(&overlay, area)"
 ---
-Question 1/1                                                    
+问 题  1/1                                                        
 Goal                                                            
 Share details.                                                  
 +--------------------------------------------------------------+
-|Type your answer (optional)                                   |
+|输 入 回 答 （ 可 选 ）                                               |
 +--------------------------------------------------------------+
-Unanswered: 1 | Will submit as skipped                          
-↑/↓ scroll | enter next question | esc interrupt
+未 回 答 ： 1 | 将 按 跳 过 提 交                                         
+↑/↓ 滚 动  | enter 下 一 题  | esc 中 断

@@ -146,7 +146,7 @@ fn footer_lines(props: FooterProps) -> Vec<Line<'static>> {
             line.push_span(" · ".dim());
             line.extend(vec![
                 key_hint::plain(KeyCode::Char('?')).into(),
-                " for shortcuts".dim(),
+                " 查看快捷键".dim(),
             ]);
             vec![line]
         }
@@ -173,7 +173,7 @@ fn footer_lines(props: FooterProps) -> Vec<Line<'static>> {
             if props.is_task_running && props.steer_enabled {
                 line.push_span(" · ".dim());
                 line.push_span(key_hint::plain(KeyCode::Tab));
-                line.push_span(" to queue message".dim());
+                line.push_span(" 加入队列".dim());
             }
             vec![line]
         }
@@ -189,19 +189,19 @@ struct ShortcutsState {
 }
 
 fn quit_shortcut_reminder_line(key: KeyBinding) -> Line<'static> {
-    Line::from(vec![key.into(), " again to quit".into()]).dim()
+    Line::from(vec![key.into(), " 再按一次退出".into()]).dim()
 }
 
 fn esc_hint_line(esc_backtrack_hint: bool) -> Line<'static> {
     let esc = key_hint::plain(KeyCode::Esc);
     if esc_backtrack_hint {
-        Line::from(vec![esc.into(), " again to edit previous message".into()]).dim()
+        Line::from(vec![esc.into(), " 再按一次编辑上一条消息".into()]).dim()
     } else {
         Line::from(vec![
             esc.into(),
             " ".into(),
             esc.into(),
-            " to edit previous message".into(),
+            " 编辑上一条消息".into(),
         ])
         .dim()
     }
@@ -308,15 +308,15 @@ fn build_columns(entries: Vec<Line<'static>>) -> Vec<Line<'static>> {
 fn context_window_line(percent: Option<i64>, used_tokens: Option<i64>) -> Line<'static> {
     if let Some(percent) = percent {
         let percent = percent.clamp(0, 100);
-        return Line::from(vec![Span::from(format!("{percent}% context left")).dim()]);
+        return Line::from(vec![Span::from(format!("上下文剩余 {percent}%")).dim()]);
     }
 
     if let Some(tokens) = used_tokens {
         let used_fmt = format_tokens_compact(tokens);
-        return Line::from(vec![Span::from(format!("{used_fmt} used")).dim()]);
+        return Line::from(vec![Span::from(format!("已用 {used_fmt}")).dim()]);
     }
 
-    Line::from(vec![Span::from("100% context left").dim()])
+    Line::from(vec!["上下文剩余 100%".dim()])
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -385,12 +385,12 @@ impl ShortcutDescriptor {
         match self.id {
             ShortcutId::EditPrevious => {
                 if state.esc_backtrack_hint {
-                    line.push_span(" again to edit previous message");
+                    line.push_span(" 再按一次编辑上一条消息");
                 } else {
                     line.extend(vec![
                         " ".into(),
                         key_hint::plain(KeyCode::Esc).into(),
-                        " to edit previous message".into(),
+                        " 编辑上一条消息".into(),
                     ]);
                 }
             }
@@ -408,7 +408,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::Always,
         }],
         prefix: "",
-        label: " for commands",
+        label: " 打开命令",
     },
     ShortcutDescriptor {
         id: ShortcutId::ShellCommands,
@@ -417,7 +417,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::Always,
         }],
         prefix: "",
-        label: " for shell commands",
+        label: " 本地命令",
     },
     ShortcutDescriptor {
         id: ShortcutId::InsertNewline,
@@ -432,7 +432,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             },
         ],
         prefix: "",
-        label: " for newline",
+        label: " 换行",
     },
     ShortcutDescriptor {
         id: ShortcutId::QueueMessageTab,
@@ -441,7 +441,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::Always,
         }],
         prefix: "",
-        label: " to queue message",
+        label: " 加入队列",
     },
     ShortcutDescriptor {
         id: ShortcutId::FilePaths,
@@ -450,7 +450,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::Always,
         }],
         prefix: "",
-        label: " for file paths",
+        label: " 文件路径",
     },
     ShortcutDescriptor {
         id: ShortcutId::PasteImage,
@@ -467,7 +467,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             },
         ],
         prefix: "",
-        label: " to paste images",
+        label: " 粘贴图片",
     },
     ShortcutDescriptor {
         id: ShortcutId::ExternalEditor,
@@ -476,7 +476,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::Always,
         }],
         prefix: "",
-        label: " to edit in external editor",
+        label: " 在外部编辑器编辑",
     },
     ShortcutDescriptor {
         id: ShortcutId::EditPrevious,
@@ -494,7 +494,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::Always,
         }],
         prefix: "",
-        label: " to exit",
+        label: " 退出",
     },
     ShortcutDescriptor {
         id: ShortcutId::ShowTranscript,
@@ -503,7 +503,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::Always,
         }],
         prefix: "",
-        label: " to view transcript",
+        label: " 查看记录",
     },
     ShortcutDescriptor {
         id: ShortcutId::ChangeMode,
@@ -512,7 +512,7 @@ const SHORTCUTS: &[ShortcutDescriptor] = &[
             condition: DisplayCondition::WhenCollaborationModesEnabled,
         }],
         prefix: "",
-        label: " to change mode",
+        label: " 切换模式",
     },
 ];
 

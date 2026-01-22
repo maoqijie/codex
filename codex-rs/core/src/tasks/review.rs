@@ -208,9 +208,7 @@ pub(crate) async fn exit_review_mode(
         (rendered, assistant_message)
     } else {
         let rendered = crate::client_common::REVIEW_EXIT_INTERRUPTED_TMPL.to_string();
-        let assistant_message =
-            "Review was interrupted. Please re-run /review and wait for it to complete."
-                .to_string();
+        let assistant_message = "审查被中断。请重新运行 /review 并等待完成。".to_string();
         (rendered, assistant_message)
     };
 
