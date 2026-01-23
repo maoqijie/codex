@@ -51,24 +51,23 @@ async fn list_models_returns_all_models_with_large_limit() -> Result<()> {
             id: "gpt-5.2-codex".to_string(),
             model: "gpt-5.2-codex".to_string(),
             display_name: "gpt-5.2-codex".to_string(),
-            description: "Latest frontier agentic coding model.".to_string(),
+            description: "最新前沿的智能体编程模型。".to_string(),
             supported_reasoning_efforts: vec![
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Low,
-                    description: "Fast responses with lighter reasoning".to_string(),
+                    description: "更轻量推理的快速响应".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Medium,
-                    description: "Balances speed and reasoning depth for everyday tasks"
-                        .to_string(),
+                    description: "兼顾速度与推理深度，适合日常任务".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::High,
-                    description: "Greater reasoning depth for complex problems".to_string(),
+                    description: "复杂问题的更深推理".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::XHigh,
-                    description: "Extra high reasoning depth for complex problems".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             default_reasoning_effort: ReasoningEffort::Medium,
@@ -78,24 +77,23 @@ async fn list_models_returns_all_models_with_large_limit() -> Result<()> {
             id: "gpt-5.1-codex-max".to_string(),
             model: "gpt-5.1-codex-max".to_string(),
             display_name: "gpt-5.1-codex-max".to_string(),
-            description: "Codex-optimized flagship for deep and fast reasoning.".to_string(),
+            description: "为 Codex 优化的旗舰模型，兼具深度与速度推理。".to_string(),
             supported_reasoning_efforts: vec![
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Low,
-                    description: "Fast responses with lighter reasoning".to_string(),
+                    description: "更轻量推理的快速响应".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Medium,
-                    description: "Balances speed and reasoning depth for everyday tasks"
-                        .to_string(),
+                    description: "兼顾速度与推理深度，适合日常任务".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::High,
-                    description: "Greater reasoning depth for complex problems".to_string(),
+                    description: "复杂问题的更深推理".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::XHigh,
-                    description: "Extra high reasoning depth for complex problems".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             default_reasoning_effort: ReasoningEffort::Medium,
@@ -105,16 +103,15 @@ async fn list_models_returns_all_models_with_large_limit() -> Result<()> {
             id: "gpt-5.1-codex-mini".to_string(),
             model: "gpt-5.1-codex-mini".to_string(),
             display_name: "gpt-5.1-codex-mini".to_string(),
-            description: "Optimized for codex. Cheaper, faster, but less capable.".to_string(),
+            description: "为 Codex 优化。 Cheaper, faster, but less capable.".to_string(),
             supported_reasoning_efforts: vec![
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Medium,
-                    description: "Dynamically adjusts reasoning based on the task".to_string(),
+                    description: "根据任务动态调整推理".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::High,
-                    description: "Maximizes reasoning depth for complex or ambiguous problems"
-                        .to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
             ],
             default_reasoning_effort: ReasoningEffort::Medium,
@@ -124,30 +121,23 @@ async fn list_models_returns_all_models_with_large_limit() -> Result<()> {
             id: "gpt-5.2".to_string(),
             model: "gpt-5.2".to_string(),
             display_name: "gpt-5.2".to_string(),
-            description:
-                "Latest frontier model with improvements across knowledge, reasoning and coding"
-                    .to_string(),
+            description: "最新前沿模型，在知识、推理与编码上都有提升".to_string(),
             supported_reasoning_efforts: vec![
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Low,
-                    description: "Balances speed with some reasoning; useful for straightforward \
-                                   queries and short explanations"
-                        .to_string(),
+                    description: "兼顾速度与一定推理；适合直接问题和短解释".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Medium,
-                    description: "Provides a solid balance of reasoning depth and latency for \
-                         general-purpose tasks"
-                        .to_string(),
+                    description: "在通用任务上平衡推理深度与延迟".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::High,
-                    description: "Maximizes reasoning depth for complex or ambiguous problems"
-                        .to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::XHigh,
-                    description: "Extra high reasoning depth for complex problems".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             default_reasoning_effort: ReasoningEffort::Medium,

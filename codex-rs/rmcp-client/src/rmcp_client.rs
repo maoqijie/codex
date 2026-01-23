@@ -101,6 +101,22 @@ pub struct RmcpClient {
     state: Mutex<ClientState>,
 }
 
+fn localize_rmcp_error(message: &str) -> String {
+    const REPLACEMENTS: &[(&str, &str)] = &[
+        (
+            "connection closed: initialize response",
+            "连接已关闭：初始化响应",
+        ),
+        ("connection closed", "连接已关闭"),
+        ("initialize response", "初始化响应"),
+    ];
+    let mut localized = message.to_string();
+    for (from, to) in REPLACEMENTS {
+        localized = localized.replace(from, to);
+    }
+    localized
+}
+
 impl RmcpClient {
     pub async fn new_stdio_client(
         program: OsString,
@@ -242,26 +258,30 @@ impl RmcpClient {
                         service::serve_client(client_handler.clone(), transport).boxed(),
                         Some(oauth_persistor),
                     ),
-                    None => return Err(anyhow!("client already initializing")),
+                    None => return Err(anyhow!("客户端正在初始化中")),
                 },
-                ClientState::Ready { .. } => return Err(anyhow!("client already initialized")),
+                ClientState::Ready { .. } => return Err(anyhow!("客户端已初始化")),
             }
         };
 
         let service = match timeout {
             Some(duration) => time::timeout(duration, transport)
                 .await
-                .map_err(|_| anyhow!("timed out handshaking with MCP server after {duration:?}"))?
-                .map_err(|err| anyhow!("handshaking with MCP server failed: {err}"))?,
-            None => transport
-                .await
-                .map_err(|err| anyhow!("handshaking with MCP server failed: {err}"))?,
+                .map_err(|_| anyhow!("与 MCP 服务器握手超时，耗时 {duration:?}"))?
+                .map_err(|err| {
+                    let err = localize_rmcp_error(&err.to_string());
+                    anyhow!("与 MCP 服务器握手失败：{err}")
+                })?,
+            None => transport.await.map_err(|err| {
+                let err = localize_rmcp_error(&err.to_string());
+                anyhow!("与 MCP 服务器握手失败：{err}")
+            })?,
         };
 
         let initialize_result_rmcp = service
             .peer()
             .peer_info()
-            .ok_or_else(|| anyhow!("handshake succeeded but server info was missing"))?;
+            .ok_or_else(|| anyhow!("握手成功但缺少服务器信息"))?;
         let initialize_result = convert_to_mcp(initialize_result_rmcp)?;
 
         {

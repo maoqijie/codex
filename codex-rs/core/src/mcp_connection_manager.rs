@@ -758,28 +758,28 @@ fn resolve_bearer_token(
         Ok(value) => {
             if value.is_empty() {
                 Err(anyhow!(
-                    "Environment variable {env_var} for MCP server '{server_name}' is empty"
+                    "MCP 服务器 '{server_name}' 的环境变量 {env_var} 为空"
                 ))
             } else {
                 Ok(Some(value))
             }
         }
         Err(env::VarError::NotPresent) => Err(anyhow!(
-            "Environment variable {env_var} for MCP server '{server_name}' is not set"
+            "MCP 服务器 '{server_name}' 未设置环境变量 {env_var}"
         )),
         Err(env::VarError::NotUnicode(_)) => Err(anyhow!(
-            "Environment variable {env_var} for MCP server '{server_name}' contains invalid Unicode"
+            "MCP 服务器 '{server_name}' 的环境变量 {env_var} 包含无效的 Unicode"
         )),
     }
 }
 
 #[derive(Debug, Clone, thiserror::Error)]
 enum StartupOutcomeError {
-    #[error("MCP startup cancelled")]
+    #[error("MCP 启动已取消")]
     Cancelled,
     // We can't store the original error here because anyhow::Error doesn't implement
     // `Clone`.
-    #[error("MCP startup failed: {error}")]
+    #[error("MCP 启动失败：{error}")]
     Failed { error: String },
 }
 
@@ -915,7 +915,7 @@ fn validate_mcp_server_name(server_name: &str) -> Result<()> {
     let re = regex_lite::Regex::new(r"^[a-zA-Z0-9_-]+$")?;
     if !re.is_match(server_name) {
         return Err(anyhow!(
-            "Invalid MCP server name '{server_name}': must match pattern {pattern}",
+            "无效的 MCP 服务器名称 '{server_name}'：必须匹配模式 {pattern}",
             pattern = re.as_str()
         ));
     }
@@ -938,12 +938,10 @@ fn mcp_init_error_display(
         && http_headers.as_ref().map(HashMap::is_empty).unwrap_or(true)
     {
         format!(
-            "GitHub MCP does not support OAuth. Log in by adding a personal access token (https://github.com/settings/personal-access-tokens) to your environment and config.toml:\n[mcp_servers.{server_name}]\nbearer_token_env_var = CODEX_GITHUB_PERSONAL_ACCESS_TOKEN"
+            "GitHub MCP 不支持 OAuth。请在环境变量与 config.toml 中添加个人访问令牌（https://github.com/settings/personal-access-tokens）来登录：\n[mcp_servers.{server_name}]\nbearer_token_env_var = CODEX_GITHUB_PERSONAL_ACCESS_TOKEN"
         )
     } else if is_mcp_client_auth_required_error(err) {
-        format!(
-            "The {server_name} MCP server is not logged in. Run `codex mcp login {server_name}`."
-        )
+        format!("{server_name} MCP 服务器未登录。运行 `codex mcp login {server_name}`。")
     } else if is_mcp_client_startup_timeout_error(err) {
         let startup_timeout_secs = match entry {
             Some(entry) => match entry.config.startup_timeout_sec {
@@ -954,10 +952,10 @@ fn mcp_init_error_display(
         }
         .as_secs();
         format!(
-            "MCP client for `{server_name}` timed out after {startup_timeout_secs} seconds. Add or adjust `startup_timeout_sec` in your config.toml:\n[mcp_servers.{server_name}]\nstartup_timeout_sec = XX"
+            "MCP 客户端 `{server_name}` 在 {startup_timeout_secs} 秒后超时。请在 config.toml 中添加或调整 `startup_timeout_sec`：\n[mcp_servers.{server_name}]\nstartup_timeout_sec = XX"
         )
     } else {
-        format!("MCP client for `{server_name}` failed to start: {err:#}")
+        format!("MCP 客户端 `{server_name}` 启动失败：{err:#}")
     }
 }
 
@@ -973,6 +971,7 @@ fn is_mcp_client_startup_timeout_error(error: &StartupOutcomeError) -> bool {
         StartupOutcomeError::Failed { error } => {
             error.contains("request timed out")
                 || error.contains("timed out handshaking with MCP server")
+                || error.contains("与 MCP 服务器握手超时")
         }
         _ => false,
     }
@@ -1184,7 +1183,7 @@ mod tests {
         let display = mcp_init_error_display(server_name, Some(&entry), &err);
 
         let expected = format!(
-            "GitHub MCP does not support OAuth. Log in by adding a personal access token (https://github.com/settings/personal-access-tokens) to your environment and config.toml:\n[mcp_servers.{server_name}]\nbearer_token_env_var = CODEX_GITHUB_PERSONAL_ACCESS_TOKEN"
+            "GitHub MCP 不支持 OAuth。请在环境变量与 config.toml 中添加个人访问令牌（https://github.com/settings/personal-access-tokens）来登录：\n[mcp_servers.{server_name}]\nbearer_token_env_var = CODEX_GITHUB_PERSONAL_ACCESS_TOKEN"
         );
 
         assert_eq!(expected, display);
@@ -1197,9 +1196,8 @@ mod tests {
 
         let display = mcp_init_error_display(server_name, None, &err);
 
-        let expected = format!(
-            "The {server_name} MCP server is not logged in. Run `codex mcp login {server_name}`."
-        );
+        let expected =
+            format!("{server_name} MCP 服务器未登录。运行 `codex mcp login {server_name}`。");
 
         assert_eq!(expected, display);
     }
@@ -1228,7 +1226,7 @@ mod tests {
 
         let display = mcp_init_error_display(server_name, Some(&entry), &err);
 
-        let expected = format!("MCP client for `{server_name}` failed to start: {err:#}");
+        let expected = format!("MCP 客户端 `{server_name}` 启动失败：{err:#}");
 
         assert_eq!(expected, display);
     }
@@ -1241,7 +1239,7 @@ mod tests {
         let display = mcp_init_error_display(server_name, None, &err);
 
         assert_eq!(
-            "MCP client for `slow` timed out after 10 seconds. Add or adjust `startup_timeout_sec` in your config.toml:\n[mcp_servers.slow]\nstartup_timeout_sec = XX",
+            "MCP 客户端 `slow` 在 10 秒后超时。请在 config.toml 中添加或调整 `startup_timeout_sec`：\n[mcp_servers.slow]\nstartup_timeout_sec = XX",
             display
         );
     }

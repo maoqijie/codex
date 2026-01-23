@@ -74,25 +74,13 @@ fn gpt_52_codex() -> ModelPreset {
         id: "gpt-5.2-codex".to_string(),
         model: "gpt-5.2-codex".to_string(),
         display_name: "gpt-5.2-codex".to_string(),
-        description: "Latest frontier agentic coding model.".to_string(),
+        description: "最新前沿的智能体编程模型。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Low,
-                "Fast responses with lighter reasoning",
-            ),
-            effort(
-                ReasoningEffort::Medium,
-                "Balances speed and reasoning depth for everyday tasks",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Greater reasoning depth for complex problems",
-            ),
-            effort(
-                ReasoningEffort::XHigh,
-                "Extra high reasoning depth for complex problems",
-            ),
+            effort(ReasoningEffort::Low, "更轻量推理的快速响应"),
+            effort(ReasoningEffort::Medium, "兼顾速度与推理深度，适合日常任务"),
+            effort(ReasoningEffort::High, "复杂问题的更深推理"),
+            effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
         is_default: true,
         upgrade: None,
@@ -106,25 +94,13 @@ fn gpt_5_1_codex_max() -> ModelPreset {
         id: "gpt-5.1-codex-max".to_string(),
         model: "gpt-5.1-codex-max".to_string(),
         display_name: "gpt-5.1-codex-max".to_string(),
-        description: "Codex-optimized flagship for deep and fast reasoning.".to_string(),
+        description: "为 Codex 优化的旗舰模型，兼具深度与速度推理。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Low,
-                "Fast responses with lighter reasoning",
-            ),
-            effort(
-                ReasoningEffort::Medium,
-                "Balances speed and reasoning depth for everyday tasks",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Greater reasoning depth for complex problems",
-            ),
-            effort(
-                ReasoningEffort::XHigh,
-                "Extra high reasoning depth for complex problems",
-            ),
+            effort(ReasoningEffort::Low, "更轻量推理的快速响应"),
+            effort(ReasoningEffort::Medium, "兼顾速度与推理深度，适合日常任务"),
+            effort(ReasoningEffort::High, "复杂问题的更深推理"),
+            effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
@@ -148,17 +124,11 @@ fn gpt_5_1_codex_mini() -> ModelPreset {
         id: "gpt-5.1-codex-mini".to_string(),
         model: "gpt-5.1-codex-mini".to_string(),
         display_name: "gpt-5.1-codex-mini".to_string(),
-        description: "Optimized for codex. Cheaper, faster, but less capable.".to_string(),
+        description: "为 Codex 优化。 Cheaper, faster, but less capable.".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Medium,
-                "Dynamically adjusts reasoning based on the task",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
+            effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
@@ -182,27 +152,16 @@ fn gpt_5_2() -> ModelPreset {
         id: "gpt-5.2".to_string(),
         model: "gpt-5.2".to_string(),
         display_name: "gpt-5.2".to_string(),
-        description:
-            "Latest frontier model with improvements across knowledge, reasoning and coding"
-                .to_string(),
+        description: "最新前沿模型，在知识、推理与编码上都有提升".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
             effort(
                 ReasoningEffort::Low,
-                "Balances speed with some reasoning; useful for straightforward queries and short explanations",
+                "兼顾速度与一定推理；适合直接问题和短解释",
             ),
-            effort(
-                ReasoningEffort::Medium,
-                "Provides a solid balance of reasoning depth and latency for general-purpose tasks",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
-            effort(
-                ReasoningEffort::XHigh,
-                "Extra high reasoning for complex problems",
-            ),
+            effort(ReasoningEffort::Medium, "在通用任务上平衡推理深度与延迟"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
+            effort(ReasoningEffort::XHigh, "复杂问题的超高推理"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
@@ -229,22 +188,10 @@ fn bengalfox() -> ModelPreset {
         description: "bengalfox".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Low,
-                "Fast responses with lighter reasoning",
-            ),
-            effort(
-                ReasoningEffort::Medium,
-                "Balances speed and reasoning depth for everyday tasks",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Greater reasoning depth for complex problems",
-            ),
-            effort(
-                ReasoningEffort::XHigh,
-                "Extra high reasoning depth for complex problems",
-            ),
+            effort(ReasoningEffort::Low, "更轻量推理的快速响应"),
+            effort(ReasoningEffort::Medium, "兼顾速度与推理深度，适合日常任务"),
+            effort(ReasoningEffort::High, "复杂问题的更深推理"),
+            effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
         is_default: false,
         upgrade: None,
@@ -263,20 +210,11 @@ fn boomslang() -> ModelPreset {
         supported_reasoning_efforts: vec![
             effort(
                 ReasoningEffort::Low,
-                "Balances speed with some reasoning; useful for straightforward queries and short explanations",
+                "兼顾速度与一定推理；适合直接问题和短解释",
             ),
-            effort(
-                ReasoningEffort::Medium,
-                "Provides a solid balance of reasoning depth and latency for general-purpose tasks",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
-            effort(
-                ReasoningEffort::XHigh,
-                "Extra high reasoning depth for complex problems",
-            ),
+            effort(ReasoningEffort::Medium, "在通用任务上平衡推理深度与延迟"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
+            effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
         is_default: false,
         upgrade: None,
@@ -290,21 +228,12 @@ fn gpt_5_codex() -> ModelPreset {
         id: "gpt-5-codex".to_string(),
         model: "gpt-5-codex".to_string(),
         display_name: "gpt-5-codex".to_string(),
-        description: "Optimized for codex.".to_string(),
+        description: "为 Codex 优化。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Low,
-                "Fastest responses with limited reasoning",
-            ),
-            effort(
-                ReasoningEffort::Medium,
-                "Dynamically adjusts reasoning based on the task",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
+            effort(ReasoningEffort::Low, "推理受限但速度最快"),
+            effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
@@ -328,17 +257,11 @@ fn gpt_5_codex_mini() -> ModelPreset {
         id: "gpt-5-codex-mini".to_string(),
         model: "gpt-5-codex-mini".to_string(),
         display_name: "gpt-5-codex-mini".to_string(),
-        description: "Optimized for codex. Cheaper, faster, but less capable.".to_string(),
+        description: "为 Codex 优化。 Cheaper, faster, but less capable.".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Medium,
-                "Dynamically adjusts reasoning based on the task",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
+            effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
@@ -362,21 +285,12 @@ fn gpt_5_1_codex() -> ModelPreset {
         id: "gpt-5.1-codex".to_string(),
         model: "gpt-5.1-codex".to_string(),
         display_name: "gpt-5.1-codex".to_string(),
-        description: "Optimized for codex.".to_string(),
+        description: "为 Codex 优化。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Low,
-                "Fastest responses with limited reasoning",
-            ),
-            effort(
-                ReasoningEffort::Medium,
-                "Dynamically adjusts reasoning based on the task",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
+            effort(ReasoningEffort::Low, "推理受限但速度最快"),
+            effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
@@ -400,25 +314,16 @@ fn gpt_5() -> ModelPreset {
         id: "gpt-5".to_string(),
         model: "gpt-5".to_string(),
         display_name: "gpt-5".to_string(),
-        description: "Broad world knowledge with strong general reasoning.".to_string(),
+        description: "广泛的世界知识与强通用推理。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
-            effort(
-                ReasoningEffort::Minimal,
-                "Fastest responses with little reasoning",
-            ),
+            effort(ReasoningEffort::Minimal, "推理较少但速度最快"),
             effort(
                 ReasoningEffort::Low,
-                "Balances speed with some reasoning; useful for straightforward queries and short explanations",
+                "兼顾速度与一定推理；适合直接问题和短解释",
             ),
-            effort(
-                ReasoningEffort::Medium,
-                "Provides a solid balance of reasoning depth and latency for general-purpose tasks",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
+            effort(ReasoningEffort::Medium, "在通用任务上平衡推理深度与延迟"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
@@ -442,21 +347,15 @@ fn gpt_5_1() -> ModelPreset {
         id: "gpt-5.1".to_string(),
         model: "gpt-5.1".to_string(),
         display_name: "gpt-5.1".to_string(),
-        description: "Broad world knowledge with strong general reasoning.".to_string(),
+        description: "广泛的世界知识与强通用推理。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
             effort(
                 ReasoningEffort::Low,
-                "Balances speed with some reasoning; useful for straightforward queries and short explanations",
+                "兼顾速度与一定推理；适合直接问题和短解释",
             ),
-            effort(
-                ReasoningEffort::Medium,
-                "Provides a solid balance of reasoning depth and latency for general-purpose tasks",
-            ),
-            effort(
-                ReasoningEffort::High,
-                "Maximizes reasoning depth for complex or ambiguous problems",
-            ),
+            effort(ReasoningEffort::Medium, "在通用任务上平衡推理深度与延迟"),
+            effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
