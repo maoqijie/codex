@@ -191,7 +191,7 @@
       "reasoning_summary_format": "experimental",
       "slug": "gpt-5.1-codex-mini",
       "display_name": "gpt-5.1-codex-mini",
-      "description": "为 Codex 优化。 Cheaper, faster, but less capable.",
+      "description": "为 Codex 优化，更便宜更快，但能力较弱。",
       "default_reasoning_level": "medium",
       "supported_reasoning_levels": [
         {
@@ -359,7 +359,7 @@
       "reasoning_summary_format": "experimental",
       "slug": "gpt-5-codex-mini",
       "display_name": "gpt-5-codex-mini",
-      "description": "为 Codex 优化。 Cheaper, faster, but less capable.",
+      "description": "为 Codex 优化，更便宜更快，但能力较弱。",
       "default_reasoning_level": "medium",
       "supported_reasoning_levels": [
         {

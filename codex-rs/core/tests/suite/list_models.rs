@@ -124,7 +124,7 @@ fn gpt_5_1_codex_mini() -> ModelPreset {
         id: "gpt-5.1-codex-mini".to_string(),
         model: "gpt-5.1-codex-mini".to_string(),
         display_name: "gpt-5.1-codex-mini".to_string(),
-        description: "为 Codex 优化。 Cheaper, faster, but less capable.".to_string(),
+        description: "为 Codex 优化，更便宜更快，但能力较弱。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
             effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
@@ -257,7 +257,7 @@ fn gpt_5_codex_mini() -> ModelPreset {
         id: "gpt-5-codex-mini".to_string(),
         model: "gpt-5-codex-mini".to_string(),
         display_name: "gpt-5-codex-mini".to_string(),
-        description: "为 Codex 优化。 Cheaper, faster, but less capable.".to_string(),
+        description: "为 Codex 优化，更便宜更快，但能力较弱。".to_string(),
         default_reasoning_effort: ReasoningEffort::Medium,
         supported_reasoning_efforts: vec![
             effort(ReasoningEffort::Medium, "根据任务动态调整推理"),

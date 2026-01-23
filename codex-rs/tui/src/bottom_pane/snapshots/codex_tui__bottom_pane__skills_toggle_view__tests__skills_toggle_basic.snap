@@ -8,7 +8,7 @@ expression: "render_lines(&view, 72)"
                                                                         
   输 入 以 搜 索 技 能                                                         
   >                                                                     
-› [x] Repo Scout        Summarize the repo layout                       
-  [ ] Changelog Writer  Draft release notes                             
+› [x] 仓 库 侦 察       总 结 仓 库 结 构                                         
+  [ ] 更 新 日 志 撰 写   起 草 发 布 说 明                                         
                                                                         
   按  space 或  enter 切 换 ； 按  esc 关 闭

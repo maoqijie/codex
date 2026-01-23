@@ -4,10 +4,10 @@ expression: popup
 ---
   选 择  gpt-5.1-codex-max 的 推 理 强 度
 
-  1. 低             Fast responses with lighter reasoning
-  2. 中 （ 默 认 ）     Balances speed and reasoning depth for everyday tasks
-  3. 高             Greater reasoning depth for complex problems
-› 4. 超 高 （ 当 前 ）   Extra high reasoning depth for complex problems
+  1. 低             更 轻 量 推 理 的 快 速 响 应
+  2. 中 （ 默 认 ）     兼 顾 速 度 与 推 理 深 度 ， 适 合 日 常 任 务
+  3. 高             复 杂 问 题 的 更 深 推 理
+› 4. 超 高 （ 当 前 ）   复 杂 问 题 的 超 高 推 理 深 度
                    ⚠ 超 高  推 理 强 度 可 能 会 快 速 消 耗  Plus 计 划 的 速 率 额 度 。
 
   按  enter 确 认 ， 或 按  esc 返 回

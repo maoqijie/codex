@@ -12,7 +12,7 @@ expression: term.backend().vt100().screen().contents()
 
 
 
-• 处理中 (0s • esc 中断)
+• 处理中 (0秒 • esc 中断)
 
   ↳ /review 运行中，已加入队列。
     ⌥ + ↑ edit

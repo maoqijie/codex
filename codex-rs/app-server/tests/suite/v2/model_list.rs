@@ -103,7 +103,7 @@ async fn list_models_returns_all_models_with_large_limit() -> Result<()> {
             id: "gpt-5.1-codex-mini".to_string(),
             model: "gpt-5.1-codex-mini".to_string(),
             display_name: "gpt-5.1-codex-mini".to_string(),
-            description: "为 Codex 优化。 Cheaper, faster, but less capable.".to_string(),
+            description: "为 Codex 优化，更便宜更快，但能力较弱。".to_string(),
             supported_reasoning_efforts: vec![
                 ReasoningEffortOption {
                     reasoning_effort: ReasoningEffort::Medium,

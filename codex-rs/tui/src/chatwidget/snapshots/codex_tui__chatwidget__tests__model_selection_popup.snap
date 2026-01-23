@@ -5,12 +5,9 @@ expression: popup
   选 择 模 型 与 推 理 强 度
   可 通 过  codex -m <model_name> 或 在  config.toml 中 使 用 旧 版 模 型
 
-› 1. gpt-5.2-codex（ 默 认 ）   Latest frontier agentic coding model.
-  2. gpt-5.2                Latest frontier model with improvements across
-                            knowledge, reasoning and coding
-  3. gpt-5.1-codex-max      Codex-optimized flagship for deep and fast
-                            reasoning.
-  4. gpt-5.1-codex-mini     Optimized for codex. Cheaper, faster, but less
-                            capable.
+› 1. gpt-5.2-codex（ 默 认 ）   最 新 前 沿 的 智 能 体 编 程 模 型 。
+  2. gpt-5.2                最 新 前 沿 模 型 ， 在 知 识 、 推 理 与 编 码 上 都 有 提 升
+  3. gpt-5.1-codex-max      为  Codex 优 化 的 旗 舰 模 型 ， 兼 具 深 度 与 速 度 推 理 。
+  4. gpt-5.1-codex-mini     为  Codex 优 化 ， 更 便 宜 更 快 ， 但 能 力 较 弱 。
 
   按  Enter 选 择 推 理 强 度 ， 按  Esc 关 闭 。

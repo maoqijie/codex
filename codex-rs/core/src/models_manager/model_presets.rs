@@ -21,19 +21,19 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "更轻量的推理，响应更快。".to_string(),
+                    description: "更轻量推理的快速响应".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "为日常任务在速度与推理深度之间取得平衡。".to_string(),
+                    description: "兼顾速度与推理深度，适合日常任务".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "适用于复杂问题的更深推理。".to_string(),
+                    description: "复杂问题的更深推理".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::XHigh,
-                    description: "适用于复杂问题的超高推理深度。".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             is_default: true,
@@ -45,24 +45,24 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             id: "gpt-5.1-codex-max".to_string(),
             model: "gpt-5.1-codex-max".to_string(),
             display_name: "gpt-5.1-codex-max".to_string(),
-            description: "为 Codex 优化的旗舰模型，兼顾深度与速度。".to_string(),
+            description: "为 Codex 优化的旗舰模型，兼具深度与速度推理。".to_string(),
             default_reasoning_effort: ReasoningEffort::Medium,
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "更轻量的推理，响应更快。".to_string(),
+                    description: "更轻量推理的快速响应".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "为日常任务在速度与推理深度之间取得平衡。".to_string(),
+                    description: "兼顾速度与推理深度，适合日常任务".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "适用于复杂问题的更深推理。".to_string(),
+                    description: "复杂问题的更深推理".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::XHigh,
-                    description: "适用于复杂问题的超高推理深度。".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -74,16 +74,16 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             id: "gpt-5.1-codex-mini".to_string(),
             model: "gpt-5.1-codex-mini".to_string(),
             display_name: "gpt-5.1-codex-mini".to_string(),
-            description: "为 Codex 优化，成本更低、速度更快，但能力较弱。".to_string(),
+            description: "为 Codex 优化，更便宜更快，但能力较弱。".to_string(),
             default_reasoning_effort: ReasoningEffort::Medium,
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "根据任务动态调整推理强度。".to_string(),
+                    description: "根据任务动态调整推理".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -95,24 +95,24 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             id: "gpt-5.2".to_string(),
             model: "gpt-5.2".to_string(),
             display_name: "gpt-5.2".to_string(),
-            description: "最新前沿模型，在知识、推理与编码方面全面提升。".to_string(),
+            description: "最新前沿模型，在知识、推理与编码上都有提升".to_string(),
             default_reasoning_effort: ReasoningEffort::Medium,
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "兼顾速度与一定推理，适合直接问题和简短说明。".to_string(),
+                    description: "兼顾速度与一定推理；适合直接问题和短解释".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "为通用任务在推理深度与延迟之间取得稳妥平衡。".to_string(),
+                    description: "在通用任务上平衡推理深度与延迟".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::XHigh,
-                    description: "适用于复杂问题的超高推理深度。".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -129,19 +129,19 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "更轻量的推理，响应更快。".to_string(),
+                    description: "更轻量推理的快速响应".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "为日常任务在速度与推理深度之间取得平衡。".to_string(),
+                    description: "兼顾速度与推理深度，适合日常任务".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "适用于复杂问题的更深推理。".to_string(),
+                    description: "复杂问题的更深推理".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::XHigh,
-                    description: "适用于复杂问题的超高推理深度。".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -158,19 +158,19 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "兼顾速度与一定推理，适合直接问题和简短说明。".to_string(),
+                    description: "兼顾速度与一定推理；适合直接问题和短解释".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "为通用任务在推理深度与延迟之间取得稳妥平衡。".to_string(),
+                    description: "在通用任务上平衡推理深度与延迟".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::XHigh,
-                    description: "适用于复杂问题的超高推理深度。".to_string(),
+                    description: "复杂问题的超高推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -188,15 +188,15 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "响应最快，推理有限。".to_string(),
+                    description: "推理受限但速度最快".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "根据任务动态调整推理强度。".to_string(),
+                    description: "根据任务动态调整推理".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -208,16 +208,16 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             id: "gpt-5-codex-mini".to_string(),
             model: "gpt-5-codex-mini".to_string(),
             display_name: "gpt-5-codex-mini".to_string(),
-            description: "为 Codex 优化，成本更低、速度更快，但能力较弱。".to_string(),
+            description: "为 Codex 优化，更便宜更快，但能力较弱。".to_string(),
             default_reasoning_effort: ReasoningEffort::Medium,
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "根据任务动态调整推理强度。".to_string(),
+                    description: "根据任务动态调整推理".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -234,15 +234,15 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "响应最快，推理有限。".to_string(),
+                    description: "推理受限但速度最快".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "根据任务动态调整推理强度。".to_string(),
+                    description: "根据任务动态调整推理".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -254,24 +254,24 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             id: "gpt-5".to_string(),
             model: "gpt-5".to_string(),
             display_name: "gpt-5".to_string(),
-            description: "广泛的世界知识与强大的通用推理能力。".to_string(),
+            description: "广泛的世界知识与强通用推理。".to_string(),
             default_reasoning_effort: ReasoningEffort::Medium,
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Minimal,
-                    description: "响应最快，几乎不推理。".to_string(),
+                    description: "推理较少但速度最快".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "兼顾速度与一定推理，适合直接问题和简短说明。".to_string(),
+                    description: "兼顾速度与一定推理；适合直接问题和短解释".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "为通用任务在推理深度与延迟之间取得稳妥平衡。".to_string(),
+                    description: "在通用任务上平衡推理深度与延迟".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
             ],
             is_default: false,
@@ -283,20 +283,20 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             id: "gpt-5.1".to_string(),
             model: "gpt-5.1".to_string(),
             display_name: "gpt-5.1".to_string(),
-            description: "广泛的世界知识与强大的通用推理能力。".to_string(),
+            description: "广泛的世界知识与强通用推理。".to_string(),
             default_reasoning_effort: ReasoningEffort::Medium,
             supported_reasoning_efforts: vec![
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Low,
-                    description: "兼顾速度与一定推理，适合直接问题和简短说明。".to_string(),
+                    description: "兼顾速度与一定推理；适合直接问题和短解释".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::Medium,
-                    description: "为通用任务在推理深度与延迟之间取得稳妥平衡。".to_string(),
+                    description: "在通用任务上平衡推理深度与延迟".to_string(),
                 },
                 ReasoningEffortPreset {
                     effort: ReasoningEffort::High,
-                    description: "为复杂或模糊问题提供最深推理。".to_string(),
+                    description: "为复杂或模糊问题最大化推理深度".to_string(),
                 },
             ],
             is_default: false,

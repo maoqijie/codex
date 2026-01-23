@@ -765,19 +765,14 @@ mod tests {
         let items = vec![
             SelectionItem {
                 name: "gpt-5.1-codex".to_string(),
-                description: Some(
-                    "Optimized for Codex. Balance of reasoning quality and coding ability."
-                        .to_string(),
-                ),
+                description: Some("为 Codex 优化，兼顾推理质量与编码能力。".to_string()),
                 is_current: true,
                 dismiss_on_select: true,
                 ..Default::default()
             },
             SelectionItem {
                 name: "gpt-5.1-codex-mini".to_string(),
-                description: Some(
-                    "Optimized for Codex. Cheaper, faster, but less capable.".to_string(),
-                ),
+                description: Some("为 Codex 优化，更便宜更快，但能力较弱。".to_string()),
                 dismiss_on_select: true,
                 ..Default::default()
             },
@@ -847,19 +842,14 @@ mod tests {
         let items = vec![
             SelectionItem {
                 name: "gpt-5.1-codex".to_string(),
-                description: Some(
-                    "Optimized for Codex. Balance of reasoning quality and coding ability."
-                        .to_string(),
-                ),
+                description: Some("为 Codex 优化，兼顾推理质量与编码能力。".to_string()),
                 is_current: true,
                 dismiss_on_select: true,
                 ..Default::default()
             },
             SelectionItem {
                 name: "gpt-5.1-codex-mini".to_string(),
-                description: Some(
-                    "Optimized for Codex. Cheaper, faster, but less capable.".to_string(),
-                ),
+                description: Some("为 Codex 优化，更便宜更快，但能力较弱。".to_string()),
                 dismiss_on_select: true,
                 ..Default::default()
             },

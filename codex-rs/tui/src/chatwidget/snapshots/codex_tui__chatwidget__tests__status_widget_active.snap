@@ -3,7 +3,7 @@ source: tui/src/chatwidget/tests.rs
 expression: terminal.backend()
 ---
 "                                                                                "
-"• Analyzing (0s • esc 中断)                                                     " Hidden by multi-width symbols: [(23, " "), (25, " ")]
+"• Analyzing (0秒 • esc 中断)                                                    " Hidden by multi-width symbols: [(15, " "), (24, " "), (26, " ")]
 "                                                                                "
 "                                                                                "
 "› Ask Codex to do anything                                                      "

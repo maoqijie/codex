@@ -1822,7 +1822,7 @@ impl HistoryCell for FinalMessageSeparator {
             .elapsed_seconds
             .map(super::status_indicator_widget::fmt_elapsed_compact);
         if let Some(elapsed_seconds) = elapsed_seconds {
-            let worked_for = format!("─ Worked for {elapsed_seconds} ─");
+            let worked_for = format!("─ 用时 {elapsed_seconds} ─");
             let worked_for_width = worked_for.width();
             vec![
                 Line::from_iter([

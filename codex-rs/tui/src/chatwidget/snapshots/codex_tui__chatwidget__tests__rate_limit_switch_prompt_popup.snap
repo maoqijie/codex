@@ -5,8 +5,7 @@ expression: popup
   即 将 触 及 限 额
   是 否 切 换 到  gpt-5.1-codex-mini 以 降 低 积 分 消 耗 ？
 
-› 1. 切 换 到  gpt-5.1-codex-mini  Optimized for codex. Cheaper, faster, but less
-                                capable.
+› 1. 切 换 到  gpt-5.1-codex-mini  为  Codex 优 化 ， 更 便 宜 更 快 ， 但 能 力 较 弱 。
   2. 保 持 当 前 模 型
   3. 保 持 当 前 模 型 （ 不 再 提 示 ）    不 再 提 醒 切 换 模 型 以 避 免 触 及 限 额 。
 
