@@ -64,6 +64,8 @@ use codex_otel::OtelManager;
 use codex_protocol::ThreadId;
 use codex_protocol::account::PlanType;
 use codex_protocol::config_types::CollaborationMode;
+use codex_protocol::config_types::ModeKind;
+use codex_protocol::config_types::Settings;
 use codex_protocol::openai_models::ModelPreset;
 use codex_protocol::openai_models::ReasoningEffortPreset;
 use codex_protocol::parse_command::ParsedCommand;
@@ -158,7 +160,7 @@ async fn resumed_initial_messages_render_history() {
                 message: "assistant reply".to_string(),
             }),
         ]),
-        rollout_path: rollout_file.path().to_path_buf(),
+        rollout_path: Some(rollout_file.path().to_path_buf()),
     };
 
     chat.handle_codex_event(Event {
@@ -219,7 +221,7 @@ async fn replayed_user_message_preserves_text_elements_and_local_images() {
             text_elements: text_elements.clone(),
             local_images: local_images.clone(),
         })]),
-        rollout_path: rollout_file.path().to_path_buf(),
+        rollout_path: Some(rollout_file.path().to_path_buf()),
     };
 
     chat.handle_codex_event(Event {
@@ -266,7 +268,7 @@ async fn submission_preserves_text_elements_and_local_images() {
         history_log_id: 0,
         history_entry_count: 0,
         initial_messages: None,
-        rollout_path: rollout_file.path().to_path_buf(),
+        rollout_path: Some(rollout_file.path().to_path_buf()),
     };
     chat.handle_codex_event(Event {
         id: "initial".into(),
@@ -779,18 +781,24 @@ async fn make_chatwidget_manual(
     let reasoning_effort = None;
     let stored_collaboration_mode = if collaboration_modes_enabled {
         collaboration_modes::default_mode(models_manager.as_ref()).unwrap_or_else(|| {
-            CollaborationMode::Custom(Settings {
+            CollaborationMode {
+                mode: ModeKind::Custom,
+                settings: Settings {
+                    model: resolved_model.clone(),
+                    reasoning_effort,
+                    developer_instructions: None,
+                },
+            }
+        })
+    } else {
+        CollaborationMode {
+            mode: ModeKind::Custom,
+            settings: Settings {
                 model: resolved_model.clone(),
                 reasoning_effort,
                 developer_instructions: None,
-            })
-        })
-    } else {
-        CollaborationMode::Custom(Settings {
-            model: resolved_model.clone(),
-            reasoning_effort,
-            developer_instructions: None,
-        })
+            },
+        }
     };
     let widget = ChatWidget {
         app_event_tx,
@@ -840,6 +848,7 @@ async fn make_chatwidget_manual(
         pre_review_token_info: None,
         needs_final_message_separator: false,
         had_work_activity: false,
+        saw_plan_update_this_turn: false,
         last_separator_elapsed_secs: None,
         last_rendered_width: std::cell::Cell::new(None),
         feedback: codex_feedback::CodexFeedback::new(),
@@ -1164,6 +1173,187 @@ async fn rate_limit_switch_prompt_popup_snapshot() {
 
     let popup = render_bottom_popup(&chat, 80);
     assert_snapshot!("rate_limit_switch_prompt_popup", popup);
+}
+
+#[tokio::test]
+async fn plan_implementation_popup_snapshot() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.open_plan_implementation_prompt();
+
+    let popup = render_bottom_popup(&chat, 80);
+    assert_snapshot!("plan_implementation_popup", popup);
+}
+
+#[tokio::test]
+async fn plan_implementation_popup_no_selected_snapshot() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.open_plan_implementation_prompt();
+    chat.handle_key_event(KeyEvent::from(KeyCode::Down));
+
+    let popup = render_bottom_popup(&chat, 80);
+    assert_snapshot!("plan_implementation_popup_no_selected", popup);
+}
+
+#[tokio::test]
+async fn plan_implementation_popup_yes_emits_submit_message_event() {
+    let (mut chat, mut rx, _op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.open_plan_implementation_prompt();
+
+    chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
+
+    let event = rx.try_recv().expect("expected AppEvent");
+    let AppEvent::SubmitUserMessageWithMode {
+        text,
+        collaboration_mode,
+    } = event
+    else {
+        panic!("expected SubmitUserMessageWithMode, got {event:?}");
+    };
+    assert_eq!(text, PLAN_IMPLEMENTATION_CODING_MESSAGE);
+    assert_eq!(collaboration_mode.mode, ModeKind::Code);
+}
+
+#[tokio::test]
+async fn submit_user_message_with_mode_sets_coding_collaboration_mode() {
+    let (mut chat, _rx, mut op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.thread_id = Some(ThreadId::new());
+    chat.set_feature_enabled(Feature::CollaborationModes, true);
+
+    let code_mode = collaboration_modes::code_mode(chat.models_manager.as_ref())
+        .expect("expected code collaboration mode");
+    chat.submit_user_message_with_mode("Implement the plan.".to_string(), code_mode);
+
+    match next_submit_op(&mut op_rx) {
+        Op::UserTurn {
+            collaboration_mode:
+                Some(CollaborationMode {
+                    mode: ModeKind::Code,
+                    ..
+                }),
+            personality: None,
+            ..
+        } => {}
+        other => {
+            panic!("expected Op::UserTurn with code collab mode, got {other:?}")
+        }
+    }
+}
+
+#[tokio::test]
+async fn plan_implementation_popup_skips_replayed_turn_complete() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.set_feature_enabled(Feature::CollaborationModes, true);
+    chat.stored_collaboration_mode = CollaborationMode {
+        mode: ModeKind::Plan,
+        settings: Settings {
+            model: chat.current_model().to_string(),
+            reasoning_effort: None,
+            developer_instructions: None,
+        },
+    };
+
+    chat.replay_initial_messages(vec![EventMsg::TurnComplete(TurnCompleteEvent {
+        last_agent_message: Some("Plan details".to_string()),
+    })]);
+
+    let popup = render_bottom_popup(&chat, 80);
+    assert!(
+        !popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        "expected no plan popup for replayed turn, got {popup:?}"
+    );
+}
+
+#[tokio::test]
+async fn plan_implementation_popup_skips_when_messages_queued() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.set_feature_enabled(Feature::CollaborationModes, true);
+    chat.stored_collaboration_mode = CollaborationMode {
+        mode: ModeKind::Plan,
+        settings: Settings {
+            model: chat.current_model().to_string(),
+            reasoning_effort: None,
+            developer_instructions: None,
+        },
+    };
+    chat.bottom_pane.set_task_running(true);
+    chat.queue_user_message("Queued message".into());
+
+    chat.on_task_complete(Some("Plan details".to_string()), false);
+
+    let popup = render_bottom_popup(&chat, 80);
+    assert!(
+        !popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        "expected no plan popup with queued messages, got {popup:?}"
+    );
+}
+
+#[tokio::test]
+async fn plan_implementation_popup_shows_on_plan_update_without_message() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.set_feature_enabled(Feature::CollaborationModes, true);
+    chat.stored_collaboration_mode = CollaborationMode {
+        mode: ModeKind::Plan,
+        settings: Settings {
+            model: chat.current_model().to_string(),
+            reasoning_effort: None,
+            developer_instructions: None,
+        },
+    };
+
+    chat.on_task_started();
+    chat.on_plan_update(UpdatePlanArgs {
+        explanation: None,
+        plan: vec![PlanItemArg {
+            step: "First".to_string(),
+            status: StepStatus::Pending,
+        }],
+    });
+    chat.on_task_complete(None, false);
+
+    let popup = render_bottom_popup(&chat, 80);
+    let normalized = normalize_ui_text(&popup);
+    assert!(
+        normalized.contains(PLAN_IMPLEMENTATION_TITLE),
+        "expected plan popup after plan update, got {popup:?}"
+    );
+}
+
+#[tokio::test]
+async fn plan_implementation_popup_skips_when_rate_limit_prompt_pending() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5")).await;
+    chat.auth_manager =
+        AuthManager::from_auth_for_testing(CodexAuth::create_dummy_chatgpt_auth_for_testing());
+    chat.set_feature_enabled(Feature::CollaborationModes, true);
+    chat.stored_collaboration_mode = CollaborationMode {
+        mode: ModeKind::Plan,
+        settings: Settings {
+            model: chat.current_model().to_string(),
+            reasoning_effort: None,
+            developer_instructions: None,
+        },
+    };
+
+    chat.on_task_started();
+    chat.on_plan_update(UpdatePlanArgs {
+        explanation: None,
+        plan: vec![PlanItemArg {
+            step: "First".to_string(),
+            status: StepStatus::Pending,
+        }],
+    });
+    chat.on_rate_limit_snapshot(Some(snapshot(92.0)));
+    chat.on_task_complete(None, false);
+
+    let popup = render_bottom_popup(&chat, 80);
+    let normalized = normalize_ui_text(&popup);
+    assert!(
+        normalized.contains("即将触及限额"),
+        "expected rate limit popup, got {popup:?}"
+    );
+    assert!(
+        !normalized.contains(PLAN_IMPLEMENTATION_TITLE),
+        "expected plan popup to be skipped, got {popup:?}"
+    );
 }
 
 // (removed experimental resize snapshot test)
@@ -1752,7 +1942,7 @@ async fn unified_exec_end_after_task_complete_is_suppressed() {
     );
     drain_insert_history(&mut rx);
 
-    chat.on_task_complete(None);
+    chat.on_task_complete(None, false);
     end_exec(&mut chat, begin, "", "", 0);
 
     let cells = drain_insert_history(&mut rx);
@@ -1766,7 +1956,7 @@ async fn unified_exec_end_after_task_complete_is_suppressed() {
 async fn unified_exec_interaction_after_task_complete_is_suppressed() {
     let (mut chat, mut rx, _op_rx) = make_chatwidget_manual(None).await;
     chat.on_task_started();
-    chat.on_task_complete(None);
+    chat.on_task_complete(None, false);
 
     chat.handle_codex_event(Event {
         id: "call-1".to_string(),
@@ -2028,16 +2218,10 @@ async fn collab_mode_shift_tab_cycles_only_when_enabled_and_idle() {
     chat.set_feature_enabled(Feature::CollaborationModes, true);
 
     chat.handle_key_event(KeyEvent::from(KeyCode::BackTab));
-    assert!(matches!(
-        chat.stored_collaboration_mode,
-        CollaborationMode::Execute(_)
-    ));
+    assert_eq!(chat.stored_collaboration_mode.mode, ModeKind::Plan);
 
     chat.handle_key_event(KeyEvent::from(KeyCode::BackTab));
-    assert!(matches!(
-        chat.stored_collaboration_mode,
-        CollaborationMode::Plan(_)
-    ));
+    assert_eq!(chat.stored_collaboration_mode.mode, ModeKind::Code);
 
     chat.on_task_started();
     let before = chat.stored_collaboration_mode.clone();
@@ -2071,11 +2255,16 @@ async fn collab_slash_command_opens_picker_and_updates_mode() {
     chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
     match next_submit_op(&mut op_rx) {
         Op::UserTurn {
-            collaboration_mode: Some(CollaborationMode::PairProgramming(_)),
+            collaboration_mode:
+                Some(CollaborationMode {
+                    mode: ModeKind::Code,
+                    ..
+                }),
+            personality: None,
             ..
         } => {}
         other => {
-            panic!("expected Op::UserTurn with pair programming collab mode, got {other:?}")
+            panic!("expected Op::UserTurn with code collab mode, got {other:?}")
         }
     }
 
@@ -2084,17 +2273,22 @@ async fn collab_slash_command_opens_picker_and_updates_mode() {
     chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
     match next_submit_op(&mut op_rx) {
         Op::UserTurn {
-            collaboration_mode: Some(CollaborationMode::PairProgramming(_)),
+            collaboration_mode:
+                Some(CollaborationMode {
+                    mode: ModeKind::Code,
+                    ..
+                }),
+            personality: None,
             ..
         } => {}
         other => {
-            panic!("expected Op::UserTurn with pair programming collab mode, got {other:?}")
+            panic!("expected Op::UserTurn with code collab mode, got {other:?}")
         }
     }
 }
 
 #[tokio::test]
-async fn collab_mode_defaults_to_pair_programming_when_enabled() {
+async fn collab_mode_defaults_to_coding_when_enabled() {
     let (mut chat, _rx, mut op_rx) = make_chatwidget_manual(None).await;
     chat.thread_id = Some(ThreadId::new());
     chat.set_feature_enabled(Feature::CollaborationModes, true);
@@ -2104,23 +2298,25 @@ async fn collab_mode_defaults_to_pair_programming_when_enabled() {
     chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
     match next_submit_op(&mut op_rx) {
         Op::UserTurn {
-            collaboration_mode: Some(CollaborationMode::PairProgramming(_)),
+            collaboration_mode:
+                Some(CollaborationMode {
+                    mode: ModeKind::Code,
+                    ..
+                }),
+            personality: None,
             ..
         } => {}
         other => {
-            panic!("expected Op::UserTurn with pair programming collab mode, got {other:?}")
+            panic!("expected Op::UserTurn with code collab mode, got {other:?}")
         }
     }
 }
 
 #[tokio::test]
-async fn collab_mode_enabling_sets_pair_programming_default() {
+async fn collab_mode_enabling_sets_coding_default() {
     let (mut chat, _rx, _op_rx) = make_chatwidget_manual(None).await;
     chat.set_feature_enabled(Feature::CollaborationModes, true);
-    assert!(matches!(
-        chat.stored_collaboration_mode,
-        CollaborationMode::PairProgramming(_)
-    ));
+    assert_eq!(chat.stored_collaboration_mode.mode, ModeKind::Code);
 }
 
 #[tokio::test]
@@ -3127,6 +3323,7 @@ async fn approvals_popup_navigation_skips_disabled() {
             ev,
             AppEvent::CodexOp(Op::OverrideTurnContext {
                 approval_policy: Some(AskForApproval::OnRequest),
+                personality: None,
                 ..
             })
         )),
@@ -3137,6 +3334,7 @@ async fn approvals_popup_navigation_skips_disabled() {
             ev,
             AppEvent::CodexOp(Op::OverrideTurnContext {
                 approval_policy: Some(AskForApproval::Never),
+                personality: None,
                 ..
             })
         )),

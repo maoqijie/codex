@@ -101,9 +101,11 @@ pub enum Feature {
     EnableRequestCompression,
     /// Enable collab tools.
     Collab,
+    /// Enable connectors (apps).
+    Connectors,
     /// Steer feature flag - when enabled, Enter submits immediately instead of queuing.
     Steer,
-    /// Enable collaboration modes (Plan, Pair Programming, Execute).
+    /// Enable collaboration modes (Plan, Code, Pair Programming, Execute).
     CollaborationModes,
     /// Use the Responses API WebSocket transport for OpenAI by default.
     ResponsesWebsockets,
@@ -437,6 +439,12 @@ pub const FEATURES: &[FeatureSpec] = &[
             menu_description: "允许 Codex 按需生成并与其他代理协作（原名 `collab`）。",
             announcement: "新功能！Codex 现在可生成其他代理并协同解决问题。到 /experimental 启用。",
         },
+        default_enabled: false,
+    },
+    FeatureSpec {
+        id: Feature::Connectors,
+        key: "connectors",
+        stage: Stage::Beta,
         default_enabled: false,
     },
     FeatureSpec {

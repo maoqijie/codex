@@ -26,6 +26,7 @@ pub enum SlashCommand {
     Init,
     Compact,
     Collab,
+    Agent,
     // Undo,
     Diff,
     Mention,
@@ -60,6 +61,7 @@ impl SlashCommand {
             SlashCommand::Ps => "列出后台终端",
             SlashCommand::Model => "选择模型与推理强度",
             SlashCommand::Collab => "切换协作模式（实验性）",
+            SlashCommand::Agent => "切换当前代理线程",
             SlashCommand::Approvals => "选择 Codex 可在无需批准时执行的操作",
             SlashCommand::Permissions => "选择 Codex 允许执行的操作",
             SlashCommand::ElevateSandbox => "配置提升权限的代理沙箱",
@@ -105,6 +107,7 @@ impl SlashCommand {
             SlashCommand::Rollout => true,
             SlashCommand::TestApproval => true,
             SlashCommand::Collab => true,
+            SlashCommand::Agent => true,
         }
     }
 

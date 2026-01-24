@@ -17,6 +17,7 @@ use crate::compact;
 use crate::compact::run_inline_auto_compact_task;
 use crate::compact::should_use_remote_compact_task;
 use crate::compact_remote::run_inline_remote_auto_compact_task;
+use crate::connectors;
 use crate::exec_policy::ExecPolicyManager;
 use crate::features::Feature;
 use crate::features::Features;
@@ -34,6 +35,7 @@ use async_channel::Receiver;
 use async_channel::Sender;
 use codex_protocol::ThreadId;
 use codex_protocol::approvals::ExecPolicyAmendment;
+use codex_protocol::config_types::ModeKind;
 use codex_protocol::config_types::Settings;
 use codex_protocol::config_types::WebSearchMode;
 use codex_protocol::items::TurnItem;
@@ -87,6 +89,7 @@ use crate::client::ModelClient;
 use crate::client::ModelClientSession;
 use crate::client_common::Prompt;
 use crate::client_common::ResponseEvent;
+use crate::codex_thread::ThreadConfigSnapshot;
 use crate::compact::collect_user_messages;
 use crate::config::Config;
 use crate::config::Constrained;
@@ -103,7 +106,10 @@ use crate::exec::StreamOutput;
 use crate::exec_policy::ExecPolicyUpdateError;
 use crate::feedback_tags;
 use crate::instructions::UserInstructions;
+use crate::mcp::CODEX_APPS_MCP_SERVER_NAME;
 use crate::mcp::auth::compute_auth_statuses;
+use crate::mcp::effective_mcp_servers;
+use crate::mcp::with_codex_apps_mcp;
 use crate::mcp_connection_manager::McpConnectionManager;
 use crate::model_provider_info::CHAT_WIRE_API_DEPRECATION_SUMMARY;
 use crate::project_doc::get_user_instructions;
@@ -166,6 +172,7 @@ use crate::util::backoff;
 use codex_async_utils::OrCancelExt;
 use codex_otel::OtelManager;
 use codex_protocol::config_types::CollaborationMode;
+use codex_protocol::config_types::Personality;
 use codex_protocol::config_types::ReasoningSummary as ReasoningSummaryConfig;
 use codex_protocol::models::ContentItem;
 use codex_protocol::models::DeveloperInstructions;
@@ -186,6 +193,7 @@ pub struct Codex {
     pub(crate) rx_event: Receiver<Event>,
     // Last known status of the agent.
     pub(crate) agent_status: watch::Receiver<AgentStatus>,
+    pub(crate) session: Arc<Session>,
 }
 
 /// Wrapper returned by [`Codex::spawn`] containing the spawned [`Codex`],
@@ -290,17 +298,21 @@ impl Codex {
 
         // TODO (aibrahim): Consolidate config.model and config.model_reasoning_effort into config.collaboration_mode
         // to avoid extracting these fields separately and constructing CollaborationMode here.
-        let collaboration_mode = CollaborationMode::Custom(Settings {
-            model: model.clone(),
-            reasoning_effort: config.model_reasoning_effort,
-            developer_instructions: None,
-        });
+        let collaboration_mode = CollaborationMode {
+            mode: ModeKind::Custom,
+            settings: Settings {
+                model: model.clone(),
+                reasoning_effort: config.model_reasoning_effort,
+                developer_instructions: None,
+            },
+        };
         let session_configuration = SessionConfiguration {
             provider: config.model_provider.clone(),
             collaboration_mode,
             model_reasoning_summary: config.model_reasoning_summary,
             developer_instructions: config.developer_instructions.clone(),
             user_instructions,
+            personality: config.model_personality,
             base_instructions,
             compact_prompt: config.compact_prompt.clone(),
             approval_policy: config.approval_policy.clone(),
@@ -335,12 +347,13 @@ impl Codex {
         let thread_id = session.conversation_id;
 
         // This task will run until Op::Shutdown is received.
-        tokio::spawn(submission_loop(session, config, rx_sub));
+        tokio::spawn(submission_loop(Arc::clone(&session), config, rx_sub));
         let codex = Codex {
             next_id: AtomicU64::new(0),
             tx_sub,
             rx_event,
             agent_status: agent_status_rx,
+            session,
         };
 
         #[allow(deprecated)]
@@ -384,6 +397,11 @@ impl Codex {
     pub(crate) async fn agent_status(&self) -> AgentStatus {
         self.agent_status.borrow().clone()
     }
+
+    pub(crate) async fn thread_config_snapshot(&self) -> ThreadConfigSnapshot {
+        let state = self.session.state.lock().await;
+        state.session_configuration.thread_config_snapshot()
+    }
 }
 
 /// Context for an initialized model agent
@@ -415,6 +433,7 @@ pub(crate) struct TurnContext {
     pub(crate) developer_instructions: Option<String>,
     pub(crate) compact_prompt: Option<String>,
     pub(crate) user_instructions: Option<String>,
+    pub(crate) personality: Option<Personality>,
     pub(crate) approval_policy: AskForApproval,
     pub(crate) sandbox_policy: SandboxPolicy,
     pub(crate) shell_environment_policy: ShellEnvironmentPolicy,
@@ -454,6 +473,9 @@ pub(crate) struct SessionConfiguration {
     /// Model instructions that are appended to the base instructions.
     user_instructions: Option<String>,
 
+    /// Personality preference for the model.
+    personality: Option<Personality>,
+
     /// Base instructions for the session.
     base_instructions: String,
 
@@ -481,6 +503,19 @@ pub(crate) struct SessionConfiguration {
 }
 
 impl SessionConfiguration {
+    fn thread_config_snapshot(&self) -> ThreadConfigSnapshot {
+        ThreadConfigSnapshot {
+            model: self.collaboration_mode.model().to_string(),
+            model_provider_id: self.original_config_do_not_use.model_provider_id.clone(),
+            approval_policy: self.approval_policy.value(),
+            sandbox_policy: self.sandbox_policy.get().clone(),
+            cwd: self.cwd.clone(),
+            reasoning_effort: self.collaboration_mode.reasoning_effort(),
+            personality: self.personality,
+            session_source: self.session_source.clone(),
+        }
+    }
+
     pub(crate) fn apply(&self, updates: &SessionSettingsUpdate) -> ConstraintResult<Self> {
         let mut next_configuration = self.clone();
         if let Some(collaboration_mode) = updates.collaboration_mode.clone() {
@@ -488,6 +523,9 @@ impl SessionConfiguration {
         }
         if let Some(summary) = updates.reasoning_summary {
             next_configuration.model_reasoning_summary = summary;
+        }
+        if let Some(personality) = updates.personality {
+            next_configuration.personality = Some(personality);
         }
         if let Some(approval_policy) = updates.approval_policy {
             next_configuration.approval_policy.set(approval_policy)?;
@@ -510,6 +548,7 @@ pub(crate) struct SessionSettingsUpdate {
     pub(crate) collaboration_mode: Option<CollaborationMode>,
     pub(crate) reasoning_summary: Option<ReasoningSummaryConfig>,
     pub(crate) final_output_json_schema: Option<Option<Value>>,
+    pub(crate) personality: Option<Personality>,
 }
 
 impl Session {
@@ -521,6 +560,7 @@ impl Session {
         per_turn_config.model_reasoning_effort =
             session_configuration.collaboration_mode.reasoning_effort();
         per_turn_config.model_reasoning_summary = session_configuration.model_reasoning_summary;
+        per_turn_config.model_personality = session_configuration.personality;
         per_turn_config.features = config.features.clone();
         per_turn_config
     }
@@ -566,6 +606,7 @@ impl Session {
             developer_instructions: session_configuration.developer_instructions.clone(),
             compact_prompt: session_configuration.compact_prompt.clone(),
             user_instructions: session_configuration.user_instructions.clone(),
+            personality: session_configuration.personality,
             approval_policy: session_configuration.approval_policy.value(),
             sandbox_policy: session_configuration.sandbox_policy.get().clone(),
             shell_environment_policy: per_turn_config.shell_environment_policy.clone(),
@@ -632,23 +673,44 @@ impl Session {
         // - initialize RolloutRecorder with new or resumed session info
         // - perform default shell discovery
         // - load history metadata
-        let rollout_fut = RolloutRecorder::new(&config, rollout_params);
+        let rollout_fut = async {
+            if config.ephemeral {
+                Ok(None)
+            } else {
+                RolloutRecorder::new(&config, rollout_params)
+                    .await
+                    .map(Some)
+            }
+        };
 
         let history_meta_fut = crate::message_history::history_metadata(&config);
-        let auth_statuses_fut = compute_auth_statuses(
-            config.mcp_servers.iter(),
-            config.mcp_oauth_credentials_store_mode,
-        );
+        let auth_manager_clone = Arc::clone(&auth_manager);
+        let config_for_mcp = Arc::clone(&config);
+        let auth_and_mcp_fut = async move {
+            let auth = auth_manager_clone.auth().await;
+            let mcp_servers = effective_mcp_servers(&config_for_mcp, auth.as_ref());
+            let auth_statuses = compute_auth_statuses(
+                mcp_servers.iter(),
+                config_for_mcp.mcp_oauth_credentials_store_mode,
+            )
+            .await;
+            (auth, mcp_servers, auth_statuses)
+        };
 
         // Join all independent futures.
-        let (rollout_recorder, (history_log_id, history_entry_count), auth_statuses) =
-            tokio::join!(rollout_fut, history_meta_fut, auth_statuses_fut);
+        let (
+            rollout_recorder,
+            (history_log_id, history_entry_count),
+            (auth, mcp_servers, auth_statuses),
+        ) = tokio::join!(rollout_fut, history_meta_fut, auth_and_mcp_fut);
 
         let rollout_recorder = rollout_recorder.map_err(|e| {
             error!("failed to initialize rollout recorder: {e:#}");
             anyhow::Error::from(e)
         })?;
-        let rollout_path = rollout_recorder.rollout_path.clone();
+        let rollout_path = rollout_recorder
+            .as_ref()
+            .map(|rec| rec.rollout_path.clone());
 
         let mut post_session_configured_events = Vec::<Event>::new();
 
@@ -682,7 +744,6 @@ impl Session {
         }
         maybe_push_chat_wire_api_deprecation(&config, &mut post_session_configured_events);
 
-        let auth = auth_manager.auth().await;
         let auth = auth.as_ref();
         let otel_manager = OtelManager::new(
             conversation_id,
@@ -717,7 +778,7 @@ impl Session {
             config.model_auto_compact_token_limit,
             config.approval_policy.value(),
             config.sandbox_policy.get().clone(),
-            config.mcp_servers.keys().map(String::as_str).collect(),
+            mcp_servers.keys().map(String::as_str).collect(),
             config.active_profile.clone(),
         );
 
@@ -738,7 +799,7 @@ impl Session {
             mcp_startup_cancellation_token: Mutex::new(CancellationToken::new()),
             unified_exec_manager: UnifiedExecProcessManager::default(),
             notifier: UserNotifier::new(config.notify.clone()),
-            rollout: Mutex::new(Some(rollout_recorder)),
+            rollout: Mutex::new(rollout_recorder),
             user_shell: Arc::new(default_shell),
             show_raw_agent_reasoning: config.show_raw_agent_reasoning,
             exec_policy,
@@ -801,7 +862,7 @@ impl Session {
             .write()
             .await
             .initialize(
-                &config.mcp_servers,
+                &mcp_servers,
                 config.mcp_oauth_credentials_store_mode,
                 auth_statuses.clone(),
                 tx_event.clone(),
@@ -1109,6 +1170,34 @@ impl Session {
         )
     }
 
+    fn build_personality_update_item(
+        &self,
+        previous: Option<&Arc<TurnContext>>,
+        next: &TurnContext,
+    ) -> Option<ResponseItem> {
+        let personality = next.personality?;
+        if let Some(prev) = previous
+            && prev.personality == Some(personality)
+        {
+            return None;
+        }
+        let model_info = next.client.get_model_info();
+        let personality_message = Self::personality_message_for(&model_info, personality);
+
+        personality_message.map(|personality_message| {
+            DeveloperInstructions::personality_spec_message(personality_message).into()
+        })
+    }
+
+    fn personality_message_for(model_info: &ModelInfo, personality: Personality) -> Option<String> {
+        model_info
+            .model_instructions_template
+            .as_ref()
+            .and_then(|template| template.personality_messages.as_ref())
+            .and_then(|messages| messages.0.get(&personality))
+            .cloned()
+    }
+
     fn build_collaboration_mode_update_item(
         &self,
         previous_collaboration_mode: &CollaborationMode,
@@ -1149,6 +1238,11 @@ impl Session {
             next_collaboration_mode,
         ) {
             update_items.push(collaboration_mode_item);
+        }
+        if let Some(personality_item) =
+            self.build_personality_update_item(previous_context, current_context)
+        {
+            update_items.push(personality_item);
         }
         update_items
     }
@@ -1504,6 +1598,7 @@ impl Session {
             content: vec![ContentItem::InputText {
                 text: format!("Warning: {}", message.into()),
             }],
+            end_turn: None,
         };
 
         self.record_conversation_items(ctx, &[item]).await;
@@ -1941,6 +2036,14 @@ impl Session {
             }
         };
 
+        let auth = self.services.auth_manager.auth().await;
+        let config = self.get_config().await;
+        let mcp_servers = with_codex_apps_mcp(
+            mcp_servers,
+            self.features.enabled(Feature::Connectors),
+            auth.as_ref(),
+            config.as_ref(),
+        );
         let auth_statuses = compute_auth_statuses(mcp_servers.iter(), store_mode).await;
         let sandbox_state = SandboxState {
             sandbox_policy: turn_context.sandbox_policy.clone(),
@@ -2013,6 +2116,7 @@ async fn submission_loop(sess: Arc<Session>, config: Arc<Config>, rx_sub: Receiv
                 effort,
                 summary,
                 collaboration_mode,
+                personality,
             } => {
                 let collaboration_mode = if let Some(collab_mode) = collaboration_mode {
                     collab_mode
@@ -2033,6 +2137,7 @@ async fn submission_loop(sess: Arc<Session>, config: Arc<Config>, rx_sub: Receiv
                         sandbox_policy,
                         collaboration_mode: Some(collaboration_mode),
                         reasoning_summary: summary,
+                        personality,
                         ..Default::default()
                     },
                 )
@@ -2120,6 +2225,7 @@ mod handlers {
 
     use crate::mcp::auth::compute_auth_statuses;
     use crate::mcp::collect_mcp_snapshot_from_manager;
+    use crate::mcp::effective_mcp_servers;
     use crate::review_prompts::resolve_review_request;
     use crate::tasks::CompactTask;
     use crate::tasks::RegularTask;
@@ -2144,6 +2250,7 @@ mod handlers {
 
     use crate::context_manager::is_user_turn_boundary;
     use codex_protocol::config_types::CollaborationMode;
+    use codex_protocol::config_types::ModeKind;
     use codex_protocol::config_types::Settings;
     use codex_protocol::user_input::UserInput;
     use codex_rmcp_client::ElicitationAction;
@@ -2217,13 +2324,17 @@ mod handlers {
                 final_output_json_schema,
                 items,
                 collaboration_mode,
+                personality,
             } => {
                 let collaboration_mode = collaboration_mode.or_else(|| {
-                    Some(CollaborationMode::Custom(Settings {
-                        model: model.clone(),
-                        reasoning_effort: effort,
-                        developer_instructions: None,
-                    }))
+                    Some(CollaborationMode {
+                        mode: ModeKind::Custom,
+                        settings: Settings {
+                            model: model.clone(),
+                            reasoning_effort: effort,
+                            developer_instructions: None,
+                        },
+                    })
                 });
                 (
                     items,
@@ -2234,6 +2345,7 @@ mod handlers {
                         collaboration_mode,
                         reasoning_summary: Some(summary),
                         final_output_json_schema: Some(final_output_json_schema),
+                        personality,
                     },
                 )
             }
@@ -2431,13 +2543,12 @@ mod handlers {
 
     pub async fn list_mcp_tools(sess: &Session, config: &Arc<Config>, sub_id: String) {
         let mcp_connection_manager = sess.services.mcp_connection_manager.read().await;
+        let auth = sess.services.auth_manager.auth().await;
+        let mcp_servers = effective_mcp_servers(config, auth.as_ref());
         let snapshot = collect_mcp_snapshot_from_manager(
             &mcp_connection_manager,
-            compute_auth_statuses(
-                config.mcp_servers.iter(),
-                config.mcp_oauth_credentials_store_mode,
-            )
-            .await,
+            compute_auth_statuses(mcp_servers.iter(), config.mcp_oauth_credentials_store_mode)
+                .await,
         )
         .await;
         let event = Event {
@@ -2707,6 +2818,7 @@ async fn spawn_review_thread(
         developer_instructions: None,
         user_instructions: None,
         compact_prompt: parent_turn_context.compact_prompt.clone(),
+        personality: parent_turn_context.personality,
         approval_policy: parent_turn_context.approval_policy,
         sandbox_policy: parent_turn_context.sandbox_policy.clone(),
         shell_environment_policy: parent_turn_context.shell_environment_policy.clone(),
@@ -2950,6 +3062,60 @@ async fn run_auto_compact(sess: &Arc<Session>, turn_context: &Arc<TurnContext>) 
     }
 }
 
+fn filter_connectors_for_input(
+    connectors: Vec<connectors::ConnectorInfo>,
+    input: &[ResponseItem],
+) -> Vec<connectors::ConnectorInfo> {
+    let user_messages = collect_user_messages(input);
+    if user_messages.is_empty() {
+        return Vec::new();
+    }
+
+    connectors
+        .into_iter()
+        .filter(|connector| connector_inserted_in_messages(connector, &user_messages))
+        .collect()
+}
+
+fn connector_inserted_in_messages(
+    connector: &connectors::ConnectorInfo,
+    user_messages: &[String],
+) -> bool {
+    let label = connectors::connector_display_label(connector);
+    let needle = label.to_lowercase();
+    let legacy = format!("{label} connector").to_lowercase();
+    user_messages.iter().any(|message| {
+        let message = message.to_lowercase();
+        message.contains(&needle) || message.contains(&legacy)
+    })
+}
+
+fn filter_codex_apps_mcp_tools(
+    mut mcp_tools: HashMap<String, crate::mcp_connection_manager::ToolInfo>,
+    connectors: &[connectors::ConnectorInfo],
+) -> HashMap<String, crate::mcp_connection_manager::ToolInfo> {
+    let allowed: HashSet<&str> = connectors
+        .iter()
+        .map(|connector| connector.connector_id.as_str())
+        .collect();
+
+    mcp_tools.retain(|_, tool| {
+        if tool.server_name != CODEX_APPS_MCP_SERVER_NAME {
+            return true;
+        }
+        let Some(connector_id) = codex_apps_connector_id(tool) else {
+            return false;
+        };
+        allowed.contains(connector_id)
+    });
+
+    mcp_tools
+}
+
+fn codex_apps_connector_id(tool: &crate::mcp_connection_manager::ToolInfo) -> Option<&str> {
+    tool.connector_id.as_deref()
+}
+
 #[instrument(level = "trace",
     skip_all,
     fields(
@@ -2966,7 +3132,7 @@ async fn run_sampling_request(
     input: Vec<ResponseItem>,
     cancellation_token: CancellationToken,
 ) -> CodexResult<SamplingRequestResult> {
-    let mcp_tools = sess
+    let mut mcp_tools = sess
         .services
         .mcp_connection_manager
         .read()
@@ -2974,6 +3140,20 @@ async fn run_sampling_request(
         .list_all_tools()
         .or_cancel(&cancellation_token)
         .await?;
+    let connectors_for_tools = if turn_context
+        .client
+        .config()
+        .features
+        .enabled(Feature::Connectors)
+    {
+        let connectors = connectors::accessible_connectors_from_mcp_tools(&mcp_tools);
+        Some(filter_connectors_for_input(connectors, &input))
+    } else {
+        None
+    };
+    if let Some(connectors) = connectors_for_tools.as_ref() {
+        mcp_tools = filter_codex_apps_mcp_tools(mcp_tools, connectors);
+    }
     let router = Arc::new(ToolRouter::from_config(
         &turn_context.tools_config,
         Some(
@@ -2996,7 +3176,7 @@ async fn run_sampling_request(
         tools: router.specs(),
         parallel_tool_calls: model_supports_parallel,
         base_instructions,
-        personality: None,
+        personality: turn_context.personality,
         output_schema: turn_context.final_output_json_schema.clone(),
     };
 
@@ -3115,6 +3295,7 @@ async fn try_run_sampling_request(
         approval_policy: turn_context.approval_policy,
         sandbox_policy: turn_context.sandbox_policy.clone(),
         model: turn_context.client.get_model(),
+        personality: turn_context.personality,
         collaboration_mode: Some(collaboration_mode),
         effort: turn_context.client.get_reasoning_effort(),
         summary: turn_context.client.get_reasoning_summary(),
@@ -3613,6 +3794,7 @@ mod tests {
                 content: vec![ContentItem::InputText {
                     text: "turn 1 user".to_string(),
                 }],
+                end_turn: None,
             },
             ResponseItem::Message {
                 id: None,
@@ -3620,6 +3802,7 @@ mod tests {
                 content: vec![ContentItem::OutputText {
                     text: "turn 1 assistant".to_string(),
                 }],
+                end_turn: None,
             },
         ];
         sess.record_into_history(&turn_1, tc.as_ref()).await;
@@ -3631,6 +3814,7 @@ mod tests {
                 content: vec![ContentItem::InputText {
                     text: "turn 2 user".to_string(),
                 }],
+                end_turn: None,
             },
             ResponseItem::Message {
                 id: None,
@@ -3638,6 +3822,7 @@ mod tests {
                 content: vec![ContentItem::OutputText {
                     text: "turn 2 assistant".to_string(),
                 }],
+                end_turn: None,
             },
         ];
         sess.record_into_history(&turn_2, tc.as_ref()).await;
@@ -3669,6 +3854,7 @@ mod tests {
             content: vec![ContentItem::InputText {
                 text: "turn 1 user".to_string(),
             }],
+            end_turn: None,
         }];
         sess.record_into_history(&turn_1, tc.as_ref()).await;
 
@@ -3731,17 +3917,21 @@ mod tests {
         let model = ModelsManager::get_model_offline(config.model.as_deref());
         let model_info = ModelsManager::construct_model_info_offline(model.as_str(), &config);
         let reasoning_effort = config.model_reasoning_effort;
-        let collaboration_mode = CollaborationMode::Custom(Settings {
-            model,
-            reasoning_effort,
-            developer_instructions: None,
-        });
+        let collaboration_mode = CollaborationMode {
+            mode: ModeKind::Custom,
+            settings: Settings {
+                model,
+                reasoning_effort,
+                developer_instructions: None,
+            },
+        };
         let session_configuration = SessionConfiguration {
             provider: config.model_provider.clone(),
             collaboration_mode,
             model_reasoning_summary: config.model_reasoning_summary,
             developer_instructions: config.developer_instructions.clone(),
             user_instructions: config.user_instructions.clone(),
+            personality: config.model_personality,
             base_instructions: config
                 .base_instructions
                 .clone()
@@ -3806,17 +3996,21 @@ mod tests {
         let model = ModelsManager::get_model_offline(config.model.as_deref());
         let model_info = ModelsManager::construct_model_info_offline(model.as_str(), &config);
         let reasoning_effort = config.model_reasoning_effort;
-        let collaboration_mode = CollaborationMode::Custom(Settings {
-            model,
-            reasoning_effort,
-            developer_instructions: None,
-        });
+        let collaboration_mode = CollaborationMode {
+            mode: ModeKind::Custom,
+            settings: Settings {
+                model,
+                reasoning_effort,
+                developer_instructions: None,
+            },
+        };
         let session_configuration = SessionConfiguration {
             provider: config.model_provider.clone(),
             collaboration_mode,
             model_reasoning_summary: config.model_reasoning_summary,
             developer_instructions: config.developer_instructions.clone(),
             user_instructions: config.user_instructions.clone(),
+            personality: config.model_personality,
             base_instructions: config
                 .base_instructions
                 .clone()
@@ -4065,17 +4259,21 @@ mod tests {
         let model = ModelsManager::get_model_offline(config.model.as_deref());
         let model_info = ModelsManager::construct_model_info_offline(model.as_str(), &config);
         let reasoning_effort = config.model_reasoning_effort;
-        let collaboration_mode = CollaborationMode::Custom(Settings {
-            model,
-            reasoning_effort,
-            developer_instructions: None,
-        });
+        let collaboration_mode = CollaborationMode {
+            mode: ModeKind::Custom,
+            settings: Settings {
+                model,
+                reasoning_effort,
+                developer_instructions: None,
+            },
+        };
         let session_configuration = SessionConfiguration {
             provider: config.model_provider.clone(),
             collaboration_mode,
             model_reasoning_summary: config.model_reasoning_summary,
             developer_instructions: config.developer_instructions.clone(),
             user_instructions: config.user_instructions.clone(),
+            personality: config.model_personality,
             base_instructions: config
                 .base_instructions
                 .clone()
@@ -4169,17 +4367,21 @@ mod tests {
         let model = ModelsManager::get_model_offline(config.model.as_deref());
         let model_info = ModelsManager::construct_model_info_offline(model.as_str(), &config);
         let reasoning_effort = config.model_reasoning_effort;
-        let collaboration_mode = CollaborationMode::Custom(Settings {
-            model,
-            reasoning_effort,
-            developer_instructions: None,
-        });
+        let collaboration_mode = CollaborationMode {
+            mode: ModeKind::Custom,
+            settings: Settings {
+                model,
+                reasoning_effort,
+                developer_instructions: None,
+            },
+        };
         let session_configuration = SessionConfiguration {
             provider: config.model_provider.clone(),
             collaboration_mode,
             model_reasoning_summary: config.model_reasoning_summary,
             developer_instructions: config.developer_instructions.clone(),
             user_instructions: config.user_instructions.clone(),
+            personality: config.model_personality,
             base_instructions: config
                 .base_instructions
                 .clone()
@@ -4561,6 +4763,7 @@ mod tests {
             content: vec![ContentItem::InputText {
                 text: "first user".to_string(),
             }],
+            end_turn: None,
         };
         live_history.record_items(std::iter::once(&user1), turn_context.truncation_policy);
         rollout_items.push(RolloutItem::ResponseItem(user1.clone()));
@@ -4571,6 +4774,7 @@ mod tests {
             content: vec![ContentItem::OutputText {
                 text: "assistant reply one".to_string(),
             }],
+            end_turn: None,
         };
         live_history.record_items(std::iter::once(&assistant1), turn_context.truncation_policy);
         rollout_items.push(RolloutItem::ResponseItem(assistant1.clone()));
@@ -4595,6 +4799,7 @@ mod tests {
             content: vec![ContentItem::InputText {
                 text: "second user".to_string(),
             }],
+            end_turn: None,
         };
         live_history.record_items(std::iter::once(&user2), turn_context.truncation_policy);
         rollout_items.push(RolloutItem::ResponseItem(user2.clone()));
@@ -4605,6 +4810,7 @@ mod tests {
             content: vec![ContentItem::OutputText {
                 text: "assistant reply two".to_string(),
             }],
+            end_turn: None,
         };
         live_history.record_items(std::iter::once(&assistant2), turn_context.truncation_policy);
         rollout_items.push(RolloutItem::ResponseItem(assistant2.clone()));
@@ -4629,6 +4835,7 @@ mod tests {
             content: vec![ContentItem::InputText {
                 text: "third user".to_string(),
             }],
+            end_turn: None,
         };
         live_history.record_items(std::iter::once(&user3), turn_context.truncation_policy);
         rollout_items.push(RolloutItem::ResponseItem(user3));
@@ -4639,6 +4846,7 @@ mod tests {
             content: vec![ContentItem::OutputText {
                 text: "assistant reply three".to_string(),
             }],
+            end_turn: None,
         };
         live_history.record_items(std::iter::once(&assistant3), turn_context.truncation_policy);
         rollout_items.push(RolloutItem::ResponseItem(assistant3));
