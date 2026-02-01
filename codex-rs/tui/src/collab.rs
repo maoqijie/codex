@@ -27,16 +27,16 @@ pub(crate) fn spawn_end(ev: CollabAgentSpawnEndEvent) -> PlainHistoryCell {
     } = ev;
     let new_agent = new_thread_id
         .map(|id| Span::from(id.to_string()))
-        .unwrap_or_else(|| Span::from("not created").dim());
+        .unwrap_or_else(|| Span::from("未创建").dim());
     let mut details = vec![
-        detail_line("call", call_id),
-        detail_line("agent", new_agent),
+        detail_line("调用", call_id),
+        detail_line("代理", new_agent),
         status_line(&status),
     ];
     if let Some(line) = prompt_line(&prompt) {
         details.push(line);
     }
-    collab_event("Agent spawned", details)
+    collab_event("已创建代理", details)
 }
 
 pub(crate) fn interaction_end(ev: CollabAgentInteractionEndEvent) -> PlainHistoryCell {
@@ -48,14 +48,14 @@ pub(crate) fn interaction_end(ev: CollabAgentInteractionEndEvent) -> PlainHistor
         status,
     } = ev;
     let mut details = vec![
-        detail_line("call", call_id),
-        detail_line("receiver", receiver_thread_id.to_string()),
+        detail_line("调用", call_id),
+        detail_line("接收方", receiver_thread_id.to_string()),
         status_line(&status),
     ];
     if let Some(line) = prompt_line(&prompt) {
         details.push(line);
     }
-    collab_event("Input sent", details)
+    collab_event("已发送输入", details)
 }
 
 pub(crate) fn waiting_begin(ev: CollabWaitingBeginEvent) -> PlainHistoryCell {
@@ -65,10 +65,10 @@ pub(crate) fn waiting_begin(ev: CollabWaitingBeginEvent) -> PlainHistoryCell {
         receiver_thread_ids,
     } = ev;
     let details = vec![
-        detail_line("call", call_id),
-        detail_line("receivers", format_thread_ids(&receiver_thread_ids)),
+        detail_line("调用", call_id),
+        detail_line("接收方", format_thread_ids(&receiver_thread_ids)),
     ];
-    collab_event("Waiting for agents", details)
+    collab_event("等待代理响应", details)
 }
 
 pub(crate) fn waiting_end(ev: CollabWaitingEndEvent) -> PlainHistoryCell {
@@ -77,9 +77,9 @@ pub(crate) fn waiting_end(ev: CollabWaitingEndEvent) -> PlainHistoryCell {
         sender_thread_id: _,
         statuses,
     } = ev;
-    let mut details = vec![detail_line("call", call_id)];
+    let mut details = vec![detail_line("调用", call_id)];
     details.extend(wait_complete_lines(&statuses));
-    collab_event("Wait complete", details)
+    collab_event("等待完成", details)
 }
 
 pub(crate) fn close_end(ev: CollabCloseEndEvent) -> PlainHistoryCell {
@@ -90,11 +90,11 @@ pub(crate) fn close_end(ev: CollabCloseEndEvent) -> PlainHistoryCell {
         status,
     } = ev;
     let details = vec![
-        detail_line("call", call_id),
-        detail_line("receiver", receiver_thread_id.to_string()),
+        detail_line("调用", call_id),
+        detail_line("接收方", receiver_thread_id.to_string()),
         status_line(&status),
     ];
-    collab_event("Agent closed", details)
+    collab_event("已关闭代理", details)
 }
 
 fn collab_event(title: impl Into<String>, details: Vec<Line<'static>>) -> PlainHistoryCell {
@@ -112,17 +112,17 @@ fn detail_line(label: &str, value: impl Into<Span<'static>>) -> Line<'static> {
 }
 
 fn status_line(status: &AgentStatus) -> Line<'static> {
-    detail_line("status", status_span(status))
+    detail_line("状态", status_span(status))
 }
 
 fn status_span(status: &AgentStatus) -> Span<'static> {
     match status {
-        AgentStatus::PendingInit => Span::from("pending init").dim(),
-        AgentStatus::Running => Span::from("running").cyan().bold(),
-        AgentStatus::Completed(_) => Span::from("completed").green(),
-        AgentStatus::Errored(_) => Span::from("errored").red(),
-        AgentStatus::Shutdown => Span::from("shutdown").dim(),
-        AgentStatus::NotFound => Span::from("not found").red(),
+        AgentStatus::PendingInit => Span::from("初始化中").dim(),
+        AgentStatus::Running => Span::from("运行中").cyan().bold(),
+        AgentStatus::Completed(_) => Span::from("已完成").green(),
+        AgentStatus::Errored(_) => Span::from("出错").red(),
+        AgentStatus::Shutdown => Span::from("已关闭").dim(),
+        AgentStatus::NotFound => Span::from("未找到").red(),
     }
 }
 
@@ -132,7 +132,7 @@ fn prompt_line(prompt: &str) -> Option<Line<'static>> {
         None
     } else {
         Some(detail_line(
-            "prompt",
+            "提示词",
             Span::from(truncate_text(trimmed, COLLAB_PROMPT_PREVIEW_GRAPHEMES)).dim(),
         ))
     }
@@ -140,7 +140,7 @@ fn prompt_line(prompt: &str) -> Option<Line<'static>> {
 
 fn format_thread_ids(ids: &[ThreadId]) -> Span<'static> {
     if ids.is_empty() {
-        return Span::from("none").dim();
+        return Span::from("无").dim();
     }
     let joined = ids
         .iter()
@@ -152,7 +152,7 @@ fn format_thread_ids(ids: &[ThreadId]) -> Span<'static> {
 
 fn wait_complete_lines(statuses: &HashMap<ThreadId, AgentStatus>) -> Vec<Line<'static>> {
     if statuses.is_empty() {
-        return vec![detail_line("agents", Span::from("none").dim())];
+        return vec![detail_line("代理", Span::from("无").dim())];
     }
 
     let mut pending_init = 0usize;
@@ -172,36 +172,38 @@ fn wait_complete_lines(statuses: &HashMap<ThreadId, AgentStatus>) -> Vec<Line<'s
         }
     }
 
-    let mut summary = vec![Span::from(format!("{} total", statuses.len())).dim()];
+    let mut summary = vec![Span::from(format!("共 {} 个", statuses.len())).dim()];
     push_status_count(
         &mut summary,
         pending_init,
-        "pending init",
+        "初始化中",
         ratatui::prelude::Stylize::dim,
     );
-    push_status_count(&mut summary, running, "running", |span| span.cyan().bold());
+    push_status_count(&mut summary, running, "运行中", |span| {
+        span.cyan().bold()
+    });
     push_status_count(
         &mut summary,
         completed,
-        "completed",
+        "已完成",
         ratatui::prelude::Stylize::green,
     );
     push_status_count(
         &mut summary,
         errored,
-        "errored",
+        "出错",
         ratatui::prelude::Stylize::red,
     );
     push_status_count(
         &mut summary,
         shutdown,
-        "shutdown",
+        "已关闭",
         ratatui::prelude::Stylize::dim,
     );
     push_status_count(
         &mut summary,
         not_found,
-        "not found",
+        "未找到",
         ratatui::prelude::Stylize::red,
     );
 
@@ -212,7 +214,7 @@ fn wait_complete_lines(statuses: &HashMap<ThreadId, AgentStatus>) -> Vec<Line<'s
     entries.sort_by(|(left, _), (right, _)| left.cmp(right));
 
     let mut lines = Vec::with_capacity(entries.len() + 1);
-    lines.push(detail_line_spans("agents", summary));
+    lines.push(detail_line_spans("代理", summary));
     lines.extend(entries.into_iter().map(|(thread_id, status)| {
         let mut spans = vec![
             Span::from(thread_id).dim(),

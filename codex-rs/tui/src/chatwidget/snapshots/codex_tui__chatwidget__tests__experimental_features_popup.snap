@@ -3,7 +3,7 @@ source: tui/src/chatwidget/tests.rs
 expression: popup
 ---
   实 验 功 能
-  切 换 测 试 功 能 。 更 改 会 保 存 到  config.toml。
+  切 换 实 验 功 能 。 更 改 会 保 存 到  config.toml。
 
 › [ ] Ghost snapshots  Capture undo snapshots each turn.
   [x] Shell tool       Allow the model to run shell commands.

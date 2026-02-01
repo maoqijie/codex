@@ -45,15 +45,15 @@ impl WidgetRef for &TrustDirectoryWidget {
 
         column.push(Line::from(vec![
             "> ".into(),
-            "You are running Codex in ".bold(),
+            "你正在此目录运行 Codex：".bold(),
             self.cwd.to_string_lossy().to_string().into(),
         ]));
         column.push("");
 
         let guidance = if self.is_git_repo {
-            "Since this folder is version controlled, you may wish to allow Codex to work in this folder without asking for approval."
+            "此目录处于版本控制之下，你可以选择让 Codex 在此目录工作时无需每次请求审批。"
         } else {
-            "Since this folder is not version controlled, we recommend requiring approval of all edits and commands."
+            "此目录未纳入版本控制，建议对所有编辑和命令都要求审批。"
         };
 
         column.push(
@@ -66,22 +66,19 @@ impl WidgetRef for &TrustDirectoryWidget {
         let mut options: Vec<(&str, TrustDirectorySelection)> = Vec::new();
         if self.is_git_repo {
             options.push((
-                "Yes, allow Codex to work in this folder without asking for approval",
+                "是，让 Codex 在此目录工作时不再要求审批",
                 TrustDirectorySelection::Trust,
             ));
             options.push((
-                "No, ask me to approve edits and commands",
+                "否，每次编辑和命令都需要我审批",
                 TrustDirectorySelection::DontTrust,
             ));
         } else {
             options.push((
-                "Allow Codex to work in this folder without asking for approval",
+                "允许 Codex 在此目录工作时不再要求审批",
                 TrustDirectorySelection::Trust,
             ));
-            options.push((
-                "Require approval of edits and commands",
-                TrustDirectorySelection::DontTrust,
-            ));
+            options.push(("对编辑和命令都要求审批", TrustDirectorySelection::DontTrust));
         }
 
         for (idx, (text, selection)) in options.iter().enumerate() {
@@ -106,9 +103,9 @@ impl WidgetRef for &TrustDirectoryWidget {
 
         column.push(
             Line::from(vec![
-                "Press ".dim(),
+                "按 ".dim(),
                 key_hint::plain(KeyCode::Enter).into(),
-                " to continue".dim(),
+                " 继续".dim(),
             ])
             .inset(Insets::tlbr(0, 2, 0, 0)),
         );
@@ -156,7 +153,7 @@ impl TrustDirectoryWidget {
             resolve_root_git_project_for_trust(&self.cwd).unwrap_or_else(|| self.cwd.clone());
         if let Err(e) = set_project_trust_level(&self.codex_home, &target, TrustLevel::Trusted) {
             tracing::error!("Failed to set project trusted: {e:?}");
-            self.error = Some(format!("Failed to set trust for {}: {e}", target.display()));
+            self.error = Some(format!("无法将 {} 设置为可信目录：{e}", target.display()));
         }
 
         self.selection = Some(TrustDirectorySelection::Trust);
@@ -168,10 +165,7 @@ impl TrustDirectoryWidget {
             resolve_root_git_project_for_trust(&self.cwd).unwrap_or_else(|| self.cwd.clone());
         if let Err(e) = set_project_trust_level(&self.codex_home, &target, TrustLevel::Untrusted) {
             tracing::error!("Failed to set project untrusted: {e:?}");
-            self.error = Some(format!(
-                "Failed to set untrusted for {}: {e}",
-                target.display()
-            ));
+            self.error = Some(format!("无法将 {} 设置为不可信目录：{e}", target.display()));
         }
 
         self.selection = Some(TrustDirectorySelection::DontTrust);

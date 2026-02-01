@@ -41,4 +41,4 @@ expression: term.backend().vt100().screen().contents()
 
 › Summarize recent commits
 
-  上下文剩余 100% · tab 加入队列
+  tab 加入队列                                                 上下文剩余 100%

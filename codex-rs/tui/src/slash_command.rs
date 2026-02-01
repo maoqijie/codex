@@ -20,11 +20,13 @@ pub enum SlashCommand {
     Experimental,
     Skills,
     Review,
+    Rename,
     New,
     Resume,
     Fork,
     Init,
     Compact,
+    Plan,
     Collab,
     Agent,
     // Undo,
@@ -32,12 +34,14 @@ pub enum SlashCommand {
     Mention,
     Status,
     Mcp,
+    Apps,
     Logout,
     Quit,
     Exit,
     Feedback,
     Rollout,
     Ps,
+    Personality,
     TestApproval,
 }
 
@@ -50,6 +54,7 @@ impl SlashCommand {
             SlashCommand::Init => "创建包含 Codex 指令的 AGENTS.md 文件",
             SlashCommand::Compact => "总结对话以避免触及上下文上限",
             SlashCommand::Review => "审查当前改动并找出问题",
+            SlashCommand::Rename => "重命名当前会话",
             SlashCommand::Resume => "恢复已保存的聊天",
             SlashCommand::Fork => "分叉当前聊天",
             // SlashCommand::Undo => "ask Codex to undo a turn",
@@ -60,6 +65,8 @@ impl SlashCommand {
             SlashCommand::Status => "显示当前会话配置与 token 用量",
             SlashCommand::Ps => "列出后台终端",
             SlashCommand::Model => "选择模型与推理强度",
+            SlashCommand::Personality => "选择 Codex 的交流风格",
+            SlashCommand::Plan => "切换到计划模式",
             SlashCommand::Collab => "切换协作模式（实验性）",
             SlashCommand::Agent => "切换当前代理线程",
             SlashCommand::Approvals => "选择 Codex 可在无需批准时执行的操作",
@@ -67,6 +74,7 @@ impl SlashCommand {
             SlashCommand::ElevateSandbox => "配置提升权限的代理沙箱",
             SlashCommand::Experimental => "切换实验功能",
             SlashCommand::Mcp => "列出已配置的 MCP 工具",
+            SlashCommand::Apps => "管理 Apps（连接器）",
             SlashCommand::Logout => "登出 Codex",
             SlashCommand::Rollout => "打印 rollout 文件路径",
             SlashCommand::TestApproval => "测试审批请求",
@@ -89,6 +97,7 @@ impl SlashCommand {
             | SlashCommand::Compact
             // | SlashCommand::Undo
             | SlashCommand::Model
+            | SlashCommand::Personality
             | SlashCommand::Approvals
             | SlashCommand::Permissions
             | SlashCommand::ElevateSandbox
@@ -96,16 +105,19 @@ impl SlashCommand {
             | SlashCommand::Review
             | SlashCommand::Logout => false,
             SlashCommand::Diff
+            | SlashCommand::Rename
             | SlashCommand::Mention
             | SlashCommand::Skills
             | SlashCommand::Status
             | SlashCommand::Ps
             | SlashCommand::Mcp
+            | SlashCommand::Apps
             | SlashCommand::Feedback
             | SlashCommand::Quit
             | SlashCommand::Exit => true,
             SlashCommand::Rollout => true,
             SlashCommand::TestApproval => true,
+            SlashCommand::Plan => true,
             SlashCommand::Collab => true,
             SlashCommand::Agent => true,
         }

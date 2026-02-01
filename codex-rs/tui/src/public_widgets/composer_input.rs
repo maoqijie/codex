@@ -37,7 +37,7 @@ impl ComposerInput {
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let sender = AppEventSender::new(tx.clone());
         // `enhanced_keys_supported=true` enables Shift+Enter newline hint/behavior.
-        let inner = ChatComposer::new(true, sender, true, "Compose new task".to_string(), false);
+        let inner = ChatComposer::new(true, sender, true, "编写新任务".to_string(), false);
         Self { inner, _tx: tx, rx }
     }
 

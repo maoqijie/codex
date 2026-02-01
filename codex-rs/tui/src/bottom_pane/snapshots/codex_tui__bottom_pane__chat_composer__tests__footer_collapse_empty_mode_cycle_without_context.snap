@@ -1,0 +1,13 @@
+---
+source: tui/src/bottom_pane/chat_composer.rs
+expression: terminal.backend()
+---
+"                                            "
+"› 让 Codex 做点什么                         " Hidden by multi-width symbols: [(3, " "), (12, " "), (14, " "), (16, " "), (18, " ")]
+"                                            "
+"                                            "
+"                                            "
+"                                            "
+"                                            "
+"                                            "
+"  ? 查看快捷键             上下文剩余 100%  " Hidden by multi-width symbols: [(5, " "), (7, " "), (9, " "), (11, " "), (13, " "), (28, " "), (30, " "), (32, " "), (34, " "), (36, " ")]

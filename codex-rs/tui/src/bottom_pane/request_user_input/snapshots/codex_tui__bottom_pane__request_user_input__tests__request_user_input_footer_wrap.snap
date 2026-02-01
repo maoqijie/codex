@@ -1,0 +1,14 @@
+---
+source: tui/src/bottom_pane/request_user_input/mod.rs
+expression: "render_snapshot(&overlay, area)"
+---
+                                                    
+  问 题  1/2（ 未 回 答  2 个 ）                            
+  Choose an option.                                 
+                                                    
+    1. Option 1  First choice.                      
+  › 2. Option 2  Second choice.                     
+    3. Option 3  Third choice.                      
+                                                    
+  Tab 添 加 备 注  | Enter 下 一 题  | Ctrl+N 下 一 题        
+  Esc 中 断

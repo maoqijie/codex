@@ -1,0 +1,11 @@
+---
+source: tui/src/history_cell.rs
+expression: rendered
+---
+/ps
+
+后台终端
+
+  • just fix
+    ↳   indented first
+          more indented

@@ -68,6 +68,7 @@ struct StatusHistoryCell {
     collaboration_mode: Option<String>,
     model_provider: Option<String>,
     account: Option<StatusAccountDisplay>,
+    thread_name: Option<String>,
     session_id: Option<String>,
     forked_from: Option<String>,
     token_usage: StatusTokenUsageData,
@@ -81,6 +82,7 @@ pub(crate) fn new_status_output(
     token_info: Option<&TokenUsageInfo>,
     total_usage: &TokenUsage,
     session_id: &Option<ThreadId>,
+    thread_name: Option<String>,
     forked_from: Option<ThreadId>,
     rate_limits: Option<&RateLimitSnapshotDisplay>,
     plan_type: Option<PlanType>,
@@ -96,6 +98,7 @@ pub(crate) fn new_status_output(
         token_info,
         total_usage,
         session_id,
+        thread_name,
         forked_from,
         rate_limits,
         plan_type,
@@ -116,6 +119,7 @@ impl StatusHistoryCell {
         token_info: Option<&TokenUsageInfo>,
         total_usage: &TokenUsage,
         session_id: &Option<ThreadId>,
+        thread_name: Option<String>,
         forked_from: Option<ThreadId>,
         rate_limits: Option<&RateLimitSnapshotDisplay>,
         plan_type: Option<PlanType>,
@@ -207,6 +211,7 @@ impl StatusHistoryCell {
             collaboration_mode: collaboration_mode.map(ToString::to_string),
             model_provider,
             account,
+            thread_name,
             session_id,
             forked_from,
             token_usage,
@@ -384,12 +389,16 @@ impl HistoryCell for StatusHistoryCell {
             .map(str::to_string)
             .collect();
         let mut seen: BTreeSet<String> = labels.iter().cloned().collect();
+        let thread_name = self.thread_name.as_deref().filter(|name| !name.is_empty());
 
         if self.model_provider.is_some() {
             push_label(&mut labels, &mut seen, "模型提供方");
         }
         if account_value.is_some() {
             push_label(&mut labels, &mut seen, "账号");
+        }
+        if thread_name.is_some() {
+            push_label(&mut labels, &mut seen, "Thread name");
         }
         if self.session_id.is_some() {
             push_label(&mut labels, &mut seen, "会话");
@@ -447,10 +456,12 @@ impl HistoryCell for StatusHistoryCell {
             lines.push(formatter.line("账号", vec![Span::from(account_value)]));
         }
 
+        if let Some(thread_name) = thread_name {
+            lines.push(formatter.line("Thread name", vec![Span::from(thread_name.to_string())]));
+        }
         if let Some(collab_mode) = self.collaboration_mode.as_ref() {
             lines.push(formatter.line("协作模式", vec![Span::from(collab_mode.clone())]));
         }
-
         if let Some(session) = self.session_id.as_ref() {
             lines.push(formatter.line("会话", vec![Span::from(session.clone())]));
         }

@@ -2,15 +2,19 @@
 用 /new 开启新想法；之前的会话会保留在历史中。
 出现异常时用 /feedback 将日志发送给维护者。
 用 /model 快速切换模型或推理强度。
-用 /approvals 控制 Codex 何时请求确认。
+用 /permissions 设置允许的操作；用 /approvals 设置哪些操作无需确认。
 运行 /review 获取当前改动的代码审查。
 用 /skills 查看可用技能，或让 Codex 使用其中一个。
 用 /status 查看当前模型、审批设置和 token 用量。
-用 /fork 将当前聊天分叉成新线程。
+用 /fork 将当前聊天分叉成新会话。
+用 /rename 重命名会话，方便之后用 `codex resume` 恢复。
 用 /init 创建包含项目指引的 AGENTS.md。
 用 /mcp 列出已配置的 MCP 工具。
+对于 API 问题，可启用 OpenAI 文档 MCP：`codex mcp add openaiDeveloperDocs --url https://developers.openai.com/mcp`。
+加入 OpenAI 社区 Discord：http://discord.gg/openai
+访问 Codex 社区论坛：https://community.openai.com/c/codex/37
 使用 `!` 可从 Codex 运行任意 shell 命令（例如 `!ls`）。
-输入 / 打开命令弹窗；Tab 可自动补全斜杠命令和已保存的提示。
+输入 / 打开命令弹窗；Tab 可自动补全斜杠命令。
 可用自定义提示定义自己的 `/` 命令。更多信息：https://developers.openai.com/codex/guides/slash-commands#create-your-own-slash-commands-with-custom-prompts
 输入框为空时，按 Esc 回退并编辑上一条消息；按 Enter 确认。
 按 Tab 将消息加入队列而非立即发送；Enter 始终立即发送。

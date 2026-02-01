@@ -1,0 +1,14 @@
+---
+source: tui/src/cwd_prompt.rs
+expression: terminal.backend()
+---
+
+选择用于分叉此会话的工作目录
+
+  会话目录 = 目标会话最后记录的工作目录                                         
+  当前目录 = 你当前的工作目录
+
+› 1. 使用会话目录（/Users/example/session）                                     
+  2. 使用当前目录（/Users/example/current）
+
+  按 enter 继续

@@ -29,7 +29,7 @@ use super::selection_popup_common::GenericDisplayRow;
 use super::selection_popup_common::measure_rows_height;
 use super::selection_popup_common::render_rows;
 
-pub(crate) struct BetaFeatureItem {
+pub(crate) struct ExperimentalFeatureItem {
     pub feature: Feature,
     pub name: String,
     pub description: String,
@@ -37,7 +37,7 @@ pub(crate) struct BetaFeatureItem {
 }
 
 pub(crate) struct ExperimentalFeaturesView {
-    features: Vec<BetaFeatureItem>,
+    features: Vec<ExperimentalFeatureItem>,
     state: ScrollState,
     complete: bool,
     app_event_tx: AppEventSender,
@@ -46,10 +46,13 @@ pub(crate) struct ExperimentalFeaturesView {
 }
 
 impl ExperimentalFeaturesView {
-    pub(crate) fn new(features: Vec<BetaFeatureItem>, app_event_tx: AppEventSender) -> Self {
+    pub(crate) fn new(
+        features: Vec<ExperimentalFeatureItem>,
+        app_event_tx: AppEventSender,
+    ) -> Self {
         let mut header = ColumnRenderable::new();
         header.push(Line::from("实验功能".bold()));
-        header.push(Line::from("切换测试功能。更改会保存到 config.toml。".dim()));
+        header.push(Line::from("切换实验功能。更改会保存到 config.toml。".dim()));
 
         let mut view = Self {
             features,

@@ -1,0 +1,13 @@
+---
+source: tui/src/bottom_pane/chat_composer.rs
+expression: terminal.backend()
+---
+"                                        "
+"› Test                                  "
+"                                        "
+"                                        "
+"                                        "
+"                                        "
+"                                        "
+"                                        "
+"  tab 加入队列          上下文剩余 98%  " Hidden by multi-width symbols: [(7, " "), (9, " "), (11, " "), (13, " "), (25, " "), (27, " "), (29, " "), (31, " "), (33, " ")]

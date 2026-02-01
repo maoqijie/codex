@@ -82,6 +82,7 @@ fn gpt_52_codex() -> ModelPreset {
             effort(ReasoningEffort::High, "复杂问题的更深推理"),
             effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
+        supports_personality: false,
         is_default: true,
         upgrade: None,
         show_in_picker: true,
@@ -102,6 +103,7 @@ fn gpt_5_1_codex_max() -> ModelPreset {
             effort(ReasoningEffort::High, "复杂问题的更深推理"),
             effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5.1-codex-max",
@@ -130,6 +132,7 @@ fn gpt_5_1_codex_mini() -> ModelPreset {
             effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5.1-codex-mini",
@@ -163,6 +166,7 @@ fn gpt_5_2() -> ModelPreset {
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
             effort(ReasoningEffort::XHigh, "复杂问题的超高推理"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5.2",
@@ -193,6 +197,7 @@ fn bengalfox() -> ModelPreset {
             effort(ReasoningEffort::High, "复杂问题的更深推理"),
             effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
+        supports_personality: true,
         is_default: false,
         upgrade: None,
         show_in_picker: false,
@@ -216,6 +221,7 @@ fn boomslang() -> ModelPreset {
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
             effort(ReasoningEffort::XHigh, "复杂问题的超高推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: None,
         show_in_picker: false,
@@ -235,6 +241,7 @@ fn gpt_5_codex() -> ModelPreset {
             effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5-codex",
@@ -263,6 +270,7 @@ fn gpt_5_codex_mini() -> ModelPreset {
             effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5-codex-mini",
@@ -292,6 +300,7 @@ fn gpt_5_1_codex() -> ModelPreset {
             effort(ReasoningEffort::Medium, "根据任务动态调整推理"),
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5.1-codex",
@@ -325,6 +334,7 @@ fn gpt_5() -> ModelPreset {
             effort(ReasoningEffort::Medium, "在通用任务上平衡推理深度与延迟"),
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5",
@@ -357,6 +367,7 @@ fn gpt_5_1() -> ModelPreset {
             effort(ReasoningEffort::Medium, "在通用任务上平衡推理深度与延迟"),
             effort(ReasoningEffort::High, "为复杂或模糊问题最大化推理深度"),
         ],
+        supports_personality: false,
         is_default: false,
         upgrade: Some(gpt52_codex_upgrade(
             "gpt-5.1",

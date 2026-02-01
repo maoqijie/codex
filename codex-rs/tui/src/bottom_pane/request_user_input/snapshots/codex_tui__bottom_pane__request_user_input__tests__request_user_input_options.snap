@@ -2,19 +2,12 @@
 source: tui/src/bottom_pane/request_user_input/mod.rs
 expression: "render_snapshot(&overlay, area)"
 ---
-问 题  1/1                                                        
-Area                                                            
-Choose an option.                                               
-回 答                                                             
-(x) Option 1  First choice.                                     
-( ) Option 2  Second choice.                                    
-( ) Option 3  Third choice.                                     
-                                                                
-                                                                
-                                                                
-                                                                
-Option 1 的 备 注 （ 可 选 ）                                          
-+--------------------------------------------------------------+
-|添 加 备 注 （ 可 选 ）                                               |
-+--------------------------------------------------------------+
-选 项  1/3 | ↑/↓ 滚 动  | enter 下 一 题  | esc 中 断
+                                                                                                                        
+  问 题  1/1（ 未 回 答  1 个 ）                                                                                                
+  Choose an option.                                                                                                     
+                                                                                                                        
+  › 1. Option 1  First choice.                                                                                          
+    2. Option 2  Second choice.                                                                                         
+    3. Option 3  Third choice.                                                                                          
+                                                                                                                        
+  Tab 添 加 备 注  | Enter 提 交  | Esc 中 断

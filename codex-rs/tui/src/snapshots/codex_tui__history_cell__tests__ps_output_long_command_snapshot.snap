@@ -7,3 +7,4 @@ expression: rendered
 后台终端
 
   • rg "foo" src --glob '**/*. [...]
+    ↳ searching...
