@@ -2,12 +2,12 @@
 source: tui/src/resume_picker.rs
 expression: snapshot
 ---
-恢复之前的会话
+恢复之前的会话  排序： 创建时间
 输入以搜索
-  更新    分支    目录    对话
+  创建时间  更新时间  分支  目录  对话
 暂无会话记录
 
 
 
 
-enter 恢复     esc 新建     ctrl + c 退出
+enter 恢复     esc 新建     ctrl + c 退出     tab 切换排序

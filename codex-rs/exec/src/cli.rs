@@ -70,6 +70,10 @@ pub struct Cli {
     #[arg(long = "add-dir", value_name = "目录", value_hint = clap::ValueHint::DirPath)]
     pub add_dir: Vec<PathBuf>,
 
+    /// 以临时模式运行：不会将会话文件持久化到磁盘。
+    #[arg(long = "ephemeral", global = true, default_value_t = false)]
+    pub ephemeral: bool,
+
     /// JSON Schema 文件路径，用于描述模型最终响应的结构。
     #[arg(long = "output-schema", value_name = "文件")]
     pub output_schema: Option<PathBuf>,
@@ -260,9 +264,11 @@ mod tests {
             "gpt-5.2-codex",
             "--dangerously-bypass-approvals-and-sandbox",
             "--skip-git-repo-check",
+            "--ephemeral",
             PROMPT,
         ]);
 
+        assert!(cli.ephemeral);
         let Some(Command::Resume(args)) = cli.command else {
             panic!("expected resume command");
         };

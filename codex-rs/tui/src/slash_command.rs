@@ -34,6 +34,7 @@ pub enum SlashCommand {
     Mention,
     Status,
     DebugConfig,
+    Statusline,
     Mcp,
     Apps,
     Logout,
@@ -65,6 +66,7 @@ impl SlashCommand {
             SlashCommand::Skills => "使用技能提升 Codex 执行特定任务的效果",
             SlashCommand::Status => "显示当前会话配置与 token 用量",
             SlashCommand::DebugConfig => "显示配置层与需求来源（调试用）",
+            SlashCommand::Statusline => "配置状态栏显示项",
             SlashCommand::Ps => "列出后台终端",
             SlashCommand::Model => "选择模型与推理强度",
             SlashCommand::Personality => "选择 Codex 的交流风格",
@@ -131,6 +133,7 @@ impl SlashCommand {
             SlashCommand::TestApproval => true,
             SlashCommand::Collab => true,
             SlashCommand::Agent => true,
+            SlashCommand::Statusline => false,
         }
     }
 
