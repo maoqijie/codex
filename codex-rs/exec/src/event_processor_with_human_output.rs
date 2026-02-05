@@ -149,18 +149,11 @@ impl EventProcessor for EventProcessorWithHumanOutput {
         session_configured_event: &SessionConfiguredEvent,
     ) {
         const VERSION: &str = env!("CARGO_PKG_VERSION");
-        ts_msg!(
-            self,
-            "OpenAI Codex v{}（研究预览版）\n--------",
-            VERSION
-        );
+        ts_msg!(self, "OpenAI Codex v{}（研究预览版）\n--------", VERSION);
 
         let mut entries =
             create_config_summary_entries(config, session_configured_event.model.as_str());
-        entries.push((
-            "会话 ID",
-            session_configured_event.session_id.to_string(),
-        ));
+        entries.push(("会话 ID", session_configured_event.session_id.to_string()));
 
         for (key, value) in entries {
             eprintln!("{} {}", format!("{key}:").style(self.bold), value);
@@ -258,11 +251,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                     "澄清请求".style(self.magenta),
                     ev.server_name.style(self.dimmed)
                 );
-                ts_msg!(
-                    self,
-                    "{}",
-                    "自动取消（exec 模式不支持）".style(self.dimmed)
-                );
+                ts_msg!(self, "{}", "自动取消（exec 模式不支持）".style(self.dimmed));
             }
             EventMsg::TurnComplete(TurnCompleteEvent { last_agent_message }) => {
                 let last_message = last_agent_message

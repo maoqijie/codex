@@ -161,7 +161,7 @@ pub async fn run_main(
         Ok(v) => v,
         #[allow(clippy::print_stderr)]
         Err(e) => {
-            eprintln!("Error parsing -c overrides: {e}");
+            eprintln!("解析 -c 覆盖项失败：{e}");
             std::process::exit(1);
         }
     };
@@ -171,7 +171,7 @@ pub async fn run_main(
     let codex_home = match find_codex_home() {
         Ok(codex_home) => codex_home.to_path_buf(),
         Err(err) => {
-            eprintln!("Error finding codex home: {err}");
+            eprintln!("查找 codex home 失败：{err}");
             std::process::exit(1);
         }
     };
@@ -198,11 +198,11 @@ pub async fn run_main(
                 .map(ConfigLoadError::config_error);
             if let Some(config_error) = config_error {
                 eprintln!(
-                    "Error loading config.toml:\n{}",
+                    "加载 config.toml 失败：\n{}",
                     format_config_error_with_source(config_error)
                 );
             } else {
-                eprintln!("Error loading config.toml: {err}");
+                eprintln!("加载 config.toml 失败：{err}");
             }
             std::process::exit(1);
         }
@@ -288,7 +288,7 @@ pub async fn run_main(
     if let Some(warning) = add_dir_warning_message(&cli.add_dir, config.sandbox_policy.get()) {
         #[allow(clippy::print_stderr)]
         {
-            eprintln!("Error adding directories: {warning}");
+            eprintln!("添加目录失败：{warning}");
             std::process::exit(1);
         }
     }
@@ -350,10 +350,8 @@ pub async fn run_main(
         let provider_id = match model_provider_override.as_ref() {
             Some(id) => id,
             None => {
-                error!("OSS provider unexpectedly not set when oss flag is used");
-                return Err(std::io::Error::other(
-                    "OSS provider not set but oss flag was used",
-                ));
+                error!("已使用 --oss，但 OSS 提供方意外未设置");
+                return Err(std::io::Error::other("已使用 --oss，但未设置 OSS 提供方"));
             }
         };
         ensure_oss_provider_ready(provider_id, &config).await?;
@@ -366,14 +364,14 @@ pub async fn run_main(
         Ok(Err(e)) => {
             #[allow(clippy::print_stderr)]
             {
-                eprintln!("Could not create otel exporter: {e}");
+                eprintln!("无法创建 otel 导出器：{e}");
             }
             None
         }
         Err(_) => {
             #[allow(clippy::print_stderr)]
             {
-                eprintln!("Could not create otel exporter: panicked during initialization");
+                eprintln!("无法创建 otel 导出器：初始化过程中发生 panic");
             }
             None
         }
@@ -879,7 +877,7 @@ async fn load_config_or_exit_with_fallback_cwd(
     {
         Ok(config) => config,
         Err(err) => {
-            eprintln!("Error loading configuration: {err}");
+            eprintln!("加载配置失败：{err}");
             std::process::exit(1);
         }
     }

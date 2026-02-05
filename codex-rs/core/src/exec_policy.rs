@@ -31,8 +31,7 @@ use crate::sandboxing::SandboxPermissions;
 use crate::tools::sandboxing::ExecApprovalRequirement;
 use shlex::try_join as shlex_try_join;
 
-const PROMPT_CONFLICT_REASON: &str =
-    "策略要求审批，但 AskForApproval 被设置为 Never";
+const PROMPT_CONFLICT_REASON: &str = "策略要求审批，但 AskForApproval 被设置为 Never";
 const RULES_DIR_NAME: &str = "rules";
 const RULE_EXTENSION: &str = "rules";
 const DEFAULT_POLICY_FILE: &str = "default.rules";

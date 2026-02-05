@@ -8,48 +8,47 @@ use std::path::PathBuf;
 #[derive(Parser, Debug)]
 #[command(version)]
 pub struct Cli {
-    /// Action to perform. If omitted, runs a new non-interactive session.
+    /// 要执行的操作。若省略，则运行新的非交互会话。
     #[command(subcommand)]
     pub command: Option<Command>,
 
-    /// Optional image(s) to attach to the initial prompt.
+    /// 可选：附加到初始提示的图片（可多个）。
     #[arg(
         long = "image",
         short = 'i',
-        value_name = "FILE",
+        value_name = "文件",
         value_delimiter = ',',
         num_args = 1..
     )]
     pub images: Vec<PathBuf>,
 
-    /// Model the agent should use.
+    /// 代理要使用的模型。
     #[arg(long, short = 'm', global = true)]
     pub model: Option<String>,
 
-    /// Use open-source provider.
+    /// 使用开源模型提供方。
     #[arg(long = "oss", default_value_t = false)]
     pub oss: bool,
 
-    /// Specify which local provider to use (lmstudio or ollama).
-    /// If not specified with --oss, will use config default or show selection.
+    /// 指定使用哪个本地提供方（lmstudio 或 ollama）。
+    /// 若未搭配 --oss 指定，则使用配置默认值或显示选择器。
     #[arg(long = "local-provider")]
     pub oss_provider: Option<String>,
 
-    /// Select the sandbox policy to use when executing model-generated shell
-    /// commands.
+    /// 选择执行模型生成的 shell 命令时使用的沙箱策略。
     #[arg(long = "sandbox", short = 's', value_enum)]
     pub sandbox_mode: Option<codex_common::SandboxModeCliArg>,
 
-    /// Configuration profile from config.toml to specify default options.
+    /// config.toml 中的配置 profile，用于指定默认选项。
     #[arg(long = "profile", short = 'p')]
     pub config_profile: Option<String>,
 
-    /// Convenience alias for low-friction sandboxed automatic execution (-a on-request, --sandbox workspace-write).
+    /// 便捷别名：低摩擦的沙箱自动执行（-a on-request，--sandbox workspace-write）。
     #[arg(long = "full-auto", default_value_t = false, global = true)]
     pub full_auto: bool,
 
-    /// Skip all confirmation prompts and execute commands without sandboxing.
-    /// EXTREMELY DANGEROUS. Intended solely for running in environments that are externally sandboxed.
+    /// 跳过所有确认提示，并在不启用沙箱的情况下执行命令。
+    /// 极其危险。仅适用于外部环境已提供沙箱隔离的场景。
     #[arg(
         long = "dangerously-bypass-approvals-and-sandbox",
         alias = "yolo",
@@ -59,30 +58,30 @@ pub struct Cli {
     )]
     pub dangerously_bypass_approvals_and_sandbox: bool,
 
-    /// Tell the agent to use the specified directory as its working root.
-    #[clap(long = "cd", short = 'C', value_name = "DIR")]
+    /// 让代理使用指定目录作为工作根目录。
+    #[clap(long = "cd", short = 'C', value_name = "目录")]
     pub cwd: Option<PathBuf>,
 
-    /// Allow running Codex outside a Git repository.
+    /// 允许在 Git 仓库外运行 Codex。
     #[arg(long = "skip-git-repo-check", global = true, default_value_t = false)]
     pub skip_git_repo_check: bool,
 
-    /// Additional directories that should be writable alongside the primary workspace.
-    #[arg(long = "add-dir", value_name = "DIR", value_hint = clap::ValueHint::DirPath)]
+    /// 除主工作区外，允许额外可写的目录。
+    #[arg(long = "add-dir", value_name = "目录", value_hint = clap::ValueHint::DirPath)]
     pub add_dir: Vec<PathBuf>,
 
-    /// Path to a JSON Schema file describing the model's final response shape.
-    #[arg(long = "output-schema", value_name = "FILE")]
+    /// JSON Schema 文件路径，用于描述模型最终响应的结构。
+    #[arg(long = "output-schema", value_name = "文件")]
     pub output_schema: Option<PathBuf>,
 
     #[clap(skip)]
     pub config_overrides: CliConfigOverrides,
 
-    /// Specifies color settings for use in the output.
+    /// 指定输出使用的颜色设置。
     #[arg(long = "color", value_enum, default_value_t = Color::Auto)]
     pub color: Color,
 
-    /// Print events to stdout as JSONL.
+    /// 将事件以 JSONL 的形式输出到 stdout。
     #[arg(
         long = "json",
         alias = "experimental-json",
@@ -91,22 +90,21 @@ pub struct Cli {
     )]
     pub json: bool,
 
-    /// Specifies file where the last message from the agent should be written.
-    #[arg(long = "output-last-message", short = 'o', value_name = "FILE")]
+    /// 指定文件路径，用于写入代理的最后一条消息。
+    #[arg(long = "output-last-message", short = 'o', value_name = "文件")]
     pub last_message_file: Option<PathBuf>,
 
-    /// Initial instructions for the agent. If not provided as an argument (or
-    /// if `-` is used), instructions are read from stdin.
-    #[arg(value_name = "PROMPT", value_hint = clap::ValueHint::Other)]
+    /// 代理的初始指令。若未作为参数提供（或使用 `-`），则从 stdin 读取。
+    #[arg(value_name = "提示", value_hint = clap::ValueHint::Other)]
     pub prompt: Option<String>,
 }
 
 #[derive(Debug, clap::Subcommand)]
 pub enum Command {
-    /// Resume a previous session by id or pick the most recent with --last.
+    /// 按 ID 恢复之前的会话，或使用 --last 选择最近会话。
     Resume(ResumeArgs),
 
-    /// Run a code review against the current repository.
+    /// 针对当前仓库运行代码评审。
     Review(ReviewArgs),
 }
 
@@ -114,50 +112,50 @@ pub enum Command {
 struct ResumeArgsRaw {
     // Note: This is the direct clap shape. We reinterpret the positional when --last is set
     // so "codex resume --last <prompt>" treats the positional as a prompt, not a session id.
-    /// Conversation/session id (UUID) or thread name. UUIDs take precedence if it parses.
-    /// If omitted, use --last to pick the most recent recorded session.
-    #[arg(value_name = "SESSION_ID")]
+    /// 会话 ID（UUID）或线程名称。若可解析为 UUID，则优先按 UUID 处理。
+    /// 若省略，使用 --last 选择最近一次记录的会话。
+    #[arg(value_name = "会话ID")]
     session_id: Option<String>,
 
-    /// Resume the most recent recorded session (newest) without specifying an id.
+    /// 无需指定 ID，直接恢复最近一次记录的会话（最新）。
     #[arg(long = "last", default_value_t = false)]
     last: bool,
 
-    /// Show all sessions (disables cwd filtering).
+    /// 显示所有会话（禁用按 cwd 过滤）。
     #[arg(long = "all", default_value_t = false)]
     all: bool,
 
-    /// Optional image(s) to attach to the prompt sent after resuming.
+    /// 可选：附加到恢复后发送的提示的图片（可多个）。
     #[arg(
         long = "image",
         short = 'i',
-        value_name = "FILE",
+        value_name = "文件",
         value_delimiter = ',',
         num_args = 1
     )]
     images: Vec<PathBuf>,
 
-    /// Prompt to send after resuming the session. If `-` is used, read from stdin.
-    #[arg(value_name = "PROMPT", value_hint = clap::ValueHint::Other)]
+    /// 恢复会话后要发送的提示。若使用 `-`，则从 stdin 读取。
+    #[arg(value_name = "提示", value_hint = clap::ValueHint::Other)]
     prompt: Option<String>,
 }
 
 #[derive(Debug)]
 pub struct ResumeArgs {
-    /// Conversation/session id (UUID) or thread name. UUIDs take precedence if it parses.
-    /// If omitted, use --last to pick the most recent recorded session.
+    /// 会话 ID（UUID）或线程名称。若可解析为 UUID，则优先按 UUID 处理。
+    /// 若省略，使用 --last 选择最近一次记录的会话。
     pub session_id: Option<String>,
 
-    /// Resume the most recent recorded session (newest) without specifying an id.
+    /// 无需指定 ID，直接恢复最近一次记录的会话（最新）。
     pub last: bool,
 
-    /// Show all sessions (disables cwd filtering).
+    /// 显示所有会话（禁用按 cwd 过滤）。
     pub all: bool,
 
-    /// Optional image(s) to attach to the prompt sent after resuming.
+    /// 可选：附加到恢复后发送的提示的图片（可多个）。
     pub images: Vec<PathBuf>,
 
-    /// Prompt to send after resuming the session. If `-` is used, read from stdin.
+    /// 恢复会话后要发送的提示。若使用 `-`，则从 stdin 读取。
     pub prompt: Option<String>,
 }
 
@@ -203,7 +201,7 @@ impl FromArgMatches for ResumeArgs {
 
 #[derive(Parser, Debug)]
 pub struct ReviewArgs {
-    /// Review staged, unstaged, and untracked changes.
+    /// 评审暂存、未暂存以及未跟踪的变更。
     #[arg(
         long = "uncommitted",
         default_value_t = false,
@@ -211,28 +209,28 @@ pub struct ReviewArgs {
     )]
     pub uncommitted: bool,
 
-    /// Review changes against the given base branch.
+    /// 相对于指定基准分支进行评审。
     #[arg(
         long = "base",
-        value_name = "BRANCH",
+        value_name = "分支",
         conflicts_with_all = ["uncommitted", "commit", "prompt"]
     )]
     pub base: Option<String>,
 
-    /// Review the changes introduced by a commit.
+    /// 评审某个提交引入的变更。
     #[arg(
         long = "commit",
-        value_name = "SHA",
+        value_name = "提交SHA",
         conflicts_with_all = ["uncommitted", "base", "prompt"]
     )]
     pub commit: Option<String>,
 
-    /// Optional commit title to display in the review summary.
-    #[arg(long = "title", value_name = "TITLE", requires = "commit")]
+    /// 可选：在评审摘要中显示的提交标题。
+    #[arg(long = "title", value_name = "标题", requires = "commit")]
     pub commit_title: Option<String>,
 
-    /// Custom review instructions. If `-` is used, read from stdin.
-    #[arg(value_name = "PROMPT", value_hint = clap::ValueHint::Other)]
+    /// 自定义评审指令。若使用 `-`，则从 stdin 读取。
+    #[arg(value_name = "提示", value_hint = clap::ValueHint::Other)]
     pub prompt: Option<String>,
 }
 

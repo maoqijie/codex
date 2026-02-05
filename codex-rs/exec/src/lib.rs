@@ -88,7 +88,7 @@ struct ThreadEventEnvelope {
 
 pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> anyhow::Result<()> {
     if let Err(err) = set_default_originator("codex_exec".to_string()) {
-        tracing::warn!(?err, "Failed to set codex exec originator override {err:?}");
+        tracing::warn!(?err, "设置 codex exec originator 覆盖失败 {err:?}");
     }
 
     let Cli {
@@ -147,7 +147,7 @@ pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> any
         Ok(v) => v,
         #[allow(clippy::print_stderr)]
         Err(e) => {
-            eprintln!("Error parsing -c overrides: {e}");
+            eprintln!("解析 -c 覆盖项失败：{e}");
             std::process::exit(1);
         }
     };
@@ -163,7 +163,7 @@ pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> any
     let codex_home = match find_codex_home() {
         Ok(codex_home) => codex_home,
         Err(err) => {
-            eprintln!("Error finding codex home: {err}");
+            eprintln!("查找 codex home 失败：{err}");
             std::process::exit(1);
         }
     };
@@ -184,11 +184,11 @@ pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> any
                 .map(ConfigLoadError::config_error);
             if let Some(config_error) = config_error {
                 eprintln!(
-                    "Error loading config.toml:\n{}",
+                    "加载 config.toml 失败：\n{}",
                     format_config_error_with_source(config_error)
                 );
             } else {
-                eprintln!("Error loading config.toml: {err}");
+                eprintln!("加载 config.toml 失败：{err}");
             }
             std::process::exit(1);
         }
@@ -217,7 +217,7 @@ pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> any
             Some(provider)
         } else {
             return Err(anyhow::anyhow!(
-                "No default OSS provider configured. Use --local-provider=provider or set oss_provider to one of: {LMSTUDIO_OSS_PROVIDER_ID}, {OLLAMA_OSS_PROVIDER_ID} in config.toml"
+                "未配置默认 OSS 提供方。请使用 --local-provider=<provider>，或在 config.toml 中将 oss_provider 设置为以下之一：{LMSTUDIO_OSS_PROVIDER_ID}、{OLLAMA_OSS_PROVIDER_ID}"
             ));
         }
     } else {
@@ -276,11 +276,11 @@ pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> any
     })) {
         Ok(Ok(otel)) => otel,
         Ok(Err(e)) => {
-            eprintln!("Could not create otel exporter: {e}");
+            eprintln!("无法创建 otel 导出器：{e}");
             None
         }
         Err(_) => {
-            eprintln!("Could not create otel exporter: panicked during initialization");
+            eprintln!("无法创建 otel 导出器：初始化过程中发生 panic");
             None
         }
     };
@@ -310,15 +310,13 @@ pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> any
         let provider_id = match model_provider.as_ref() {
             Some(id) => id,
             None => {
-                error!("OSS provider unexpectedly not set when oss flag is used");
-                return Err(anyhow::anyhow!(
-                    "OSS provider not set but oss flag was used"
-                ));
+                error!("已使用 --oss，但 OSS 提供方意外未设置");
+                return Err(anyhow::anyhow!("已使用 --oss，但未设置 OSS 提供方"));
             }
         };
         ensure_oss_provider_ready(provider_id, &config)
             .await
-            .map_err(|e| anyhow::anyhow!("OSS setup failed: {e}"))?;
+            .map_err(|e| anyhow::anyhow!("OSS 初始化失败：{e}"))?;
     }
 
     let default_cwd = config.cwd.to_path_buf();
@@ -333,7 +331,7 @@ pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> any
         && !dangerously_bypass_approvals_and_sandbox
         && get_git_repo_root(&default_cwd).is_none()
     {
-        eprintln!("Not inside a trusted directory and --skip-git-repo-check was not specified.");
+        eprintln!("当前不在受信任目录中，且未指定 --skip-git-repo-check。");
         std::process::exit(1);
     }
 
@@ -642,10 +640,7 @@ fn load_output_schema(path: Option<PathBuf>) -> Option<Value> {
     let schema_str = match std::fs::read_to_string(&path) {
         Ok(contents) => contents,
         Err(err) => {
-            eprintln!(
-                "Failed to read output schema file {}: {err}",
-                path.display()
-            );
+            eprintln!("读取输出 schema 文件 {} 失败：{err}", path.display());
             std::process::exit(1);
         }
     };
@@ -653,10 +648,7 @@ fn load_output_schema(path: Option<PathBuf>) -> Option<Value> {
     match serde_json::from_str::<Value>(&schema_str) {
         Ok(value) => Some(value),
         Err(err) => {
-            eprintln!(
-                "Output schema file {} is not valid JSON: {err}",
-                path.display()
-            );
+            eprintln!("输出 schema 文件 {} 不是有效的 JSON：{err}", path.display());
             std::process::exit(1);
         }
     }
@@ -674,16 +666,15 @@ impl std::fmt::Display for PromptDecodeError {
         match self {
             PromptDecodeError::InvalidUtf8 { valid_up_to } => write!(
                 f,
-                "input is not valid UTF-8 (invalid byte at offset {valid_up_to}). Convert it to UTF-8 and retry (e.g., `iconv -f <ENC> -t UTF-8 prompt.txt`)."
+                "输入不是有效的 UTF-8（在偏移 {valid_up_to} 处出现无效字节）。请将其转换为 UTF-8 后重试（例如：`iconv -f <ENC> -t UTF-8 prompt.txt`）。"
             ),
             PromptDecodeError::InvalidUtf16 { encoding } => write!(
                 f,
-                "input looked like {encoding} but could not be decoded. Convert it to UTF-8 and retry."
+                "输入看起来是 {encoding}，但无法解码。请将其转换为 UTF-8 后重试。"
             ),
-            PromptDecodeError::UnsupportedBom { encoding } => write!(
-                f,
-                "input appears to be {encoding}. Convert it to UTF-8 and retry."
-            ),
+            PromptDecodeError::UnsupportedBom { encoding } => {
+                write!(f, "输入似乎是 {encoding}。请将其转换为 UTF-8 后重试。")
+            }
         }
     }
 }
@@ -742,32 +733,30 @@ fn resolve_prompt(prompt_arg: Option<String>) -> String {
             let force_stdin = matches!(maybe_dash.as_deref(), Some("-"));
 
             if std::io::stdin().is_terminal() && !force_stdin {
-                eprintln!(
-                    "No prompt provided. Either specify one as an argument or pipe the prompt into stdin."
-                );
+                eprintln!("未提供提示。请将提示作为参数传入，或将提示通过管道传入 stdin。");
                 std::process::exit(1);
             }
 
             if !force_stdin {
-                eprintln!("Reading prompt from stdin...");
+                eprintln!("正在从 stdin 读取提示…");
             }
 
             let mut bytes = Vec::new();
             if let Err(e) = std::io::stdin().read_to_end(&mut bytes) {
-                eprintln!("Failed to read prompt from stdin: {e}");
+                eprintln!("从 stdin 读取提示失败：{e}");
                 std::process::exit(1);
             }
 
             let buffer = match decode_prompt_bytes(&bytes) {
                 Ok(s) => s,
                 Err(e) => {
-                    eprintln!("Failed to read prompt from stdin: {e}");
+                    eprintln!("从 stdin 读取提示失败：{e}");
                     std::process::exit(1);
                 }
             };
 
             if buffer.trim().is_empty() {
-                eprintln!("No prompt provided via stdin.");
+                eprintln!("stdin 未提供提示。");
                 std::process::exit(1);
             }
             buffer
@@ -788,15 +777,13 @@ fn build_review_request(args: ReviewArgs) -> anyhow::Result<ReviewRequest> {
     } else if let Some(prompt_arg) = args.prompt {
         let prompt = resolve_prompt(Some(prompt_arg)).trim().to_string();
         if prompt.is_empty() {
-            anyhow::bail!("Review prompt cannot be empty");
+            anyhow::bail!("评审提示不能为空");
         }
         ReviewTarget::Custom {
             instructions: prompt,
         }
     } else {
-        anyhow::bail!(
-            "Specify --uncommitted, --base, --commit, or provide custom review instructions"
-        );
+        anyhow::bail!("请指定 --uncommitted、--base、--commit，或提供自定义评审指令");
     };
 
     Ok(ReviewRequest {
