@@ -51,8 +51,10 @@ impl ExperimentalFeaturesView {
         app_event_tx: AppEventSender,
     ) -> Self {
         let mut header = ColumnRenderable::new();
-        header.push(Line::from("实验功能".bold()));
-        header.push(Line::from("切换实验功能。更改会保存到 config.toml。".dim()));
+        header.push(Line::from("Experimental features".bold()));
+        header.push(Line::from(
+            "Toggle experimental features. Changes are saved to config.toml.".dim(),
+        ));
 
         let mut view = Self {
             features,
@@ -173,11 +175,16 @@ impl BottomPaneView for ExperimentalFeaturesView {
                 ..
             } => self.move_down(),
             KeyEvent {
-                code: KeyCode::Enter,
+                code: KeyCode::Char(' '),
                 modifiers: KeyModifiers::NONE,
                 ..
             } => self.toggle_selected(),
             KeyEvent {
+                code: KeyCode::Enter,
+                modifiers: KeyModifiers::NONE,
+                ..
+            }
+            | KeyEvent {
                 code: KeyCode::Esc, ..
             } => {
                 self.on_ctrl_c();
@@ -253,7 +260,7 @@ impl Renderable for ExperimentalFeaturesView {
                 &rows,
                 &self.state,
                 MAX_POPUP_ROWS,
-                "  暂无可用的实验功能",
+                "  No experimental features available for now",
             );
         }
 
@@ -284,10 +291,10 @@ impl Renderable for ExperimentalFeaturesView {
 
 fn experimental_popup_hint_line() -> Line<'static> {
     Line::from(vec![
-        "按 ".into(),
+        "Press ".into(),
+        key_hint::plain(KeyCode::Char(' ')).into(),
+        " to select or ".into(),
         key_hint::plain(KeyCode::Enter).into(),
-        " 切换，或按 ".into(),
-        key_hint::plain(KeyCode::Esc).into(),
-        " 保存并在下次对话生效".into(),
+        " to save for next conversation".into(),
     ])
 }

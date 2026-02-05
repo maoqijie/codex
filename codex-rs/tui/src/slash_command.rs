@@ -33,6 +33,7 @@ pub enum SlashCommand {
     Diff,
     Mention,
     Status,
+    DebugConfig,
     Mcp,
     Apps,
     Logout,
@@ -49,35 +50,36 @@ impl SlashCommand {
     /// User-visible description shown in the popup.
     pub fn description(self) -> &'static str {
         match self {
-            SlashCommand::Feedback => "发送日志给维护者",
-            SlashCommand::New => "在对话中开启新聊天",
-            SlashCommand::Init => "创建包含 Codex 指令的 AGENTS.md 文件",
-            SlashCommand::Compact => "总结对话以避免触及上下文上限",
-            SlashCommand::Review => "审查当前改动并找出问题",
-            SlashCommand::Rename => "重命名当前会话",
-            SlashCommand::Resume => "恢复已保存的聊天",
-            SlashCommand::Fork => "分叉当前聊天",
+            SlashCommand::Feedback => "send logs to maintainers",
+            SlashCommand::New => "start a new chat during a conversation",
+            SlashCommand::Init => "create an AGENTS.md file with instructions for Codex",
+            SlashCommand::Compact => "summarize conversation to prevent hitting the context limit",
+            SlashCommand::Review => "review my current changes and find issues",
+            SlashCommand::Rename => "rename the current thread",
+            SlashCommand::Resume => "resume a saved chat",
+            SlashCommand::Fork => "fork the current chat",
             // SlashCommand::Undo => "ask Codex to undo a turn",
-            SlashCommand::Quit | SlashCommand::Exit => "退出 Codex",
-            SlashCommand::Diff => "显示 git diff（包含未跟踪文件）",
-            SlashCommand::Mention => "提及文件",
-            SlashCommand::Skills => "使用技能提升 Codex 执行特定任务的效果",
-            SlashCommand::Status => "显示当前会话配置与 token 用量",
-            SlashCommand::Ps => "列出后台终端",
-            SlashCommand::Model => "选择模型与推理强度",
-            SlashCommand::Personality => "选择 Codex 的交流风格",
-            SlashCommand::Plan => "切换到计划模式",
-            SlashCommand::Collab => "切换协作模式（实验性）",
-            SlashCommand::Agent => "切换当前代理线程",
-            SlashCommand::Approvals => "选择 Codex 可在无需批准时执行的操作",
-            SlashCommand::Permissions => "选择 Codex 允许执行的操作",
-            SlashCommand::ElevateSandbox => "配置提升权限的代理沙箱",
-            SlashCommand::Experimental => "切换实验功能",
-            SlashCommand::Mcp => "列出已配置的 MCP 工具",
-            SlashCommand::Apps => "管理 Apps（连接器）",
-            SlashCommand::Logout => "登出 Codex",
-            SlashCommand::Rollout => "打印 rollout 文件路径",
-            SlashCommand::TestApproval => "测试审批请求",
+            SlashCommand::Quit | SlashCommand::Exit => "exit Codex",
+            SlashCommand::Diff => "show git diff (including untracked files)",
+            SlashCommand::Mention => "mention a file",
+            SlashCommand::Skills => "use skills to improve how Codex performs specific tasks",
+            SlashCommand::Status => "show current session configuration and token usage",
+            SlashCommand::DebugConfig => "show config layers and requirement sources for debugging",
+            SlashCommand::Ps => "list background terminals",
+            SlashCommand::Model => "choose what model and reasoning effort to use",
+            SlashCommand::Personality => "choose a communication style for Codex",
+            SlashCommand::Plan => "switch to Plan mode",
+            SlashCommand::Collab => "change collaboration mode (experimental)",
+            SlashCommand::Agent => "switch the active agent thread",
+            SlashCommand::Approvals => "choose what Codex can do without approval",
+            SlashCommand::Permissions => "choose what Codex is allowed to do",
+            SlashCommand::ElevateSandbox => "set up elevated agent sandbox",
+            SlashCommand::Experimental => "toggle experimental features",
+            SlashCommand::Mcp => "list configured MCP tools",
+            SlashCommand::Apps => "manage apps",
+            SlashCommand::Logout => "log out of Codex",
+            SlashCommand::Rollout => "print the rollout file path",
+            SlashCommand::TestApproval => "test approval request",
         }
     }
 
@@ -85,6 +87,14 @@ impl SlashCommand {
     /// existing code that expects a method named `command()`.
     pub fn command(self) -> &'static str {
         self.into()
+    }
+
+    /// Whether this command supports inline args (for example `/review ...`).
+    pub fn supports_inline_args(self) -> bool {
+        matches!(
+            self,
+            SlashCommand::Review | SlashCommand::Rename | SlashCommand::Plan
+        )
     }
 
     /// Whether this command can be run while a task is in progress.
@@ -103,12 +113,14 @@ impl SlashCommand {
             | SlashCommand::ElevateSandbox
             | SlashCommand::Experimental
             | SlashCommand::Review
+            | SlashCommand::Plan
             | SlashCommand::Logout => false,
             SlashCommand::Diff
             | SlashCommand::Rename
             | SlashCommand::Mention
             | SlashCommand::Skills
             | SlashCommand::Status
+            | SlashCommand::DebugConfig
             | SlashCommand::Ps
             | SlashCommand::Mcp
             | SlashCommand::Apps
@@ -117,7 +129,6 @@ impl SlashCommand {
             | SlashCommand::Exit => true,
             SlashCommand::Rollout => true,
             SlashCommand::TestApproval => true,
-            SlashCommand::Plan => true,
             SlashCommand::Collab => true,
             SlashCommand::Agent => true,
         }

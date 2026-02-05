@@ -3,6 +3,7 @@ use codex_protocol::openai_models::ModelPreset;
 use codex_protocol::openai_models::ModelUpgrade;
 use codex_protocol::openai_models::ReasoningEffort;
 use codex_protocol::openai_models::ReasoningEffortPreset;
+use codex_protocol::openai_models::default_input_modalities;
 use indoc::indoc;
 use once_cell::sync::Lazy;
 
@@ -41,6 +42,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: None,
             show_in_picker: true,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "gpt-5.1-codex-max".to_string(),
@@ -71,6 +73,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: true,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "gpt-5.1-codex-mini".to_string(),
@@ -93,6 +96,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: true,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "gpt-5.2".to_string(),
@@ -123,6 +127,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: true,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "bengalfox".to_string(),
@@ -153,6 +158,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: None,
             show_in_picker: false,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "boomslang".to_string(),
@@ -183,6 +189,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: None,
             show_in_picker: false,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         // Deprecated models.
         ModelPreset {
@@ -210,6 +217,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: false,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "gpt-5-codex-mini".to_string(),
@@ -232,6 +240,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: false,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "gpt-5.1-codex".to_string(),
@@ -258,6 +267,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: false,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "gpt-5".to_string(),
@@ -288,6 +298,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: false,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
         ModelPreset {
             id: "gpt-5.1".to_string(),
@@ -314,6 +325,7 @@ static PRESETS: Lazy<Vec<ModelPreset>> = Lazy::new(|| {
             upgrade: Some(gpt_52_codex_upgrade()),
             show_in_picker: false,
             supported_in_api: true,
+            input_modalities: default_input_modalities(),
         },
     ]
 });

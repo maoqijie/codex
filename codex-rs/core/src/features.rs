@@ -89,6 +89,8 @@ pub enum Feature {
     WebSearchCached,
     /// Gate the execpolicy enforcement for shell/unified exec.
     ExecPolicy,
+    /// Use the bubblewrap-based Linux sandbox pipeline.
+    UseLinuxSandboxBwrap,
     /// Allow the model to request approval and propose exec rules.
     RequestRule,
     /// Enable Windows sandbox (restricted token) on Windows.
@@ -121,7 +123,7 @@ pub enum Feature {
     SkillEnvVarDependencyPrompt,
     /// Steer feature flag - when enabled, Enter submits immediately instead of queuing.
     Steer,
-    /// Enable collaboration modes (Plan, Code, Pair Programming, Execute).
+    /// Enable collaboration modes (Plan, Default).
     CollaborationModes,
     /// Enable personality selection in the TUI.
     Personality,
@@ -358,7 +360,7 @@ fn legacy_usage_notice(alias: &str, feature: Feature) -> (String, Option<String>
 }
 
 fn web_search_details() -> &'static str {
-    "Set `web_search` to `\"live\"`, `\"cached\"`, or `\"disabled\"` in config.toml."
+    "Set `web_search` to `\"live\"`, `\"cached\"`, or `\"disabled\"` at the top level (or under a profile) in config.toml."
 }
 
 /// Keys accepted in `[features]` tables.
@@ -407,6 +409,12 @@ pub const FEATURES: &[FeatureSpec] = &[
         default_enabled: true,
     },
     FeatureSpec {
+        id: Feature::UnifiedExec,
+        key: "unified_exec",
+        stage: Stage::Stable,
+        default_enabled: !cfg!(windows),
+    },
+    FeatureSpec {
         id: Feature::WebSearchRequest,
         key: "web_search_request",
         stage: Stage::Deprecated,
@@ -420,22 +428,12 @@ pub const FEATURES: &[FeatureSpec] = &[
     },
     // Experimental program. Rendered in the `/experimental` menu for users.
     FeatureSpec {
-        id: Feature::UnifiedExec,
-        key: "unified_exec",
-        stage: Stage::Experimental {
-            name: "后台终端",
-            menu_description: "在后台运行耗时的终端命令。",
-            announcement: "新功能！可在后台运行耗时命令。到 /experimental 启用。",
-        },
-        default_enabled: false,
-    },
-    FeatureSpec {
         id: Feature::ShellSnapshot,
         key: "shell_snapshot",
         stage: Stage::Experimental {
-            name: "Shell 快照",
-            menu_description: "保存 shell 环境快照，避免每次命令都重跑登录脚本。",
-            announcement: "新功能！试试 Shell 快照，让 Codex 更快。到 /experimental 启用。",
+            name: "Shell snapshot",
+            menu_description: "Snapshot your shell environment to avoid re-running login scripts for every command.",
+            announcement: "NEW! Try shell snapshotting to make your Codex faster. Enable in /experimental!",
         },
         default_enabled: false,
     },
@@ -468,6 +466,12 @@ pub const FEATURES: &[FeatureSpec] = &[
         key: "exec_policy",
         stage: Stage::UnderDevelopment,
         default_enabled: true,
+    },
+    FeatureSpec {
+        id: Feature::UseLinuxSandboxBwrap,
+        key: "use_linux_sandbox_bwrap",
+        stage: Stage::UnderDevelopment,
+        default_enabled: false,
     },
     FeatureSpec {
         id: Feature::RequestRule,
@@ -520,16 +524,20 @@ pub const FEATURES: &[FeatureSpec] = &[
     FeatureSpec {
         id: Feature::Collab,
         key: "collab",
-        stage: Stage::UnderDevelopment,
+        stage: Stage::Experimental {
+            name: "Sub-agents",
+            menu_description: "Ask Codex to spawn multiple agents to parallelize the work and win in efficiency.",
+            announcement: "NEW: Sub-agents can now be spawned by Codex. Enable in /experimental and restart Codex!",
+        },
         default_enabled: false,
     },
     FeatureSpec {
         id: Feature::Apps,
         key: "apps",
         stage: Stage::Experimental {
-            name: "Apps（连接器）",
-            menu_description: "使用通过 \"$\" 连接的 ChatGPT Apps（连接器）。通过 /apps 安装 Apps（连接器）；启用后请重启 Codex。",
-            announcement: "新功能：在 Codex 中通过 $ 提及使用 ChatGPT Apps（连接器）。到 /experimental 启用并重启 Codex！",
+            name: "Apps",
+            menu_description: "Use a connected ChatGPT App using \"$\". Install Apps via /apps command. Restart Codex after enabling.",
+            announcement: "NEW: Use ChatGPT Apps (Connectors) in Codex via $ mentions. Enable in /experimental and restart Codex!",
         },
         default_enabled: false,
     },
@@ -548,12 +556,8 @@ pub const FEATURES: &[FeatureSpec] = &[
     FeatureSpec {
         id: Feature::Steer,
         key: "steer",
-        stage: Stage::Experimental {
-            name: "引导会话",
-            menu_description: "Enter 立即提交；任务运行时用 Tab 将消息加入队列。",
-            announcement: "新功能！试试引导模式：Enter 立即提交，Tab 入队。到 /experimental 启用。",
-        },
-        default_enabled: false,
+        stage: Stage::Stable,
+        default_enabled: true,
     },
     FeatureSpec {
         id: Feature::CollaborationModes,
