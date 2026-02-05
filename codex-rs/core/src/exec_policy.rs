@@ -32,7 +32,7 @@ use crate::tools::sandboxing::ExecApprovalRequirement;
 use shlex::try_join as shlex_try_join;
 
 const PROMPT_CONFLICT_REASON: &str =
-    "approval required by policy, but AskForApproval is set to Never";
+    "策略要求审批，但 AskForApproval 被设置为 Never";
 const RULES_DIR_NAME: &str = "rules";
 const RULE_EXTENSION: &str = "rules";
 const DEFAULT_POLICY_FILE: &str = "default.rules";
@@ -46,19 +46,19 @@ fn is_policy_match(rule_match: &RuleMatch) -> bool {
 
 #[derive(Debug, Error)]
 pub enum ExecPolicyError {
-    #[error("failed to read rules files from {dir}: {source}")]
+    #[error("读取 {dir} 中的规则文件失败：{source}")]
     ReadDir {
         dir: PathBuf,
         source: std::io::Error,
     },
 
-    #[error("failed to read rules file {path}: {source}")]
+    #[error("读取规则文件 {path} 失败：{source}")]
     ReadFile {
         path: PathBuf,
         source: std::io::Error,
     },
 
-    #[error("failed to parse rules file {path}: {source}")]
+    #[error("解析规则文件 {path} 失败：{source}")]
     ParsePolicy {
         path: String,
         source: codex_execpolicy::Error,
@@ -67,19 +67,19 @@ pub enum ExecPolicyError {
 
 #[derive(Debug, Error)]
 pub enum ExecPolicyUpdateError {
-    #[error("failed to update rules file {path}: {source}")]
+    #[error("更新规则文件 {path} 失败：{source}")]
     AppendRule { path: PathBuf, source: AmendError },
 
-    #[error("failed to join blocking rules update task: {source}")]
+    #[error("等待阻塞规则更新任务失败：{source}")]
     JoinBlockingTask { source: tokio::task::JoinError },
 
-    #[error("failed to update in-memory rules: {source}")]
+    #[error("更新内存中的规则失败：{source}")]
     AddRule {
         #[from]
         source: ExecPolicyRuleError,
     },
 
-    #[error("cannot append rule because rules feature is disabled")]
+    #[error("无法追加规则，因为 rules 功能已被禁用")]
     FeatureDisabled,
 }
 

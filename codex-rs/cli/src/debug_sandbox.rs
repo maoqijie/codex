@@ -50,7 +50,7 @@ pub async fn run_command_under_seatbelt(
     _command: SeatbeltCommand,
     _codex_linux_sandbox_exe: Option<PathBuf>,
 ) -> anyhow::Result<()> {
-    anyhow::bail!("Seatbelt sandbox is only available on macOS");
+    anyhow::bail!("Seatbelt 沙箱仅在 macOS 可用");
 }
 
 pub async fn run_command_under_landlock(
@@ -182,11 +182,11 @@ async fn run_command_under_sandbox(
             let capture = match res {
                 Ok(Ok(v)) => v,
                 Ok(Err(err)) => {
-                    eprintln!("windows sandbox failed: {err}");
+                    eprintln!("Windows 沙箱执行失败：{err}");
                     std::process::exit(1);
                 }
                 Err(join_err) => {
-                    eprintln!("windows sandbox join error: {join_err}");
+                    eprintln!("Windows 沙箱 join 失败：{join_err}");
                     std::process::exit(1);
                 }
             };
@@ -204,7 +204,7 @@ async fn run_command_under_sandbox(
         }
         #[cfg(not(target_os = "windows"))]
         {
-            anyhow::bail!("Windows sandbox is only available on Windows");
+            anyhow::bail!("Windows 沙箱仅在 Windows 可用");
         }
     }
 
@@ -231,7 +231,7 @@ async fn run_command_under_sandbox(
             #[expect(clippy::expect_used)]
             let codex_linux_sandbox_exe = config
                 .codex_linux_sandbox_exe
-                .expect("codex-linux-sandbox executable not found");
+                .expect("未找到 codex-linux-sandbox 可执行文件");
             let use_bwrap_sandbox = config.features.enabled(Feature::UseLinuxSandboxBwrap);
             spawn_command_under_linux_sandbox(
                 codex_linux_sandbox_exe,
@@ -260,9 +260,9 @@ async fn run_command_under_sandbox(
     #[cfg(target_os = "macos")]
     if let Some(denial_logger) = denial_logger {
         let denials = denial_logger.finish().await;
-        eprintln!("\n=== Sandbox denials ===");
+        eprintln!("\n=== 沙箱拒绝记录 ===");
         if denials.is_empty() {
-            eprintln!("None found.");
+            eprintln!("未发现。");
         } else {
             for seatbelt::SandboxDenial { name, capability } in denials {
                 eprintln!("({name}) {capability}");

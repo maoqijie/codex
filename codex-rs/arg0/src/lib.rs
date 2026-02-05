@@ -57,7 +57,7 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
                 }
             }
             None => {
-                eprintln!("Error: {CODEX_APPLY_PATCH_ARG1} requires a UTF-8 PATCH argument.");
+                eprintln!("错误：{CODEX_APPLY_PATCH_ARG1} 需要一个 UTF-8 编码的 PATCH 参数。");
                 1
             }
         };
@@ -73,7 +73,7 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
         Err(err) => {
             // It is possible that Codex will proceed successfully even if
             // updating the PATH fails, so warn the user and move on.
-            eprintln!("WARNING: proceeding, even though we could not update PATH: {err}");
+            eprintln!("警告：虽然无法更新 PATH（{err}），仍将继续执行。");
             None
         }
     }
@@ -176,7 +176,7 @@ pub fn prepend_path_entry_for_codex_aliases() -> std::io::Result<Arg0PathEntryGu
             return Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
                 format!(
-                    "Refusing to create helper binaries under temporary dir {temp_root:?} (codex_home: {codex_home:?})"
+                    "拒绝在临时目录 {temp_root:?} 下创建辅助二进制文件（codex_home: {codex_home:?}）"
                 ),
             ));
         }
@@ -196,7 +196,7 @@ pub fn prepend_path_entry_for_codex_aliases() -> std::io::Result<Arg0PathEntryGu
 
     // Best-effort cleanup of stale per-session dirs. Ignore failures so startup proceeds.
     if let Err(err) = janitor_cleanup(&temp_root) {
-        eprintln!("WARNING: failed to clean up stale arg0 temp dirs: {err}");
+        eprintln!("警告：清理过期的 arg0 临时目录失败：{err}");
     }
 
     let temp_dir = tempfile::Builder::new()

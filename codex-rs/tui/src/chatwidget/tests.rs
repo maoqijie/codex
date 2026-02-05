@@ -363,7 +363,7 @@ async fn blocked_image_restore_preserves_mention_paths() {
         .map(|lines| lines_to_single_string(lines))
         .expect("expected warning cell");
     assert!(
-        warning.contains("does not support image inputs"),
+        warning.contains("不支持图片输入"),
         "expected image warning, got: {warning:?}"
     );
 }
@@ -971,7 +971,9 @@ fn lines_to_single_string(lines: &[ratatui::text::Line<'static>]) -> String {
 }
 
 fn normalize_ui_text(text: &str) -> String {
-    text.split_whitespace().collect()
+    text.chars()
+        .filter(|ch| !ch.is_whitespace() && *ch != '\u{00A0}')
+        .collect()
 }
 
 fn make_token_info(total_tokens: i64, context_window: i64) -> TokenUsageInfo {
@@ -1296,7 +1298,7 @@ async fn plan_implementation_popup_skips_replayed_turn_complete() {
 
     let popup = render_bottom_popup(&chat, 80);
     assert!(
-        !popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        !normalize_ui_text(&popup).contains(PLAN_IMPLEMENTATION_TITLE),
         "expected no plan popup for replayed turn, got {popup:?}"
     );
 }
@@ -1319,7 +1321,7 @@ async fn plan_implementation_popup_shows_once_when_replay_precedes_live_turn_com
     })]);
     let replay_popup = render_bottom_popup(&chat, 80);
     assert!(
-        !replay_popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        !normalize_ui_text(&replay_popup).contains(PLAN_IMPLEMENTATION_TITLE),
         "expected no prompt for replayed turn completion, got {replay_popup:?}"
     );
 
@@ -1332,14 +1334,14 @@ async fn plan_implementation_popup_shows_once_when_replay_precedes_live_turn_com
 
     let popup = render_bottom_popup(&chat, 80);
     assert!(
-        popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        normalize_ui_text(&popup).contains(PLAN_IMPLEMENTATION_TITLE),
         "expected prompt for first live turn completion after replay, got {popup:?}"
     );
 
     chat.handle_key_event(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
     let dismissed_popup = render_bottom_popup(&chat, 80);
     assert!(
-        !dismissed_popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        !normalize_ui_text(&dismissed_popup).contains(PLAN_IMPLEMENTATION_TITLE),
         "expected prompt to dismiss on Esc, got {dismissed_popup:?}"
     );
 
@@ -1351,7 +1353,7 @@ async fn plan_implementation_popup_shows_once_when_replay_precedes_live_turn_com
     });
     let duplicate_popup = render_bottom_popup(&chat, 80);
     assert!(
-        !duplicate_popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        !normalize_ui_text(&duplicate_popup).contains(PLAN_IMPLEMENTATION_TITLE),
         "expected no prompt for duplicate live completion, got {duplicate_popup:?}"
     );
 }
@@ -1371,7 +1373,7 @@ async fn plan_implementation_popup_skips_when_messages_queued() {
 
     let popup = render_bottom_popup(&chat, 80);
     assert!(
-        !popup.contains(PLAN_IMPLEMENTATION_TITLE),
+        !normalize_ui_text(&popup).contains(PLAN_IMPLEMENTATION_TITLE),
         "expected no plan popup with queued messages, got {popup:?}"
     );
 }
@@ -4786,7 +4788,10 @@ async fn plan_update_renders_history_cell() {
     let cells = drain_insert_history(&mut rx);
     assert!(!cells.is_empty(), "expected plan update cell to be sent");
     let blob = lines_to_single_string(cells.last().unwrap());
-    assert!(blob.contains("更新计划"), "missing plan header: {blob:?}");
+    assert!(
+        blob.contains("更新后的计划"),
+        "missing plan header: {blob:?}"
+    );
     assert!(blob.contains("Explore codebase"));
     assert!(blob.contains("Implement feature"));
     assert!(blob.contains("Write tests"));

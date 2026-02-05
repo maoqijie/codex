@@ -398,7 +398,7 @@ impl HistoryCell for StatusHistoryCell {
             push_label(&mut labels, &mut seen, "账号");
         }
         if thread_name.is_some() {
-            push_label(&mut labels, &mut seen, "Thread name");
+            push_label(&mut labels, &mut seen, "线程名称");
         }
         if self.session_id.is_some() {
             push_label(&mut labels, &mut seen, "会话");
@@ -457,7 +457,7 @@ impl HistoryCell for StatusHistoryCell {
         }
 
         if let Some(thread_name) = thread_name {
-            lines.push(formatter.line("Thread name", vec![Span::from(thread_name.to_string())]));
+            lines.push(formatter.line("线程名称", vec![Span::from(thread_name.to_string())]));
         }
         if let Some(collab_mode) = self.collaboration_mode.as_ref() {
             lines.push(formatter.line("协作模式", vec![Span::from(collab_mode.clone())]));

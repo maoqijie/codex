@@ -2,9 +2,9 @@
 source: tui/src/chatwidget/tests.rs
 expression: popup
 ---
-  Implement this plan?
+  要 实 现 这 个 计 划 吗 ？
 
-  1. Yes, implement this plan  Switch to Default and start coding.
-› 2. No, stay in Plan mode     Continue planning with the model.
+  1. 是 ， 实 施 此 计 划       切 换 到 默 认 并 开 始 编 码 。
+› 2. 否 ， 保 持 在 计 划 模 式   继 续 和 模 型 一 起 规 划 。
 
-  Press enter to confirm or esc to go back
+  按  enter 确 认 ， 或 按  esc 返 回

@@ -12,4 +12,4 @@ expression: "render_snapshot(&overlay, area)"
   › 4. Refactor                             Tighten structure and remove dead code.                                     
     5. Ship it                              Finalize and open a PR.                                                     
                                                                                                                         
-  Tab 添 加 备 注  | Enter 提 交  | Esc 中 断
+  Tab 添 加 备 注  | Enter 提 交 回 答  | Esc 中 断

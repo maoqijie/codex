@@ -37,21 +37,21 @@ use codex_protocol::request_user_input::RequestUserInputResponse;
 use codex_protocol::user_input::TextElement;
 use unicode_width::UnicodeWidthStr;
 
-const NOTES_PLACEHOLDER: &str = "Add notes";
-const ANSWER_PLACEHOLDER: &str = "Type your answer (optional)";
+const NOTES_PLACEHOLDER: &str = "添加备注";
+const ANSWER_PLACEHOLDER: &str = "输入你的回答（可选）";
 // Keep in sync with ChatComposer's minimum composer height.
 const MIN_COMPOSER_HEIGHT: u16 = 3;
-const SELECT_OPTION_PLACEHOLDER: &str = "Select an option to add notes";
+const SELECT_OPTION_PLACEHOLDER: &str = "选择一个选项以添加备注";
 pub(super) const TIP_SEPARATOR: &str = " | ";
 pub(super) const DESIRED_SPACERS_BETWEEN_SECTIONS: u16 = 2;
-const OTHER_OPTION_LABEL: &str = "None of the above";
-const OTHER_OPTION_DESCRIPTION: &str = "Optionally, add details in notes (tab).";
-const UNANSWERED_CONFIRM_TITLE: &str = "Submit with unanswered questions?";
-const UNANSWERED_CONFIRM_GO_BACK: &str = "Go back";
-const UNANSWERED_CONFIRM_GO_BACK_DESC: &str = "Return to the first unanswered question.";
-const UNANSWERED_CONFIRM_SUBMIT: &str = "Proceed";
-const UNANSWERED_CONFIRM_SUBMIT_DESC_SINGULAR: &str = "question";
-const UNANSWERED_CONFIRM_SUBMIT_DESC_PLURAL: &str = "questions";
+const OTHER_OPTION_LABEL: &str = "以上都不是";
+const OTHER_OPTION_DESCRIPTION: &str = "可选：在备注中补充细节（Tab）。";
+const UNANSWERED_CONFIRM_TITLE: &str = "有未回答的问题，仍要提交吗？";
+const UNANSWERED_CONFIRM_GO_BACK: &str = "返回";
+const UNANSWERED_CONFIRM_GO_BACK_DESC: &str = "返回到第一个未回答的问题。";
+const UNANSWERED_CONFIRM_SUBMIT: &str = "继续";
+const UNANSWERED_CONFIRM_SUBMIT_DESC_SINGULAR: &str = "问题";
+const UNANSWERED_CONFIRM_SUBMIT_DESC_PLURAL: &str = "问题";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Focus {
@@ -425,32 +425,32 @@ impl RequestUserInputOverlay {
         let notes_visible = self.notes_ui_visible();
         if self.has_options() {
             if self.selected_option_index().is_some() && !notes_visible {
-                tips.push(FooterTip::highlighted("tab to add notes"));
+                tips.push(FooterTip::highlighted("Tab 添加备注"));
             }
             if self.selected_option_index().is_some() && notes_visible {
-                tips.push(FooterTip::new("tab or esc to clear notes"));
+                tips.push(FooterTip::new("Tab 或 Esc 清除备注"));
             }
         }
 
         let question_count = self.question_count();
         let is_last_question = self.current_index().saturating_add(1) >= question_count;
         let enter_tip = if question_count == 1 {
-            FooterTip::highlighted("enter to submit answer")
+            FooterTip::highlighted("Enter 提交回答")
         } else if is_last_question {
-            FooterTip::highlighted("enter to submit all")
+            FooterTip::highlighted("Enter 全部提交")
         } else {
-            FooterTip::new("enter to submit answer")
+            FooterTip::new("Enter 提交回答")
         };
         tips.push(enter_tip);
         if question_count > 1 {
             if is_last_question {
-                tips.push(FooterTip::new("ctrl + n first question"));
+                tips.push(FooterTip::new("Ctrl+N 第一个问题"));
             } else {
-                tips.push(FooterTip::new("ctrl + n next question"));
+                tips.push(FooterTip::new("Ctrl+N 下一个问题"));
             }
         }
         if !(self.has_options() && notes_visible) {
-            tips.push(FooterTip::new("esc to interrupt"));
+            tips.push(FooterTip::new("Esc 中断"));
         }
         tips
     }
@@ -784,7 +784,7 @@ impl RequestUserInputOverlay {
         } else {
             UNANSWERED_CONFIRM_SUBMIT_DESC_PLURAL
         };
-        format!("Submit with {count} unanswered {suffix}.")
+        format!("仍有 {count} 个未回答{suffix}，继续提交。")
     }
 
     fn first_unanswered_index(&self) -> Option<usize> {
@@ -2188,7 +2188,7 @@ mod tests {
 
         let rows = overlay.option_rows();
         let other_row = rows.last().expect("expected none-of-the-above row");
-        assert_eq!(other_row.name, "  4. None of the above");
+        assert_eq!(other_row.name, "  4. 以上都不是");
         assert_eq!(
             other_row.description.as_deref(),
             Some(OTHER_OPTION_DESCRIPTION)

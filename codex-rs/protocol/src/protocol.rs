@@ -1327,12 +1327,12 @@ impl fmt::Display for FinalOutput {
 
         write!(
             f,
-            "Token usage: total={} input={}{} output={}{}",
+            "Token 用量：总计={} 输入={}{} 输出={}{}",
             format_with_separators(token_usage.blended_total()),
             format_with_separators(token_usage.non_cached_input()),
             if token_usage.cached_input() > 0 {
                 format!(
-                    " (+ {} cached)",
+                    "（其中缓存 {}）",
                     format_with_separators(token_usage.cached_input())
                 )
             } else {
@@ -1341,7 +1341,7 @@ impl fmt::Display for FinalOutput {
             format_with_separators(token_usage.output_tokens),
             if token_usage.reasoning_output_tokens > 0 {
                 format!(
-                    " (reasoning {})",
+                    "（推理 {}）",
                     format_with_separators(token_usage.reasoning_output_tokens)
                 )
             } else {

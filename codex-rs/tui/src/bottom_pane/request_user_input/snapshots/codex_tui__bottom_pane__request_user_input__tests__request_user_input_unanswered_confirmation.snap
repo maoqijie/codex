@@ -3,11 +3,11 @@ source: tui/src/bottom_pane/request_user_input/mod.rs
 expression: "render_snapshot(&overlay, area)"
 ---
                                                                                 
-  有 未 回 答 问 题 ， 仍 要 提 交 吗 ？                                                     
+  有 未 回 答 的 问 题 ， 仍 要 提 交 吗 ？                                                   
   未 回 答  2 个 问 题                                                                
                                                                                 
-  › 1. 继 续 提 交   将 提 交 并 跳 过  2 个 未 回 答 的 问 题 。                                 
-    2. 返 回       返 回 第 一 个 未 回 答 的 问 题 。                                        
+  › 1. 继 续   仍 有  2 个 未 回 答 问 题 ， 继 续 提 交 。                                     
+    2. 返 回   返 回 到 第 一 个 未 回 答 的 问 题 。                                          
                                                                                 
                                                                                 
                                                                                 

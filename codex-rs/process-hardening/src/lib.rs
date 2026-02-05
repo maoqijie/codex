@@ -46,7 +46,7 @@ pub(crate) fn pre_main_hardening_linux() {
     let ret_code = unsafe { libc::prctl(libc::PR_SET_DUMPABLE, 0, 0, 0, 0) };
     if ret_code != 0 {
         eprintln!(
-            "ERROR: prctl(PR_SET_DUMPABLE, 0) failed: {}",
+            "错误：prctl(PR_SET_DUMPABLE, 0) 失败：{}",
             std::io::Error::last_os_error()
         );
         std::process::exit(PRCTL_FAILED_EXIT_CODE);
@@ -85,7 +85,7 @@ pub(crate) fn pre_main_hardening_macos() {
     let ret_code = unsafe { libc::ptrace(libc::PT_DENY_ATTACH, 0, std::ptr::null_mut(), 0) };
     if ret_code == -1 {
         eprintln!(
-            "ERROR: ptrace(PT_DENY_ATTACH) failed: {}",
+            "错误：ptrace(PT_DENY_ATTACH) 失败：{}",
             std::io::Error::last_os_error()
         );
         std::process::exit(PTRACE_DENY_ATTACH_FAILED_EXIT_CODE);
@@ -115,7 +115,7 @@ fn set_core_file_size_limit_to_zero() {
     let ret_code = unsafe { libc::setrlimit(libc::RLIMIT_CORE, &rlim) };
     if ret_code != 0 {
         eprintln!(
-            "ERROR: setrlimit(RLIMIT_CORE) failed: {}",
+            "错误：setrlimit(RLIMIT_CORE) 失败：{}",
             std::io::Error::last_os_error()
         );
         std::process::exit(SET_RLIMIT_CORE_FAILED_EXIT_CODE);

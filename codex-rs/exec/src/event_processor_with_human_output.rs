@@ -151,14 +151,14 @@ impl EventProcessor for EventProcessorWithHumanOutput {
         const VERSION: &str = env!("CARGO_PKG_VERSION");
         ts_msg!(
             self,
-            "OpenAI Codex v{} (research preview)\n--------",
+            "OpenAI Codex v{}（研究预览版）\n--------",
             VERSION
         );
 
         let mut entries =
             create_config_summary_entries(config, session_configured_event.model.as_str());
         entries.push((
-            "session id",
+            "会话 ID",
             session_configured_event.session_id.to_string(),
         ));
 
@@ -171,28 +171,28 @@ impl EventProcessor for EventProcessorWithHumanOutput {
         // Echo the prompt that will be sent to the agent so it is visible in the
         // transcript/logs before any events come in. Note the prompt may have been
         // read from stdin, so it may not be visible in the terminal otherwise.
-        ts_msg!(self, "{}\n{}", "user".style(self.cyan), prompt);
+        ts_msg!(self, "{}\n{}", "用户".style(self.cyan), prompt);
     }
 
     fn process_event(&mut self, event: Event) -> CodexStatus {
         let Event { id: _, msg } = event;
         match msg {
             EventMsg::Error(ErrorEvent { message, .. }) => {
-                let prefix = "ERROR:".style(self.red);
+                let prefix = "错误：".style(self.red);
                 ts_msg!(self, "{prefix} {message}");
             }
             EventMsg::Warning(WarningEvent { message }) => {
                 ts_msg!(
                     self,
                     "{} {message}",
-                    "warning:".style(self.yellow).style(self.bold)
+                    "警告：".style(self.yellow).style(self.bold)
                 );
             }
             EventMsg::DeprecationNotice(DeprecationNoticeEvent { summary, details }) => {
                 ts_msg!(
                     self,
                     "{} {summary}",
-                    "deprecated:".style(self.magenta).style(self.bold)
+                    "已弃用：".style(self.magenta).style(self.bold)
                 );
                 if let Some(details) = details {
                     ts_msg!(self, "  {}", details.style(self.dimmed));
@@ -200,11 +200,11 @@ impl EventProcessor for EventProcessorWithHumanOutput {
             }
             EventMsg::McpStartupUpdate(update) => {
                 let status_text = match update.status {
-                    codex_core::protocol::McpStartupStatus::Starting => "starting".to_string(),
-                    codex_core::protocol::McpStartupStatus::Ready => "ready".to_string(),
-                    codex_core::protocol::McpStartupStatus::Cancelled => "cancelled".to_string(),
+                    codex_core::protocol::McpStartupStatus::Starting => "启动中".to_string(),
+                    codex_core::protocol::McpStartupStatus::Ready => "就绪".to_string(),
+                    codex_core::protocol::McpStartupStatus::Cancelled => "已取消".to_string(),
                     codex_core::protocol::McpStartupStatus::Failed { ref error } => {
-                        format!("failed: {error}")
+                        format!("失败：{error}")
                     }
                 };
                 ts_msg!(
@@ -218,21 +218,21 @@ impl EventProcessor for EventProcessorWithHumanOutput {
             EventMsg::McpStartupComplete(summary) => {
                 let mut parts = Vec::new();
                 if !summary.ready.is_empty() {
-                    parts.push(format!("ready: {}", summary.ready.join(", ")));
+                    parts.push(format!("就绪：{}", summary.ready.join(", ")));
                 }
                 if !summary.failed.is_empty() {
                     let servers: Vec<_> = summary.failed.iter().map(|f| f.server.clone()).collect();
-                    parts.push(format!("failed: {}", servers.join(", ")));
+                    parts.push(format!("失败：{}", servers.join(", ")));
                 }
                 if !summary.cancelled.is_empty() {
-                    parts.push(format!("cancelled: {}", summary.cancelled.join(", ")));
+                    parts.push(format!("已取消：{}", summary.cancelled.join(", ")));
                 }
                 let joined = if parts.is_empty() {
-                    "no servers".to_string()
+                    "无服务器".to_string()
                 } else {
                     parts.join("; ")
                 };
-                ts_msg!(self, "{} {}", "mcp startup:".style(self.cyan), joined);
+                ts_msg!(self, "{} {}", "mcp 启动：".style(self.cyan), joined);
             }
             EventMsg::BackgroundEvent(BackgroundEventEvent { message }) => {
                 ts_msg!(self, "{}", message.style(self.dimmed));
@@ -255,13 +255,13 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "elicitation request".style(self.magenta),
+                    "澄清请求".style(self.magenta),
                     ev.server_name.style(self.dimmed)
                 );
                 ts_msg!(
                     self,
                     "{}",
-                    "auto-cancelling (not supported in exec mode)".style(self.dimmed)
+                    "自动取消（exec 模式不支持）".style(self.dimmed)
                 );
             }
             EventMsg::TurnComplete(TurnCompleteEvent { last_agent_message }) => {
@@ -291,7 +291,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                     ts_msg!(
                         self,
                         "{}\n{}",
-                        "thinking".style(self.italic).style(self.magenta),
+                        "思考".style(self.italic).style(self.magenta),
                         text,
                     );
                 }
@@ -312,8 +312,8 @@ impl EventProcessor for EventProcessorWithHumanOutput {
             }
             EventMsg::ExecCommandBegin(ExecCommandBeginEvent { command, cwd, .. }) => {
                 eprint!(
-                    "{}\n{} in {}",
-                    "exec".style(self.italic).style(self.magenta),
+                    "{}\n{} 在 {}",
+                    "执行".style(self.italic).style(self.magenta),
                     escape_command(&command).style(self.bold),
                     cwd.to_string_lossy(),
                 );
@@ -324,7 +324,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 exit_code,
                 ..
             }) => {
-                let duration = format!(" in {}", format_duration(duration));
+                let duration = format!("，耗时 {}", format_duration(duration));
 
                 let truncated_output = aggregated_output
                     .lines()
@@ -333,11 +333,11 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                     .join("\n");
                 match exit_code {
                     0 => {
-                        let title = format!(" succeeded{duration}:");
+                        let title = format!(" 成功{duration}：");
                         ts_msg!(self, "{}", title.style(self.green));
                     }
                     _ => {
-                        let title = format!(" exited {exit_code}{duration}:");
+                        let title = format!(" 退出码 {exit_code}{duration}：");
                         ts_msg!(self, "{}", title.style(self.red));
                     }
                 }
@@ -350,7 +350,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "tool".style(self.magenta),
+                    "工具".style(self.magenta),
                     format_mcp_invocation(&invocation).style(self.bold),
                 );
             }
@@ -363,12 +363,12 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                     duration,
                 } = tool_call_end_event;
 
-                let duration = format!(" in {}", format_duration(duration));
+                let duration = format!("，耗时 {}", format_duration(duration));
 
-                let status_str = if is_success { "success" } else { "failed" };
+                let status_str = if is_success { "成功" } else { "失败" };
                 let title_style = if is_success { self.green } else { self.red };
                 let title = format!(
-                    "{} {status_str}{duration}:",
+                    "{} {status_str}{duration}：",
                     format_mcp_invocation(&invocation)
                 );
 
@@ -376,7 +376,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
 
                 if let Ok(res) = result {
                     let val = serde_json::to_value(res)
-                        .unwrap_or_else(|_| serde_json::Value::String("<result>".to_string()));
+                        .unwrap_or_else(|_| serde_json::Value::String("<结果>".to_string()));
                     let pretty =
                         serde_json::to_string_pretty(&val).unwrap_or_else(|_| val.to_string());
 
@@ -386,7 +386,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 }
             }
             EventMsg::WebSearchBegin(_) => {
-                ts_msg!(self, "🌐 Searching the web...");
+                ts_msg!(self, "🌐 正在搜索网络…");
             }
             EventMsg::WebSearchEnd(WebSearchEndEvent {
                 call_id: _,
@@ -395,9 +395,9 @@ impl EventProcessor for EventProcessorWithHumanOutput {
             }) => {
                 let detail = web_search_detail(Some(&action), &query);
                 if detail.is_empty() {
-                    ts_msg!(self, "🌐 Searched the web");
+                    ts_msg!(self, "🌐 已搜索网络");
                 } else {
-                    ts_msg!(self, "🌐 Searched: {detail}");
+                    ts_msg!(self, "🌐 已搜索：{detail}");
                 }
             }
             EventMsg::PatchApplyBegin(PatchApplyBeginEvent {
@@ -419,7 +419,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{}",
-                    "file update".style(self.magenta).style(self.italic),
+                    "文件更新".style(self.magenta).style(self.italic),
                 );
 
                 // Pretty-print the patch summary with colored diff markers so
@@ -498,8 +498,8 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 }) = patch_begin
                 {
                     (
-                        format!(" in {}", format_elapsed(start_time)),
-                        format!("apply_patch(auto_approved={auto_approved})"),
+                        format!("，耗时 {}", format_elapsed(start_time)),
+                        format!("apply_patch(自动批准={auto_approved})"),
                     )
                 } else {
                     (String::new(), format!("apply_patch('{call_id}')"))
@@ -511,7 +511,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                     (1, stderr, self.red)
                 };
 
-                let title = format!("{label} exited {exit_code}{duration}:");
+                let title = format!("{label} 退出码 {exit_code}{duration}：");
                 ts_msg!(self, "{}", title.style(title_style));
                 for line in output.lines() {
                     eprintln!("{}", line.style(self.dimmed));
@@ -521,7 +521,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{}",
-                    "file update:".style(self.magenta).style(self.italic)
+                    "文件更新：".style(self.magenta).style(self.italic)
                 );
                 eprintln!("{unified_diff}");
             }
@@ -530,7 +530,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                     ts_msg!(
                         self,
                         "{}\n{}",
-                        "thinking".style(self.italic).style(self.magenta),
+                        "思考".style(self.italic).style(self.magenta),
                         agent_reasoning_event.text,
                     );
                 }
@@ -545,18 +545,18 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "codex session".style(self.magenta).style(self.bold),
+                    "Codex 会话".style(self.magenta).style(self.bold),
                     conversation_id.to_string().style(self.dimmed)
                 );
 
-                ts_msg!(self, "model: {}", model);
+                ts_msg!(self, "模型：{}", model);
                 eprintln!();
             }
             EventMsg::PlanUpdate(plan_update_event) => {
                 let UpdatePlanArgs { explanation, plan } = plan_update_event;
 
                 // Header
-                ts_msg!(self, "{}", "Plan update".style(self.magenta));
+                ts_msg!(self, "{}", "计划更新".style(self.magenta));
 
                 // Optional explanation
                 if let Some(explanation) = explanation
@@ -589,26 +589,26 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "viewed image".style(self.magenta),
+                    "查看图片".style(self.magenta),
                     view.path.display()
                 );
             }
             EventMsg::TurnAborted(abort_reason) => {
                 match abort_reason.reason {
                     TurnAbortReason::Interrupted => {
-                        ts_msg!(self, "task interrupted");
+                        ts_msg!(self, "任务已中断");
                     }
                     TurnAbortReason::Replaced => {
-                        ts_msg!(self, "task aborted: replaced by a new task");
+                        ts_msg!(self, "任务已中止：已被新任务替换");
                     }
                     TurnAbortReason::ReviewEnded => {
-                        ts_msg!(self, "task aborted: review ended");
+                        ts_msg!(self, "任务已中止：评审结束");
                     }
                 }
                 return CodexStatus::InitiateShutdown;
             }
             EventMsg::ContextCompacted(_) => {
-                ts_msg!(self, "context compacted");
+                ts_msg!(self, "上下文已压缩");
             }
             EventMsg::CollabAgentSpawnBegin(CollabAgentSpawnBeginEvent {
                 call_id,
@@ -618,7 +618,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "collab".style(self.magenta),
+                    "协作".style(self.magenta),
                     format_collab_invocation("spawn_agent", &call_id, Some(&prompt))
                         .style(self.bold)
                 );
@@ -639,7 +639,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 );
                 ts_msg!(self, "{}", title.style(title_style));
                 if let Some(new_thread_id) = new_thread_id {
-                    eprintln!("  agent: {}", new_thread_id.to_string().style(self.dimmed));
+                    eprintln!("  代理：{}", new_thread_id.to_string().style(self.dimmed));
                 }
             }
             EventMsg::CollabAgentInteractionBegin(CollabAgentInteractionBeginEvent {
@@ -651,12 +651,12 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "collab".style(self.magenta),
+                    "协作".style(self.magenta),
                     format_collab_invocation("send_input", &call_id, Some(&prompt))
                         .style(self.bold)
                 );
                 eprintln!(
-                    "  receiver: {}",
+                    "  接收方：{}",
                     receiver_thread_id.to_string().style(self.dimmed)
                 );
             }
@@ -676,7 +676,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 );
                 ts_msg!(self, "{}", title.style(title_style));
                 eprintln!(
-                    "  receiver: {}",
+                    "  接收方：{}",
                     receiver_thread_id.to_string().style(self.dimmed)
                 );
             }
@@ -688,11 +688,11 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "collab".style(self.magenta),
+                    "协作".style(self.magenta),
                     format_collab_invocation("wait", &call_id, None).style(self.bold)
                 );
                 eprintln!(
-                    "  receivers: {}",
+                    "  接收方列表：{}",
                     format_receiver_list(&receiver_thread_ids).style(self.dimmed)
                 );
             }
@@ -706,14 +706,14 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                         self,
                         "{} {}:",
                         format_collab_invocation("wait", &call_id, None),
-                        "timed out".style(self.yellow)
+                        "超时".style(self.yellow)
                     );
                     return CodexStatus::Running;
                 }
                 let success = !statuses.values().any(is_collab_status_failure);
                 let title_style = if success { self.green } else { self.red };
                 let title = format!(
-                    "{} {} agents complete:",
+                    "{} {} 个代理已完成：",
                     format_collab_invocation("wait", &call_id, None),
                     statuses.len()
                 );
@@ -739,11 +739,11 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 ts_msg!(
                     self,
                     "{} {}",
-                    "collab".style(self.magenta),
+                    "协作".style(self.magenta),
                     format_collab_invocation("close_agent", &call_id, None).style(self.bold)
                 );
                 eprintln!(
-                    "  receiver: {}",
+                    "  接收方：{}",
                     receiver_thread_id.to_string().style(self.dimmed)
                 );
             }
@@ -762,7 +762,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
                 );
                 ts_msg!(self, "{}", title.style(title_style));
                 eprintln!(
-                    "  receiver: {}",
+                    "  接收方：{}",
                     receiver_thread_id.to_string().style(self.dimmed)
                 );
             }
@@ -805,7 +805,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
         if let Some(usage_info) = &self.last_total_token_usage {
             eprintln!(
                 "{}\n{}",
-                "tokens used".style(self.magenta).style(self.italic),
+                "Token 用量".style(self.magenta).style(self.italic),
                 format_with_separators(usage_info.total_token_usage.blended_total())
             );
         }
@@ -848,34 +848,34 @@ fn format_collab_invocation(tool: &str, call_id: &str, prompt: Option<&str>) -> 
         .filter(|prompt| !prompt.is_empty())
         .map(|prompt| truncate_preview(prompt, 120));
     match prompt {
-        Some(prompt) => format!("{tool}({call_id}, prompt=\"{prompt}\")"),
+        Some(prompt) => format!("{tool}({call_id}, 提示=\"{prompt}\")"),
         None => format!("{tool}({call_id})"),
     }
 }
 
 fn format_collab_status(status: &AgentStatus) -> String {
     match status {
-        AgentStatus::PendingInit => "pending init".to_string(),
-        AgentStatus::Running => "running".to_string(),
+        AgentStatus::PendingInit => "初始化中".to_string(),
+        AgentStatus::Running => "运行中".to_string(),
         AgentStatus::Completed(Some(message)) => {
             let preview = truncate_preview(message.trim(), 120);
             if preview.is_empty() {
-                "completed".to_string()
+                "已完成".to_string()
             } else {
-                format!("completed: \"{preview}\"")
+                format!("已完成：\"{preview}\"")
             }
         }
-        AgentStatus::Completed(None) => "completed".to_string(),
+        AgentStatus::Completed(None) => "已完成".to_string(),
         AgentStatus::Errored(message) => {
             let preview = truncate_preview(message.trim(), 120);
             if preview.is_empty() {
-                "errored".to_string()
+                "出错".to_string()
             } else {
-                format!("errored: \"{preview}\"")
+                format!("出错：\"{preview}\"")
             }
         }
-        AgentStatus::Shutdown => "shutdown".to_string(),
-        AgentStatus::NotFound => "not found".to_string(),
+        AgentStatus::Shutdown => "已关闭".to_string(),
+        AgentStatus::NotFound => "未找到".to_string(),
     }
 }
 
@@ -897,7 +897,7 @@ fn is_collab_status_failure(status: &AgentStatus) -> bool {
 
 fn format_receiver_list(ids: &[codex_protocol::ThreadId]) -> String {
     if ids.is_empty() {
-        return "none".to_string();
+        return "无".to_string();
     }
     ids.iter()
         .map(ToString::to_string)

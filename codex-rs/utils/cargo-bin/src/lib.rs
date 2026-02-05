@@ -8,6 +8,8 @@ pub use runfiles;
 /// Bazel sets this when runfiles directories are disabled, which we do on all platforms for consistency.
 const RUNFILES_MANIFEST_ONLY_ENV: &str = "RUNFILES_MANIFEST_ONLY";
 
+static CARGO_BUILD_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 #[derive(Debug, thiserror::Error)]
 pub enum CargoBinError {
     #[error("failed to read current exe")]
@@ -43,29 +45,54 @@ pub fn cargo_bin(name: &str) -> Result<PathBuf, CargoBinError> {
             return resolve_bin_from_env(key, value);
         }
     }
-    match assert_cmd::Command::cargo_bin(name) {
-        Ok(cmd) => {
-            let mut path = PathBuf::from(cmd.get_program());
-            if !path.is_absolute() {
-                path = std::env::current_dir()
-                    .map_err(|source| CargoBinError::CurrentDir { source })?
-                    .join(path);
-            }
-            if path.exists() {
-                Ok(path)
-            } else {
-                Err(CargoBinError::ResolvedPathDoesNotExist {
-                    key: "assert_cmd::Command::cargo_bin".to_owned(),
+
+    let mut build_attempt = None;
+    for attempt in 0..2 {
+        match assert_cmd::Command::cargo_bin(name) {
+            Ok(cmd) => {
+                let path = resolve_assert_cmd_path(&cmd)?;
+                if path.exists() {
+                    return Ok(path);
+                }
+
+                if attempt == 0 && !runfiles_available() {
+                    build_attempt = Some(try_build_cargo_bin(name));
+                    continue;
+                }
+
+                let build_note = match build_attempt {
+                    Some(Ok(())) => " (cargo build fallback succeeded)".to_owned(),
+                    Some(Err(ref err)) => format!(" (cargo build fallback failed: {err})"),
+                    None => String::new(),
+                };
+
+                return Err(CargoBinError::ResolvedPathDoesNotExist {
+                    key: format!("assert_cmd::Command::cargo_bin{build_note}"),
                     path,
-                })
+                });
+            }
+            Err(err) => {
+                if attempt == 0 && !runfiles_available() {
+                    build_attempt = Some(try_build_cargo_bin(name));
+                    continue;
+                }
+
+                let build_note = match build_attempt {
+                    Some(Ok(())) => "; cargo build fallback succeeded".to_owned(),
+                    Some(Err(ref err)) => format!("; cargo build fallback failed: {err}"),
+                    None => String::new(),
+                };
+
+                return Err(CargoBinError::NotFound {
+                    name: name.to_owned(),
+                    env_keys,
+                    fallback: format!("assert_cmd fallback failed: {err}{build_note}"),
+                });
             }
         }
-        Err(err) => Err(CargoBinError::NotFound {
-            name: name.to_owned(),
-            env_keys,
-            fallback: format!("assert_cmd fallback failed: {err}"),
-        }),
     }
+
+    unreachable!("cargo_bin should return on attempts")
 }
 
 fn cargo_bin_env_keys(name: &str) -> Vec<String> {
@@ -79,6 +106,80 @@ fn cargo_bin_env_keys(name: &str) -> Vec<String> {
     }
 
     keys
+}
+
+fn resolve_assert_cmd_path(cmd: &assert_cmd::Command) -> Result<PathBuf, CargoBinError> {
+    fn resolve_candidate(candidate: PathBuf) -> Option<PathBuf> {
+        if candidate.exists() {
+            return Some(candidate);
+        }
+        if cfg!(windows) && candidate.extension().is_none() {
+            let exe = candidate.with_extension("exe");
+            if exe.exists() {
+                return Some(exe);
+            }
+        }
+        None
+    }
+
+    let path = PathBuf::from(cmd.get_program());
+    if path.is_absolute() {
+        return Ok(path);
+    }
+
+    let current_dir =
+        std::env::current_dir().map_err(|source| CargoBinError::CurrentDir { source })?;
+    let current_dir_candidate = current_dir.join(&path);
+    if let Some(resolved) = resolve_candidate(current_dir_candidate.clone()) {
+        return Ok(resolved);
+    }
+
+    if let Ok(repo_root) = repo_root() {
+        let workspace_candidate = repo_root.join("codex-rs").join(&path);
+        if let Some(resolved) = resolve_candidate(workspace_candidate) {
+            return Ok(resolved);
+        }
+
+        let repo_root_candidate = repo_root.join(&path);
+        if let Some(resolved) = resolve_candidate(repo_root_candidate) {
+            return Ok(resolved);
+        }
+    }
+
+    Ok(current_dir_candidate)
+}
+
+fn try_build_cargo_bin(name: &str) -> io::Result<()> {
+    let _lock = CARGO_BUILD_LOCK
+        .lock()
+        .map_err(|_| io::Error::other("cargo build lock poisoned"))?;
+
+    let repo_root = repo_root()?;
+    let manifest_path = repo_root.join("codex-rs").join("Cargo.toml");
+    if !manifest_path.exists() {
+        let manifest_path_display = manifest_path.display();
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("workspace Cargo.toml not found at {manifest_path_display}"),
+        ));
+    }
+
+    let status = std::process::Command::new("cargo")
+        .arg("build")
+        .arg("--quiet")
+        .arg("--manifest-path")
+        .arg(&manifest_path)
+        .arg("--bin")
+        .arg(name)
+        .status()?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(io::Error::other(format!(
+            "cargo build --bin {name} failed with status {status}"
+        )))
+    }
 }
 
 pub fn runfiles_available() -> bool {

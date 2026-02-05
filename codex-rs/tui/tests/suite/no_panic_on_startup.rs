@@ -37,11 +37,11 @@ model_provider = "ollama"
     let CodexCliOutput { exit_code, output } = run_codex_cli(codex_home, cwd).await?;
     assert_ne!(0, exit_code, "Codex CLI should exit nonzero.");
     assert!(
-        output.contains("ERROR: Failed to initialize codex:"),
+        output.contains("错误：初始化 Codex 失败："),
         "expected startup error in output, got: {output}"
     );
     assert!(
-        output.contains("failed to read rules files"),
+        output.contains("规则文件失败"),
         "expected rules read error in output, got: {output}"
     );
     Ok(())

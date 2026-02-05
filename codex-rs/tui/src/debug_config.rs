@@ -16,25 +16,21 @@ pub(crate) fn new_debug_config_output(config: &Config) -> PlainHistoryCell {
 fn render_debug_config_lines(stack: &ConfigLayerStack) -> Vec<Line<'static>> {
     let mut lines = vec!["/debug-config".magenta().into(), "".into()];
 
-    lines.push(
-        "Config layer stack (lowest precedence first):"
-            .bold()
-            .into(),
-    );
+    lines.push("配置层栈（优先级从低到高）：".bold().into());
     let layers = stack.get_layers(ConfigLayerStackOrdering::LowestPrecedenceFirst, true);
     if layers.is_empty() {
-        lines.push("  <none>".dim().into());
+        lines.push("  <无>".dim().into());
     } else {
         for (index, layer) in layers.iter().enumerate() {
             let source = format_config_layer_source(&layer.name);
             let status = if layer.is_disabled() {
-                "disabled"
+                "已禁用"
             } else {
-                "enabled"
+                "已启用"
             };
             lines.push(format!("  {}. {source} ({status})", index + 1).into());
             if let Some(reason) = &layer.disabled_reason {
-                lines.push(format!("     reason: {reason}").dim().into());
+                lines.push(format!("     原因：{reason}").dim().into());
             }
         }
     }
@@ -43,7 +39,7 @@ fn render_debug_config_lines(stack: &ConfigLayerStack) -> Vec<Line<'static>> {
     let requirements_toml = stack.requirements_toml();
 
     lines.push("".into());
-    lines.push("Requirements:".bold().into());
+    lines.push("要求：".bold().into());
     let mut requirement_lines = Vec::new();
 
     if let Some(policies) = requirements_toml.allowed_approval_policies.as_ref() {
@@ -86,7 +82,7 @@ fn render_debug_config_lines(stack: &ConfigLayerStack) -> Vec<Line<'static>> {
     if requirements_toml.rules.is_some() {
         requirement_lines.push(requirement_line(
             "rules",
-            "configured".to_string(),
+            "已配置".to_string(),
             requirements.exec_policy_source(),
         ));
     }
@@ -100,7 +96,7 @@ fn render_debug_config_lines(stack: &ConfigLayerStack) -> Vec<Line<'static>> {
     }
 
     if requirement_lines.is_empty() {
-        lines.push("  <none>".dim().into());
+        lines.push("  <无>".dim().into());
     } else {
         lines.extend(requirement_lines);
     }
@@ -115,13 +111,13 @@ fn requirement_line(
 ) -> Line<'static> {
     let source = source
         .map(ToString::to_string)
-        .unwrap_or_else(|| "<unspecified>".to_string());
-    format!("  - {name}: {value} (source: {source})").into()
+        .unwrap_or_else(|| "<未指定>".to_string());
+    format!("  - {name}：{value}（来源：{source}）").into()
 }
 
 fn join_or_empty(values: Vec<String>) -> String {
     if values.is_empty() {
-        "<empty>".to_string()
+        "<空>".to_string()
     } else {
         values.join(", ")
     }
@@ -247,11 +243,11 @@ mod tests {
         .expect("config layer stack");
 
         let rendered = render_to_text(&render_debug_config_lines(&stack));
-        assert!(rendered.contains("(enabled)"));
-        assert!(rendered.contains("(disabled)"));
-        assert!(rendered.contains("reason: project is untrusted"));
-        assert!(rendered.contains("Requirements:"));
-        assert!(rendered.contains("  <none>"));
+        assert!(rendered.contains("(已启用)"));
+        assert!(rendered.contains("(已禁用)"));
+        assert!(rendered.contains("原因：project is untrusted"));
+        assert!(rendered.contains("要求："));
+        assert!(rendered.contains("  <无>"));
     }
 
     #[test]
@@ -320,19 +316,19 @@ mod tests {
 
         let rendered = render_to_text(&render_debug_config_lines(&stack));
         assert!(
-            rendered.contains("allowed_approval_policies: on-request (source: cloud requirements)")
+            rendered.contains("allowed_approval_policies：on-request（来源：cloud requirements）")
         );
         assert!(
             rendered.contains(
                 format!(
-                    "allowed_sandbox_modes: read-only (source: {})",
+                    "allowed_sandbox_modes：read-only（来源：{}）",
                     requirements_file.as_path().display()
                 )
                 .as_str(),
             )
         );
-        assert!(rendered.contains("mcp_servers: docs (source: MDM managed_config.toml (legacy))"));
-        assert!(rendered.contains("enforce_residency: us (source: cloud requirements)"));
-        assert!(!rendered.contains("  - rules:"));
+        assert!(rendered.contains("mcp_servers：docs（来源：MDM managed_config.toml (legacy)）"));
+        assert!(rendered.contains("enforce_residency：us（来源：cloud requirements）"));
+        assert!(!rendered.contains("  - rules："));
     }
 }

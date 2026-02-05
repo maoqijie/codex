@@ -31,14 +31,14 @@ pub(crate) fn spawn_agent(
         } = match server.start_thread(config).await {
             Ok(v) => v,
             Err(err) => {
-                let message = format!("Failed to initialize codex: {err}");
+                let message = format!("初始化 Codex 失败：{err}");
                 tracing::error!("{message}");
                 app_event_tx_clone.send(AppEvent::CodexEvent(Event {
                     id: "".to_string(),
                     msg: EventMsg::Error(err.to_error_event(None)),
                 }));
                 app_event_tx_clone.send(AppEvent::FatalExitRequest(message));
-                tracing::error!("failed to initialize codex: {err}");
+                tracing::error!("初始化 Codex 失败：{err}");
                 return;
             }
         };
