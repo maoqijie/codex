@@ -1,7 +1,7 @@
-use codex_app_server_protocol::AuthMode;
 use codex_common::CliConfigOverrides;
 use codex_core::CodexAuth;
 use codex_core::auth::AuthCredentialsStoreMode;
+use codex_core::auth::AuthMode;
 use codex_core::auth::CLIENT_ID;
 use codex_core::auth::login_with_api_key;
 use codex_core::auth::logout;
@@ -223,7 +223,7 @@ pub async fn run_login_status(cli_config_overrides: CliConfigOverrides) -> ! {
     let config = load_config_or_exit(cli_config_overrides).await;
 
     match CodexAuth::from_auth_storage(&config.codex_home, config.cli_auth_credentials_store_mode) {
-        Ok(Some(auth)) => match auth.api_auth_mode() {
+        Ok(Some(auth)) => match auth.auth_mode() {
             AuthMode::ApiKey => match auth.get_token() {
                 Ok(api_key) => {
                     let safe_key = safe_format_key(&api_key);
@@ -237,10 +237,6 @@ pub async fn run_login_status(cli_config_overrides: CliConfigOverrides) -> ! {
             },
             AuthMode::Chatgpt => {
                 eprintln!("已使用 ChatGPT 登录");
-                std::process::exit(0);
-            }
-            AuthMode::ChatgptAuthTokens => {
-                eprintln!("已使用 ChatGPT 登录（外部令牌）");
                 std::process::exit(0);
             }
         },
