@@ -59,7 +59,7 @@ impl SessionTask for GhostSnapshotTask {
                                 .send_event(
                                     &ctx_for_warning,
                                     EventMsg::Warning(WarningEvent {
-                                        message: "Repository snapshot is taking longer than expected. Large untracked or ignored files can slow snapshots; consider adding large files or directories to .gitignore or disabling `undo` in your config.".to_string()
+                                        message: "仓库快照耗时超出预期。大量未跟踪或被忽略的文件会拖慢快照；可以考虑将大文件或目录加入 `.gitignore`，或在配置中禁用 `undo`。".to_string()
                                     }),
                                 )
                                 .await;
@@ -129,8 +129,7 @@ impl SessionTask for GhostSnapshotTask {
                                 sub_id = ctx_for_task.sub_id.as_str(),
                                 "ghost snapshot task panicked: {err}"
                             );
-                            let message =
-                                format!("Snapshots disabled after ghost snapshot panic: {err}.");
+                            let message = format!("ghost snapshot 发生 panic，已禁用快照：{err}。");
                             session
                                 .session
                                 .notify_background_event(&ctx_for_task, message)
@@ -190,14 +189,18 @@ fn format_large_untracked_warning(
     const MAX_DIRS: usize = 3;
     let mut parts: Vec<String> = Vec::new();
     for dir in report.large_untracked_dirs.iter().take(MAX_DIRS) {
-        parts.push(format!("{} ({} files)", dir.path.display(), dir.file_count));
+        parts.push(format!(
+            "{}（{} 个文件）",
+            dir.path.display(),
+            dir.file_count
+        ));
     }
     if report.large_untracked_dirs.len() > MAX_DIRS {
         let remaining = report.large_untracked_dirs.len() - MAX_DIRS;
-        parts.push(format!("{remaining} more"));
+        parts.push(format!("另有 {remaining} 个"));
     }
     Some(format!(
-        "Repository snapshot ignored large untracked directories (>= {threshold} files): {}. These directories are excluded from snapshots and undo cleanup. Adjust `ghost_snapshot.ignore_large_untracked_dirs` to change this behavior.",
+        "仓库快照已忽略较大的未跟踪目录（>= {threshold} 个文件）：{}。这些目录不会被纳入快照和撤销清理。可调整 `ghost_snapshot.ignore_large_untracked_dirs` 来改变该行为。",
         parts.join(", ")
     ))
 }
@@ -226,7 +229,7 @@ fn format_ignored_untracked_files_warning(
     }
 
     Some(format!(
-        "Repository snapshot ignored untracked files larger than {}: {}. These files are preserved during undo cleanup, but their contents are not captured in the snapshot. Adjust `ghost_snapshot.ignore_large_untracked_files` to change this behavior. To avoid this message in the future, update your `.gitignore`.",
+        "仓库快照已忽略大于 {} 的未跟踪文件：{}。这些文件在撤销清理时会被保留，但其内容不会被写入快照。可调整 `ghost_snapshot.ignore_large_untracked_files` 来改变该行为。若想避免再次提示，请更新你的 `.gitignore`。",
         format_bytes(threshold),
         parts.join(", ")
     ))
@@ -263,7 +266,7 @@ mod tests {
         };
 
         let message = format_large_untracked_warning(Some(200), &report).unwrap();
-        assert!(message.contains(">= 200 files"));
+        assert!(message.contains(">= 200 个文件"));
     }
 
     #[test]

@@ -44,13 +44,13 @@ async fn emits_deprecation_notice_for_legacy_feature_flag() -> anyhow::Result<()
     let DeprecationNoticeEvent { summary, details } = notice;
     assert_eq!(
         summary,
-        "`use_experimental_unified_exec_tool` is deprecated. Use `[features].unified_exec` instead."
+        "`use_experimental_unified_exec_tool` 已弃用，请改用 `[features].unified_exec`。"
             .to_string(),
     );
     assert_eq!(
         details.as_deref(),
         Some(
-            "Enable it with `--enable unified_exec` or `[features].unified_exec` in config.toml. See https://github.com/openai/codex/blob/main/docs/config.md#feature-flags for details."
+            "可通过 `--enable unified_exec` 或在 config.toml 的 `[features].unified_exec` 中启用。详情见：https://github.com/openai/codex/blob/main/docs/config.md#feature-flags"
         ),
     );
 
@@ -99,13 +99,13 @@ async fn emits_deprecation_notice_for_experimental_instructions_file() -> anyhow
     let DeprecationNoticeEvent { summary, details } = notice;
     assert_eq!(
         summary,
-        "`experimental_instructions_file` is deprecated and ignored. Use `model_instructions_file` instead."
+        "`experimental_instructions_file` 已弃用且会被忽略，请改用 `model_instructions_file`。"
             .to_string(),
     );
     assert_eq!(
         details.as_deref(),
         Some(
-            "Move the setting to `model_instructions_file` in config.toml (or under a profile) to load instructions from a file."
+            "请将该设置迁移到 config.toml（或 profile）中的 `model_instructions_file`，以从文件加载指引。"
         ),
     );
 
@@ -137,12 +137,12 @@ async fn emits_deprecation_notice_for_web_search_feature_flags() -> anyhow::Resu
     let DeprecationNoticeEvent { summary, details } = notice;
     assert_eq!(
         summary,
-        "`[features].web_search_request` is deprecated. Use `web_search` instead.".to_string(),
+        "`[features].web_search_request` 已弃用，请改用 `web_search`。".to_string(),
     );
     assert_eq!(
         details.as_deref(),
         Some(
-            "Set `web_search` to `\"live\"`, `\"cached\"`, or `\"disabled\"` at the top level (or under a profile) in config.toml."
+            "请在 config.toml 顶层（或 profile 下）将 `web_search` 设置为 `\"live\"`、`\"cached\"` 或 `\"disabled\"`。"
         ),
     );
 
@@ -174,12 +174,12 @@ async fn emits_deprecation_notice_for_disabled_web_search_feature_flag() -> anyh
     let DeprecationNoticeEvent { summary, details } = notice;
     assert_eq!(
         summary,
-        "`[features].web_search_request` is deprecated. Use `web_search` instead.".to_string(),
+        "`[features].web_search_request` 已弃用，请改用 `web_search`。".to_string(),
     );
     assert_eq!(
         details.as_deref(),
         Some(
-            "Set `web_search` to `\"live\"`, `\"cached\"`, or `\"disabled\"` at the top level (or under a profile) in config.toml."
+            "请在 config.toml 顶层（或 profile 下）将 `web_search` 设置为 `\"live\"`、`\"cached\"` 或 `\"disabled\"`。"
         ),
     );
 

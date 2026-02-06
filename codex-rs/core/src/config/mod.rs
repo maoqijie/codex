@@ -620,10 +620,10 @@ where
             error = %err,
             ?fallback_value,
             requirement_source = ?constrained_value.source,
-            "configured value is disallowed by requirements; falling back to required value for {field_name}"
+            "配置值不符合配置要求（requirements）；已为 {field_name} 回退到要求的值"
         );
         let message = format!(
-            "Configured value for `{field_name}` is disallowed by requirements; falling back to required value {fallback_value:?}. Details: {err}"
+            "配置项 `{field_name}` 的值不符合配置要求（requirements）；已回退到要求的值 {fallback_value:?}。详情：{err}"
         );
         startup_warnings.push(message);
 
@@ -631,7 +631,7 @@ where
             std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
                 format!(
-                    "configured value for `{field_name}` is disallowed by requirements ({err}); fallback to a requirement-compliant value also failed ({fallback_err})"
+                    "配置项 `{field_name}` 的值不符合配置要求（requirements）（{err}）；回退到满足要求的值也失败了（{fallback_err}）"
                 ),
             )
         })?;

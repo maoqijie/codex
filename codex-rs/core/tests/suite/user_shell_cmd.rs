@@ -99,11 +99,11 @@ async fn user_shell_cmd_can_be_interrupted() {
     // Set up isolated config and conversation.
     let server = start_mock_server().await;
     let mut builder = test_codex();
-    let codex = builder
+    let fixture = builder
         .build(&server)
         .await
-        .expect("create new conversation")
-        .codex;
+        .expect("create new conversation");
+    let codex = fixture.codex.clone();
 
     // Start a long-running command and then interrupt it.
     let sleep_cmd = "sleep 5".to_string();

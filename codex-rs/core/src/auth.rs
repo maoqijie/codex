@@ -96,11 +96,13 @@ impl PartialEq for CodexAuth {
 // TODO(pakrym): use token exp field to check for expiration instead
 const TOKEN_REFRESH_INTERVAL: i64 = 8;
 
-const REFRESH_TOKEN_EXPIRED_MESSAGE: &str = "Your access token could not be refreshed because your refresh token has expired. Please log out and sign in again.";
-const REFRESH_TOKEN_REUSED_MESSAGE: &str = "Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.";
-const REFRESH_TOKEN_INVALIDATED_MESSAGE: &str = "Your access token could not be refreshed because your refresh token was revoked. Please log out and sign in again.";
-const REFRESH_TOKEN_UNKNOWN_MESSAGE: &str =
-    "Your access token could not be refreshed. Please log out and sign in again.";
+const REFRESH_TOKEN_EXPIRED_MESSAGE: &str =
+    "无法刷新访问令牌：刷新令牌已过期。请退出登录后重新登录。";
+const REFRESH_TOKEN_REUSED_MESSAGE: &str =
+    "无法刷新访问令牌：刷新令牌已被使用。请退出登录后重新登录。";
+const REFRESH_TOKEN_INVALIDATED_MESSAGE: &str =
+    "无法刷新访问令牌：刷新令牌已被撤销。请退出登录后重新登录。";
+const REFRESH_TOKEN_UNKNOWN_MESSAGE: &str = "无法刷新访问令牌。请退出登录后重新登录。";
 const REFRESH_TOKEN_URL: &str = "https://auth.openai.com/oauth/token";
 pub const REFRESH_TOKEN_URL_OVERRIDE_ENV_VAR: &str = "CODEX_REFRESH_TOKEN_URL_OVERRIDE";
 
@@ -165,7 +167,7 @@ impl CodexAuth {
         let auth_mode = auth_dot_json.resolved_mode();
         if auth_mode == ApiAuthMode::ApiKey {
             let Some(api_key) = auth_dot_json.openai_api_key.as_deref() else {
-                return Err(std::io::Error::other("API key auth is missing a key."));
+                return Err(std::io::Error::other("API Key 认证缺少密钥。"));
             };
             return Ok(CodexAuth::from_api_key_with_client(api_key, client));
         }
@@ -236,7 +238,7 @@ impl CodexAuth {
                 last_refresh: Some(_),
                 ..
             }) => Ok(tokens),
-            _ => Err(std::io::Error::other("Token data is not available.")),
+            _ => Err(std::io::Error::other("令牌数据不可用。")),
         }
     }
 
@@ -447,14 +449,12 @@ pub fn enforce_login_restrictions(config: &Config) -> std::io::Result<()> {
         let method_violation = match (required_method, auth.auth_mode()) {
             (ForcedLoginMethod::Api, AuthMode::ApiKey) => None,
             (ForcedLoginMethod::Chatgpt, AuthMode::Chatgpt) => None,
-            (ForcedLoginMethod::Api, AuthMode::Chatgpt) => Some(
-                "API key login is required, but ChatGPT is currently being used. Logging out."
-                    .to_string(),
-            ),
-            (ForcedLoginMethod::Chatgpt, AuthMode::ApiKey) => Some(
-                "ChatGPT login is required, but an API key is currently being used. Logging out."
-                    .to_string(),
-            ),
+            (ForcedLoginMethod::Api, AuthMode::Chatgpt) => {
+                Some("需要使用 API Key 登录，但当前正在使用 ChatGPT 登录。将退出登录。".to_string())
+            }
+            (ForcedLoginMethod::Chatgpt, AuthMode::ApiKey) => {
+                Some("需要使用 ChatGPT 登录，但当前正在使用 API Key 登录。将退出登录。".to_string())
+            }
         };
 
         if let Some(message) = method_violation {
@@ -476,9 +476,7 @@ pub fn enforce_login_restrictions(config: &Config) -> std::io::Result<()> {
             Err(err) => {
                 return logout_with_message(
                     &config.codex_home,
-                    format!(
-                        "Failed to load ChatGPT credentials while enforcing workspace restrictions: {err}. Logging out."
-                    ),
+                    format!("在执行工作区限制时，加载 ChatGPT 凭据失败：{err}。将退出登录。"),
                     config.cli_auth_credentials_store_mode,
                 );
             }
@@ -489,10 +487,10 @@ pub fn enforce_login_restrictions(config: &Config) -> std::io::Result<()> {
         if chatgpt_account_id != Some(expected_account_id) {
             let message = match chatgpt_account_id {
                 Some(actual) => format!(
-                    "Login is restricted to workspace {expected_account_id}, but current credentials belong to {actual}. Logging out."
+                    "登录被限制在工作区 {expected_account_id}，但当前凭据属于 {actual}。将退出登录。"
                 ),
                 None => format!(
-                    "Login is restricted to workspace {expected_account_id}, but current credentials lack a workspace identifier. Logging out."
+                    "登录被限制在工作区 {expected_account_id}，但当前凭据缺少工作区标识。将退出登录。"
                 ),
             };
             return logout_with_message(
@@ -516,7 +514,7 @@ fn logout_with_message(
     let removal_result = logout_all_stores(codex_home, auth_credentials_store_mode);
     let error_message = match removal_result {
         Ok(_) => message,
-        Err(err) => format!("{message}. Failed to remove auth.json: {err}"),
+        Err(err) => format!("{message}（删除 auth.json 失败：{err}）"),
     };
     Err(std::io::Error::other(error_message))
 }
@@ -587,7 +585,7 @@ fn update_tokens(
 ) -> std::io::Result<AuthDotJson> {
     let mut auth_dot_json = storage
         .load()?
-        .ok_or(std::io::Error::other("Token data is not available."))?;
+        .ok_or(std::io::Error::other("令牌数据不可用。"))?;
 
     let tokens = auth_dot_json.tokens.get_or_insert_with(TokenData::default);
     if let Some(id_token) = id_token {
@@ -1143,9 +1141,7 @@ impl AuthManager {
             }
             CodexAuth::Chatgpt(chatgpt_auth) => {
                 let token_data = chatgpt_auth.current_token_data().ok_or_else(|| {
-                    RefreshTokenError::Transient(std::io::Error::other(
-                        "Token data is not available.",
-                    ))
+                    RefreshTokenError::Transient(std::io::Error::other("令牌数据不可用。"))
                 })?;
                 self.refresh_tokens(&chatgpt_auth, token_data.refresh_token)
                     .await?;
@@ -1559,7 +1555,7 @@ mod tests {
 
         let err = super::enforce_login_restrictions(&config)
             .expect_err("expected method mismatch to error");
-        assert!(err.to_string().contains("ChatGPT login is required"));
+        assert!(err.to_string().contains("需要使用 ChatGPT 登录"));
         assert!(
             !codex_home.path().join("auth.json").exists(),
             "auth.json should be removed on mismatch"
@@ -1584,7 +1580,7 @@ mod tests {
 
         let err = super::enforce_login_restrictions(&config)
             .expect_err("expected workspace mismatch to error");
-        assert!(err.to_string().contains("workspace org_mine"));
+        assert!(err.to_string().contains("工作区 org_mine"));
         assert!(
             !codex_home.path().join("auth.json").exists(),
             "auth.json should be removed on mismatch"
@@ -1642,7 +1638,7 @@ mod tests {
             .expect_err("environment API key should not satisfy forced ChatGPT login");
         assert!(
             err.to_string()
-                .contains("ChatGPT login is required, but an API key is currently being used.")
+                .contains("需要使用 ChatGPT 登录，但当前正在使用 API Key 登录")
         );
     }
 
