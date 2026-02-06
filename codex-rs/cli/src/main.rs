@@ -62,9 +62,24 @@ use codex_core::terminal::TerminalName;
     // `codex2-x86_64-unknown-linux-musl`, but the help output should always use
     // the generic `codex2` command name that users run.
     bin_name = "codex2",
-    override_usage = "codex2 [选项] [提示]\n       codex2 [选项] <命令> [参数]"
+    override_usage = "codex2 [选项] [提示]\n       codex2 [选项] <命令> [参数]",
+    disable_help_subcommand = true,
+    disable_help_flag = true,
+    disable_version_flag = true
 )]
 struct MultitoolCli {
+    /// 显示简要帮助（使用 `-h`）。
+    #[arg(short = 'h', action = clap::ArgAction::HelpShort, global = true)]
+    help_short: Option<bool>,
+
+    /// 显示完整帮助（使用 `--help`）。
+    #[arg(long = "help", action = clap::ArgAction::HelpLong, global = true)]
+    help_long: Option<bool>,
+
+    /// 显示版本信息（使用 `-V` / `--version`）。
+    #[arg(short = 'V', long = "version", action = clap::ArgAction::Version)]
+    version: Option<bool>,
+
     #[clap(flatten)]
     pub config_overrides: CliConfigOverrides,
 
@@ -547,6 +562,9 @@ fn main() -> anyhow::Result<()> {
 
 async fn cli_main(codex_linux_sandbox_exe: Option<PathBuf>) -> anyhow::Result<()> {
     let MultitoolCli {
+        help_short: _,
+        help_long: _,
+        version: _,
         config_overrides: mut root_config_overrides,
         feature_toggles,
         mut interactive,
@@ -1039,6 +1057,7 @@ mod tests {
             config_overrides: root_overrides,
             subcommand,
             feature_toggles: _,
+            ..
         } = cli;
 
         let Subcommand::Resume(ResumeCommand {
@@ -1068,6 +1087,7 @@ mod tests {
             config_overrides: root_overrides,
             subcommand,
             feature_toggles: _,
+            ..
         } = cli;
 
         let Subcommand::Fork(ForkCommand {

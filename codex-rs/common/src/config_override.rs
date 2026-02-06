@@ -17,12 +17,11 @@ use toml::Value;
 /// calling code can decide how to interpret the right-hand side.
 #[derive(Parser, Debug, Default, Clone)]
 pub struct CliConfigOverrides {
-    /// Override a configuration value that would otherwise be loaded from
-    /// `~/.codex/config.toml`. Use a dotted path (`foo.bar.baz`) to override
-    /// nested values. The `value` portion is parsed as TOML. If it fails to
-    /// parse as TOML, the raw string is used as a literal.
+    /// 覆盖原本会从 `~/.codex/config.toml` 加载的配置值。
+    /// 使用点号路径（`foo.bar.baz`）可覆盖嵌套字段。
+    /// 右侧的 `value` 会先按 TOML 解析；若解析失败，则按原始字符串字面量处理。
     ///
-    /// Examples:
+    /// 示例：
     ///   - `-c model="o3"`
     ///   - `-c 'sandbox_permissions=["disk-full-read-access"]'`
     ///   - `-c shell_environment_policy.inherit=all`
@@ -48,15 +47,15 @@ impl CliConfigOverrides {
                 let mut parts = s.splitn(2, '=');
                 let key = match parts.next() {
                     Some(k) => k.trim(),
-                    None => return Err("Override missing key".to_string()),
+                    None => return Err("覆盖项缺少键。".to_string()),
                 };
                 let value_str = parts
                     .next()
-                    .ok_or_else(|| format!("Invalid override (missing '='): {s}"))?
+                    .ok_or_else(|| format!("无效的覆盖项（缺少 '='）：{s}"))?
                     .trim();
 
                 if key.is_empty() {
-                    return Err(format!("Empty key in override: {s}"));
+                    return Err(format!("覆盖项的键为空：{s}"));
                 }
 
                 // Attempt to parse as TOML. If that fails, treat it as a raw
@@ -146,7 +145,7 @@ fn parse_toml_value(raw: &str) -> Result<Value, toml::de::Error> {
     table
         .get("_x_")
         .cloned()
-        .ok_or_else(|| SerdeError::custom("missing sentinel key"))
+        .ok_or_else(|| SerdeError::custom("缺少哨兵键"))
 }
 
 #[cfg(all(test, feature = "cli"))]

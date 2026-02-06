@@ -8,21 +8,19 @@ use codex_core::protocol::AskForApproval;
 #[derive(Clone, Copy, Debug, ValueEnum)]
 #[value(rename_all = "kebab-case")]
 pub enum ApprovalModeCliArg {
-    /// Only run "trusted" commands (e.g. ls, cat, sed) without asking for user
-    /// approval. Will escalate to the user if the model proposes a command that
-    /// is not in the "trusted" set.
+    /// 不询问即可运行“可信”命令（例如：ls、cat、sed）。
+    /// 若模型提出的命令不在“可信”集合中，将升级为向用户请求批准。
     Untrusted,
 
-    /// Run all commands without asking for user approval.
-    /// Only asks for approval if a command fails to execute, in which case it
-    /// will escalate to the user to ask for un-sandboxed execution.
+    /// 不询问即可运行所有命令。
+    /// 仅当命令执行失败时才会请求批准；此时会升级为请求在未沙箱限制下执行。
     OnFailure,
 
-    /// The model decides when to ask the user for approval.
+    /// 由模型决定何时向用户请求批准。
     OnRequest,
 
-    /// Never ask for user approval
-    /// Execution failures are immediately returned to the model.
+    /// 从不向用户请求批准。
+    /// 任何执行失败都会立即返回给模型。
     Never,
 }
 
