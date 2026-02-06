@@ -5,14 +5,15 @@ set positional-arguments
 help:
     just -l
 
-# `codex`
-alias c := codex
-codex *args:
-    cargo run --bin codex -- "$@"
+# `codex2`
+alias codex := codex2
+alias c := codex2
+codex2 *args:
+    cargo run --bin codex2 -- "$@"
 
-# `codex exec`
+# `codex2 exec`
 exec *args:
-    cargo run --bin codex -- exec "$@"
+    cargo run --bin codex2 -- exec "$@"
 
 # Run the CLI version of the file-search crate.
 file-search *args:
@@ -21,7 +22,7 @@ file-search *args:
 # Build the CLI and run the app-server test client
 app-server-test-client *args:
     cargo build -p codex-cli
-    cargo run -p codex-app-server-test-client -- --codex-bin ./target/debug/codex "$@"
+    cargo run -p codex-app-server-test-client -- --codex-bin ./target/debug/codex2 "$@"
 
 # format code
 fmt:
@@ -49,7 +50,7 @@ test:
 # to ensure that Bazel runs the command in the current working directory.
 [no-cd]
 bazel-codex *args:
-    bazel run //codex-rs/cli:codex --run_under="cd $PWD &&" -- "$@"
+    bazel run //codex-rs/cli:codex2 --run_under="cd $PWD &&" -- "$@"
 
 bazel-test:
     bazel test //... --keep_going

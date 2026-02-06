@@ -64,7 +64,7 @@ pub struct GetArgs {
 }
 
 #[derive(Debug, clap::Parser)]
-#[command(override_usage = "codex mcp add [OPTIONS] <NAME> (--url <URL> | -- <COMMAND>...)")]
+#[command(override_usage = "codex2 mcp add [OPTIONS] <NAME> (--url <URL> | -- <COMMAND>...)")]
 pub struct AddArgs {
     /// MCP 服务器配置名称。
     pub name: String,
@@ -278,7 +278,7 @@ async fn run_add(config_overrides: &CliConfigOverrides, add_args: AddArgs) -> Re
         }
         McpOAuthLoginSupport::Unsupported => {}
         McpOAuthLoginSupport::Unknown(_) => println!(
-            "该 MCP 服务器可能需要也可能不需要登录。可运行 `codex mcp login {name}` 进行登录。"
+            "该 MCP 服务器可能需要也可能不需要登录。可运行 `codex2 mcp login {name}` 进行登录。"
         ),
     }
 
@@ -467,7 +467,7 @@ async fn run_list(config_overrides: &CliConfigOverrides, list_args: ListArgs) ->
     }
 
     if entries.is_empty() {
-        println!("尚未配置任何 MCP 服务器。可以试试：`codex mcp add my-tool -- my-command`。");
+        println!("尚未配置任何 MCP 服务器。可以试试：`codex2 mcp add my-tool -- my-command`。");
         return Ok(());
     }
 
@@ -795,7 +795,7 @@ async fn run_get(config_overrides: &CliConfigOverrides, get_args: GetArgs) -> Re
     if let Some(timeout) = server.tool_timeout_sec {
         println!("  工具超时（秒）：{}", timeout.as_secs_f64());
     }
-    println!("  删除：codex mcp remove {}", get_args.name);
+    println!("  删除：codex2 mcp remove {}", get_args.name);
 
     Ok(())
 }

@@ -1094,7 +1094,7 @@ fn mcp_init_error_display(
             "GitHub MCP 不支持 OAuth。请在环境变量与 config.toml 中添加个人访问令牌（https://github.com/settings/personal-access-tokens）来登录：\n[mcp_servers.{server_name}]\nbearer_token_env_var = CODEX_GITHUB_PERSONAL_ACCESS_TOKEN"
         )
     } else if is_mcp_client_auth_required_error(err) {
-        format!("{server_name} MCP 服务器未登录。运行 `codex mcp login {server_name}`。")
+        format!("{server_name} MCP 服务器未登录。运行 `codex2 mcp login {server_name}`。")
     } else if is_mcp_client_startup_timeout_error(err) {
         let startup_timeout_secs = match entry {
             Some(entry) => match entry.config.startup_timeout_sec {
@@ -1352,7 +1352,7 @@ mod tests {
         let display = mcp_init_error_display(server_name, None, &err);
 
         let expected =
-            format!("{server_name} MCP 服务器未登录。运行 `codex mcp login {server_name}`。");
+            format!("{server_name} MCP 服务器未登录。运行 `codex2 mcp login {server_name}`。");
 
         assert_eq!(expected, display);
     }

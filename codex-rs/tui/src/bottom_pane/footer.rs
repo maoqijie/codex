@@ -1564,11 +1564,11 @@ mod tests {
             render_footer_with_mode_indicator(80, &props, Some(CollaborationModeIndicator::Plan));
         let collapsed = screen.split_whitespace().collect::<Vec<_>>().join(" ");
         assert!(
-            collapsed.contains("Plan mode"),
+            collapsed.contains("计划模式"),
             "mode indicator should remain visible"
         );
         assert!(
-            !collapsed.contains("shift+tab to cycle"),
+            !collapsed.contains(MODE_CYCLE_HINT),
             "compact mode indicator should be used when space is tight"
         );
         assert!(

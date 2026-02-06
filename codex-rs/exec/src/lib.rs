@@ -88,7 +88,7 @@ struct ThreadEventEnvelope {
 
 pub async fn run_main(cli: Cli, codex_linux_sandbox_exe: Option<PathBuf>) -> anyhow::Result<()> {
     if let Err(err) = set_default_originator("codex_exec".to_string()) {
-        tracing::warn!(?err, "设置 codex exec originator 覆盖失败 {err:?}");
+        tracing::warn!(?err, "设置 codex2 exec originator 覆盖失败 {err:?}");
     }
 
     let Cli {

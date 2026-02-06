@@ -6,9 +6,9 @@ use rand::Rng;
 const ANNOUNCEMENT_TIP_URL: &str =
     "https://raw.githubusercontent.com/openai/codex/main/announcement_tip.toml";
 
-const PAID_TOOLTIP: &str = "*新功能* 试用 **Codex App**，在 *4 月 2 日* 之前享受 2 倍速率限制。运行 `codex app` 或访问 https://chatgpt.com/codex";
+const PAID_TOOLTIP: &str = "*新功能* 试用 **Codex App**，在 *4 月 2 日* 之前享受 2 倍速率限制。运行 `codex2 app` 或访问 https://chatgpt.com/codex";
 const OTHER_TOOLTIP: &str =
-    "*新功能* 使用 **Codex App** 更快构建。运行 `codex app` 或访问 https://chatgpt.com/codex";
+    "*新功能* 使用 **Codex App** 更快构建。运行 `codex2 app` 或访问 https://chatgpt.com/codex";
 const FREE_GO_TOOLTIP: &str =
     "*新功能* 在 *3 月 2 日* 之前，Codex 已包含在你的套餐中可免费使用——一起构建吧。";
 

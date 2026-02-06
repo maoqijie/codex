@@ -3126,7 +3126,7 @@ mod tests {
         assert_eq!(summary.usage_line, "Token 用量：总计=12 输入=10 输出=2");
         assert_eq!(
             summary.resume_command,
-            Some("codex resume 123e4567-e89b-12d3-a456-426614174000".to_string())
+            Some("codex2 resume 123e4567-e89b-12d3-a456-426614174000".to_string())
         );
     }
 
@@ -3144,7 +3144,7 @@ mod tests {
             .expect("summary");
         assert_eq!(
             summary.resume_command,
-            Some("codex resume my-session".to_string())
+            Some("codex2 resume my-session".to_string())
         );
     }
 }

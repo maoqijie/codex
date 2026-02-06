@@ -45,9 +45,9 @@ WINDOWS_TARGETS = tuple(target for target in BINARY_TARGETS if "windows" in targ
 
 BINARY_COMPONENTS = {
     "codex": BinaryComponent(
-        artifact_prefix="codex",
+        artifact_prefix="codex2",
         dest_dir="codex",
-        binary_basename="codex",
+        binary_basename="codex2",
     ),
     "codex-responses-api-proxy": BinaryComponent(
         artifact_prefix="codex-responses-api-proxy",

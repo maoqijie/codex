@@ -52,7 +52,7 @@ impl ApplyPatchRuntime {
             path.clone()
         } else {
             env::current_exe()
-                .map_err(|e| ToolError::Rejected(format!("failed to determine codex exe: {e}")))?
+                .map_err(|e| ToolError::Rejected(format!("无法确定 codex2 可执行文件路径：{e}")))?
         };
         let program = exe.to_string_lossy().to_string();
         Ok(CommandSpec {

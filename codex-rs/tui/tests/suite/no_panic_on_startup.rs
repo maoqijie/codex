@@ -56,7 +56,7 @@ async fn run_codex_cli(
     codex_home: impl AsRef<Path>,
     cwd: impl AsRef<Path>,
 ) -> anyhow::Result<CodexCliOutput> {
-    let codex_cli = codex_utils_cargo_bin::cargo_bin("codex")?;
+    let codex_cli = codex_utils_cargo_bin::cargo_bin("codex2")?;
     let mut env = HashMap::new();
     env.insert(
         "CODEX_HOME".to_string(),
@@ -103,7 +103,7 @@ async fn run_codex_cli(
         Ok(Err(err)) => return Err(err.into()),
         Err(_) => {
             spawned.session.terminate();
-            anyhow::bail!("timed out waiting for codex CLI to exit");
+            anyhow::bail!("timed out waiting for codex2 CLI to exit");
         }
     };
     // Drain any output that raced with the exit notification.

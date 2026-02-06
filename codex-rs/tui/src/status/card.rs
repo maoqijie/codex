@@ -380,7 +380,7 @@ impl HistoryCell for StatusHistoryCell {
                 (None, None) => "ChatGPT".to_string(),
             },
             StatusAccountDisplay::ApiKey => {
-                "已配置 API Key（运行 codex login 使用 ChatGPT）".to_string()
+                "已配置 API Key（运行 codex2 login 使用 ChatGPT）".to_string()
             }
         });
 

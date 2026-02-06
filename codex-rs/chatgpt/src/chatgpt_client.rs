@@ -30,11 +30,11 @@ pub(crate) async fn chatgpt_get_request_with_timeout<T: DeserializeOwned>(
     let url = format!("{chatgpt_base_url}{path}");
 
     let token =
-        get_chatgpt_token_data().ok_or_else(|| anyhow::anyhow!("ChatGPT token not available"))?;
+        get_chatgpt_token_data().ok_or_else(|| anyhow::anyhow!("未获取到 ChatGPT Token"))?;
 
-    let account_id = token.account_id.ok_or_else(|| {
-        anyhow::anyhow!("ChatGPT account ID not available, please re-run `codex login`")
-    });
+    let account_id = token
+        .account_id
+        .ok_or_else(|| anyhow::anyhow!("ChatGPT 账户 ID 不可用，请重新运行 `codex2 login`"));
 
     let mut request = client
         .get(&url)
@@ -46,17 +46,14 @@ pub(crate) async fn chatgpt_get_request_with_timeout<T: DeserializeOwned>(
         request = request.timeout(timeout);
     }
 
-    let response = request.send().await.context("Failed to send request")?;
+    let response = request.send().await.context("发送请求失败")?;
 
     if response.status().is_success() {
-        let result: T = response
-            .json()
-            .await
-            .context("Failed to parse JSON response")?;
+        let result: T = response.json().await.context("解析 JSON 响应失败")?;
         Ok(result)
     } else {
         let status = response.status();
         let body = response.text().await.unwrap_or_default();
-        anyhow::bail!("Request failed with status {status}: {body}")
+        anyhow::bail!("请求失败（HTTP {status}）：{body}")
     }
 }

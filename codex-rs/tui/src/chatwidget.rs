@@ -4666,7 +4666,7 @@ impl ChatWidget {
 
         let header = self.model_menu_header(
             "选择模型与推理强度",
-            "可通过 codex -m <model_name> 或在 config.toml 中使用旧版模型",
+            "可通过 codex2 -m <model_name> 或在 config.toml 中使用旧版模型",
         );
         self.bottom_pane.show_selection_view(SelectionViewParams {
             footer_hint: Some("按 Enter 选择推理强度，按 Esc 关闭。".into()),
@@ -6044,7 +6044,7 @@ impl ChatWidget {
 
     fn rename_confirmation_cell(name: &str, thread_id: Option<ThreadId>) -> PlainHistoryCell {
         let resume_cmd = codex_core::util::resume_command(Some(name), thread_id)
-            .unwrap_or_else(|| format!("codex resume {name}"));
+            .unwrap_or_else(|| format!("codex2 resume {name}"));
         let name = name.to_string();
         let line = vec![
             "• ".into(),

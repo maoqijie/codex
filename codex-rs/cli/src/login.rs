@@ -102,7 +102,7 @@ pub fn read_api_key_from_stdin() -> String {
 
     if stdin.is_terminal() {
         eprintln!(
-            "--with-api-key 需要从标准输入读取 API Key。可以尝试通过管道传入，例如：`printenv OPENAI_API_KEY | codex login --with-api-key`。"
+            "--with-api-key 需要从标准输入读取 API Key。可以尝试通过管道传入，例如：`printenv OPENAI_API_KEY | codex2 login --with-api-key`。"
         );
         std::process::exit(1);
     }
@@ -158,7 +158,7 @@ pub async fn run_login_with_device_code(
 }
 
 /// Prefers device-code login (with `open_browser = false`) when headless environment is detected, but keeps
-/// `codex login` working in environments where device-code may be disabled/feature-gated.
+/// `codex2 login` working in environments where device-code may be disabled/feature-gated.
 /// If `run_device_code_login` returns `ErrorKind::NotFound` ("device-code unsupported"), this
 /// falls back to starting the local browser login server.
 pub async fn run_login_with_device_code_fallback_to_browser(

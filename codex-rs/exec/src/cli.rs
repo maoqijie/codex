@@ -115,7 +115,7 @@ pub enum Command {
 #[derive(Args, Debug)]
 struct ResumeArgsRaw {
     // Note: This is the direct clap shape. We reinterpret the positional when --last is set
-    // so "codex resume --last <prompt>" treats the positional as a prompt, not a session id.
+    // so "codex2 resume --last <prompt>" treats the positional as a prompt, not a session id.
     /// 会话 ID（UUID）或线程名称。若可解析为 UUID，则优先按 UUID 处理。
     /// 若省略，使用 --last 选择最近一次记录的会话。
     #[arg(value_name = "会话ID")]

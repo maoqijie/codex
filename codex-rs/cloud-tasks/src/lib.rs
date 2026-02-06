@@ -72,7 +72,7 @@ async fn init_backend(user_agent_suffix: &str) -> anyhow::Result<BackendContext>
         Some(auth) => auth,
         None => {
             eprintln!(
-                "Not signed in. Please run 'codex login' to sign in with ChatGPT, then re-run 'codex cloud'."
+                "未登录。请运行 `codex2 login` 使用 ChatGPT 登录，然后重新运行 `codex2 cloud`。"
             );
             std::process::exit(1);
         }
@@ -86,7 +86,7 @@ async fn init_backend(user_agent_suffix: &str) -> anyhow::Result<BackendContext>
         Ok(t) if !t.is_empty() => t,
         _ => {
             eprintln!(
-                "Not signed in. Please run 'codex login' to sign in with ChatGPT, then re-run 'codex cloud'."
+                "未登录。请运行 `codex2 login` 使用 ChatGPT 登录，然后重新运行 `codex2 cloud`。"
             );
             std::process::exit(1);
         }
@@ -183,15 +183,13 @@ async fn run_exec_command(args: crate::cli::ExecCommand) -> anyhow::Result<()> {
 async fn resolve_environment_id(ctx: &BackendContext, requested: &str) -> anyhow::Result<String> {
     let trimmed = requested.trim();
     if trimmed.is_empty() {
-        return Err(anyhow!("environment id must not be empty"));
+        return Err(anyhow!("环境 ID 不能为空"));
     }
     let normalized = util::normalize_base_url(&ctx.base_url);
     let headers = util::build_chatgpt_headers().await;
     let environments = crate::env_detect::list_environments(&normalized, &headers).await?;
     if environments.is_empty() {
-        return Err(anyhow!(
-            "no cloud environments are available for this workspace"
-        ));
+        return Err(anyhow!("当前工作区没有可用的云环境"));
     }
 
     if let Some(row) = environments.iter().find(|row| row.id == trimmed) {
@@ -209,7 +207,7 @@ async fn resolve_environment_id(ctx: &BackendContext, requested: &str) -> anyhow
         .collect::<Vec<_>>();
     match label_matches.as_slice() {
         [] => Err(anyhow!(
-            "environment '{trimmed}' not found; run `codex cloud` to list available environments"
+            "未找到环境 '{trimmed}'；运行 `codex2 cloud` 可列出可用环境"
         )),
         [single] => Ok(single.id.clone()),
         [first, rest @ ..] => {
@@ -218,7 +216,7 @@ async fn resolve_environment_id(ctx: &BackendContext, requested: &str) -> anyhow
                 Ok(first_id.clone())
             } else {
                 Err(anyhow!(
-                    "environment label '{trimmed}' is ambiguous; run `codex cloud` to pick the desired environment id"
+                    "环境标签 '{trimmed}' 存在歧义；运行 `codex2 cloud` 选择目标环境 ID"
                 ))
             }
         }
@@ -232,20 +230,18 @@ fn resolve_query_input(query_arg: Option<String>) -> anyhow::Result<String> {
             let force_stdin = matches!(maybe_dash.as_deref(), Some("-"));
             if std::io::stdin().is_terminal() && !force_stdin {
                 return Err(anyhow!(
-                    "no query provided. Pass one as an argument or pipe it via stdin."
+                    "未提供查询内容。请通过参数传入，或通过 stdin 管道输入。"
                 ));
             }
             if !force_stdin {
-                eprintln!("Reading query from stdin...");
+                eprintln!("正在从 stdin 读取查询内容…");
             }
             let mut buffer = String::new();
             std::io::stdin()
                 .read_to_string(&mut buffer)
-                .map_err(|e| anyhow!("failed to read query from stdin: {e}"))?;
+                .map_err(|e| anyhow!("从 stdin 读取查询内容失败：{e}"))?;
             if buffer.trim().is_empty() {
-                return Err(anyhow!(
-                    "no query provided via stdin (received empty input)."
-                ));
+                return Err(anyhow!("stdin 未提供查询内容（输入为空）。"));
             }
             Ok(buffer)
         }
@@ -552,7 +548,7 @@ async fn run_list_command(args: crate::cli::ListCommand) -> anyhow::Result<()> {
         return Ok(());
     }
     if page.tasks.is_empty() {
-        println!("No tasks found.");
+        println!("未找到任何任务。");
         return Ok(());
     }
     let now = Utc::now();
@@ -561,14 +557,14 @@ async fn run_list_command(args: crate::cli::ListCommand) -> anyhow::Result<()> {
         println!("{line}");
     }
     if let Some(cursor) = page.cursor {
-        let command = format!("codex cloud list --cursor='{cursor}'");
+        let command = format!("codex2 cloud list --cursor='{cursor}'");
         if colorize {
             println!(
-                "\nTo fetch the next page, run {}",
+                "\n要获取下一页，请运行 {}",
                 command.if_supports_color(Stream::Stdout, |text| text.cyan())
             );
         } else {
-            println!("\nTo fetch the next page, run {command}");
+            println!("\n要获取下一页，请运行 {command}");
         }
     }
     Ok(())
@@ -728,7 +724,7 @@ fn spawn_apply(
 
 // (no standalone patch summarizer needed – UI displays raw diffs)
 
-/// Entry point for the `codex cloud` subcommand.
+/// Entry point for the `codex2 cloud` subcommand.
 pub async fn run_main(cli: Cli, _codex_linux_sandbox_exe: Option<PathBuf>) -> anyhow::Result<()> {
     if let Some(command) = cli.command {
         return match command {

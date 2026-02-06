@@ -485,11 +485,11 @@ impl CodexClient {
         let stdin = codex_app_server
             .stdin
             .take()
-            .context("codex app-server stdin unavailable")?;
+            .context("codex2 app-server stdin unavailable")?;
         let stdout = codex_app_server
             .stdout
             .take()
-            .context("codex app-server stdout unavailable")?;
+            .context("codex2 app-server stdout unavailable")?;
 
         Ok(Self {
             child: codex_app_server,
@@ -817,9 +817,9 @@ impl CodexClient {
             writeln!(stdin, "{request_json}")?;
             stdin
                 .flush()
-                .context("failed to flush request to codex app-server")?;
+                .context("failed to flush request to codex2 app-server")?;
         } else {
-            bail!("codex app-server stdin closed");
+            bail!("codex2 app-server stdin closed");
         }
 
         Ok(())
@@ -881,10 +881,10 @@ impl CodexClient {
             let bytes = self
                 .stdout
                 .read_line(&mut response_line)
-                .context("failed to read from codex app-server")?;
+                .context("failed to read from codex2 app-server")?;
 
             if bytes == 0 {
-                bail!("codex app-server closed stdout");
+                bail!("codex2 app-server closed stdout");
             }
 
             let trimmed = response_line.trim();
@@ -1021,11 +1021,11 @@ impl CodexClient {
             writeln!(stdin, "{payload}")?;
             stdin
                 .flush()
-                .context("failed to flush response to codex app-server")?;
+                .context("failed to flush response to codex2 app-server")?;
             return Ok(());
         }
 
-        bail!("codex app-server stdin closed")
+        bail!("codex2 app-server stdin closed")
     }
 }
 
@@ -1040,14 +1040,14 @@ impl Drop for CodexClient {
         let _ = self.stdin.take();
 
         if let Ok(Some(status)) = self.child.try_wait() {
-            println!("[codex app-server exited: {status}]");
+            println!("[codex2 app-server exited: {status}]");
             return;
         }
 
         thread::sleep(Duration::from_millis(100));
 
         if let Ok(Some(status)) = self.child.try_wait() {
-            println!("[codex app-server exited: {status}]");
+            println!("[codex2 app-server exited: {status}]");
             return;
         }
 

@@ -236,8 +236,8 @@ async fn run_session_picker(
 /// Returns the human-readable column header for the given sort key.
 fn sort_key_label(sort_key: ThreadSortKey) -> &'static str {
     match sort_key {
-        ThreadSortKey::CreatedAt => "Created at",
-        ThreadSortKey::UpdatedAt => "Updated at",
+        ThreadSortKey::CreatedAt => "创建时间",
+        ThreadSortKey::UpdatedAt => "更新时间",
     }
 }
 
@@ -874,7 +874,7 @@ fn draw_picker(tui: &mut Tui, state: &PickerState) -> std::io::Result<()> {
         let header_line: Line = vec![
             state.action.title().bold().cyan(),
             "  ".into(),
-            "Sort:".dim(),
+            "排序：".dim(),
             " ".into(),
             sort_key_label(state.sort_key).magenta(),
         ]
@@ -908,7 +908,7 @@ fn draw_picker(tui: &mut Tui, state: &PickerState) -> std::io::Result<()> {
             " 退出 ".dim(),
             "    ".dim(),
             key_hint::plain(KeyCode::Tab).into(),
-            " to toggle sort ".dim(),
+            " 切换排序 ".dim(),
             "    ".dim(),
             key_hint::plain(KeyCode::Up).into(),
             "/".dim(),
@@ -1311,13 +1311,13 @@ mod tests {
     use super::*;
     use chrono::Duration;
     use codex_protocol::ThreadId;
-    use codex_protocol::models::ContentItem;
-    use codex_protocol::models::ResponseItem;
+    use codex_protocol::protocol::EventMsg;
     use codex_protocol::protocol::RolloutItem;
     use codex_protocol::protocol::RolloutLine;
     use codex_protocol::protocol::SessionMeta;
     use codex_protocol::protocol::SessionMetaLine;
     use codex_protocol::protocol::SessionSource;
+    use codex_protocol::protocol::UserMessageEvent;
     use crossterm::event::KeyCode;
     use crossterm::event::KeyEvent;
     use crossterm::event::KeyModifiers;
@@ -1417,15 +1417,12 @@ mod tests {
             };
             let user_line = RolloutLine {
                 timestamp: ts.to_rfc3339(),
-                item: RolloutItem::ResponseItem(ResponseItem::Message {
-                    id: None,
-                    role: String::from("user"),
-                    content: vec![ContentItem::InputText {
-                        text: preview.to_string(),
-                    }],
-                    end_turn: None,
-                    phase: None,
-                }),
+                item: RolloutItem::EventMsg(EventMsg::UserMessage(UserMessageEvent {
+                    message: preview.to_string(),
+                    images: None,
+                    local_images: Vec::new(),
+                    text_elements: Vec::new(),
+                })),
             };
             let meta_json = serde_json::to_string(&meta_line).expect("serialize meta");
             let user_json = serde_json::to_string(&user_line).expect("serialize user");

@@ -528,7 +528,7 @@ async fn run_ratatui_app(
             thread_name: None,
             update_action: None,
             exit_reason: ExitReason::Fatal(format!(
-                "找不到 ID 为 {id_str} 的已保存会话。直接运行 `codex {action}`（不带 ID）可从已有会话中选择。"
+                "找不到 ID 为 {id_str} 的已保存会话。直接运行 `codex2 {action}`（不带 ID）可从已有会话中选择。"
             )),
         })
     };

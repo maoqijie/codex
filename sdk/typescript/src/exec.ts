@@ -353,7 +353,7 @@ function findCodexPath() {
 
   const vendorRoot = path.join(scriptDirName, "..", "vendor");
   const archRoot = path.join(vendorRoot, targetTriple);
-  const codexBinaryName = process.platform === "win32" ? "codex.exe" : "codex";
+  const codexBinaryName = process.platform === "win32" ? "codex2.exe" : "codex2";
   const binaryPath = path.join(archRoot, "codex", codexBinaryName);
 
   return binaryPath;
