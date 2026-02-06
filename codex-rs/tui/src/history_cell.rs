@@ -2154,7 +2154,7 @@ impl HistoryCell for FinalMessageSeparator {
     }
 }
 
-fn runtime_metrics_label(summary: RuntimeMetricsSummary) -> Option<String> {
+pub(crate) fn runtime_metrics_label(summary: RuntimeMetricsSummary) -> Option<String> {
     let mut parts = Vec::new();
     if summary.tool_calls.count > 0 {
         let duration = format_duration_ms(summary.tool_calls.duration_ms);
@@ -2200,6 +2200,34 @@ fn runtime_metrics_label(summary: RuntimeMetricsSummary) -> Option<String> {
     if summary.responses_api_inference_time_ms > 0 {
         let duration = format_duration_ms(summary.responses_api_inference_time_ms);
         parts.push(format!("Responses API 推理耗时：{duration}"));
+    }
+    if summary.responses_api_engine_iapi_ttft_ms > 0
+        || summary.responses_api_engine_service_ttft_ms > 0
+    {
+        let mut ttft_parts = Vec::new();
+        if summary.responses_api_engine_iapi_ttft_ms > 0 {
+            let duration = format_duration_ms(summary.responses_api_engine_iapi_ttft_ms);
+            ttft_parts.push(format!("{duration}（iapi）"));
+        }
+        if summary.responses_api_engine_service_ttft_ms > 0 {
+            let duration = format_duration_ms(summary.responses_api_engine_service_ttft_ms);
+            ttft_parts.push(format!("{duration}（service）"));
+        }
+        parts.push(format!("TTFT：{}", ttft_parts.join(" ")));
+    }
+    if summary.responses_api_engine_iapi_tbt_ms > 0
+        || summary.responses_api_engine_service_tbt_ms > 0
+    {
+        let mut tbt_parts = Vec::new();
+        if summary.responses_api_engine_iapi_tbt_ms > 0 {
+            let duration = format_duration_ms(summary.responses_api_engine_iapi_tbt_ms);
+            tbt_parts.push(format!("{duration}（iapi）"));
+        }
+        if summary.responses_api_engine_service_tbt_ms > 0 {
+            let duration = format_duration_ms(summary.responses_api_engine_service_tbt_ms);
+            tbt_parts.push(format!("{duration}（service）"));
+        }
+        parts.push(format!("TBT：{}", tbt_parts.join(" ")));
     }
     if parts.is_empty() {
         None
@@ -2364,9 +2392,13 @@ mod tests {
             },
             responses_api_overhead_ms: 650,
             responses_api_inference_time_ms: 1_940,
+            responses_api_engine_iapi_ttft_ms: 410,
+            responses_api_engine_service_ttft_ms: 460,
+            responses_api_engine_iapi_tbt_ms: 1_180,
+            responses_api_engine_service_tbt_ms: 1_240,
         };
         let cell = FinalMessageSeparator::new(Some(12), Some(summary));
-        let rendered = render_lines(&cell.display_lines(300));
+        let rendered = render_lines(&cell.display_lines(600));
 
         assert_eq!(rendered.len(), 1);
         assert!(!rendered[0].contains("耗时 "));
@@ -2377,6 +2409,8 @@ mod tests {
         assert!(rendered[0].contains("WebSocket：接收 4 个事件（1.2s）"));
         assert!(rendered[0].contains("Responses API 额外开销：650ms"));
         assert!(rendered[0].contains("Responses API 推理耗时：1.9s"));
+        assert!(rendered[0].contains("TTFT：410ms（iapi） 460ms（service）"));
+        assert!(rendered[0].contains("TBT：1.2s（iapi） 1.2s（service）"));
     }
 
     #[test]
