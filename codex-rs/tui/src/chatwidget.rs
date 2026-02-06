@@ -950,7 +950,7 @@ impl ChatWidget {
     fn log_websocket_timing_totals(&mut self, delta: RuntimeMetricsSummary) {
         if let Some(label) = history_cell::runtime_metrics_label(delta.responses_api_summary()) {
             self.add_plain_history_lines(vec![
-                vec!["• ".dim(), format!("WebSocket timing: {label}").dark_gray()].into(),
+                vec!["• ".dim(), format!("WebSocket 耗时：{label}").dark_gray()].into(),
             ]);
         }
     }
