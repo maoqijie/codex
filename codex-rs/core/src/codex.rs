@@ -952,10 +952,10 @@ impl Session {
             post_session_configured_events.push(Event {
                 id: INITIAL_SUBMIT_ID.to_owned(),
                 msg: EventMsg::DeprecationNotice(DeprecationNoticeEvent {
-                    summary: "`experimental_instructions_file` is deprecated and ignored. Use `model_instructions_file` instead."
+                    summary: "`experimental_instructions_file` 已弃用且会被忽略，请改用 `model_instructions_file`。"
                         .to_string(),
                     details: Some(
-                        "Move the setting to `model_instructions_file` in config.toml (or under a profile) to load instructions from a file."
+                        "请将该设置迁移到 config.toml（或 profile）中的 `model_instructions_file`，以从文件加载指引。"
                             .to_string(),
                     ),
                 }),
@@ -3002,7 +3002,7 @@ mod handlers {
                         .await;
                 }
                 Err(err) => {
-                    let message = format!("Failed to apply execpolicy amendment: {err}");
+                    let message = format!("应用 execpolicy 修订失败：{err}");
                     tracing::warn!("{message}");
                     let warning = EventMsg::Warning(WarningEvent { message });
                     sess.send_event_raw(Event {

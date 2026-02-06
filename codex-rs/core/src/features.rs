@@ -344,16 +344,16 @@ fn legacy_usage_notice(alias: &str, feature: Feature) -> (String, Option<String>
                 }
                 _ => alias,
             };
-            let summary = format!("`{label}` is deprecated. Use `web_search` instead.");
+            let summary = format!("`{label}` 已弃用，请改用 `web_search`。");
             (summary, Some(web_search_details().to_string()))
         }
         _ => {
-            let summary = format!("`{alias}` is deprecated. Use `[features].{canonical}` instead.");
+            let summary = format!("`{alias}` 已弃用，请改用 `[features].{canonical}`。");
             let details = if alias == canonical {
                 None
             } else {
                 Some(format!(
-                    "Enable it with `--enable {canonical}` or `[features].{canonical}` in config.toml. See https://github.com/openai/codex/blob/main/docs/config.md#feature-flags for details."
+                    "可通过 `--enable {canonical}` 或在 config.toml 的 `[features].{canonical}` 中启用。详情见：https://github.com/openai/codex/blob/main/docs/config.md#feature-flags"
                 ))
             };
             (summary, details)
@@ -362,7 +362,7 @@ fn legacy_usage_notice(alias: &str, feature: Feature) -> (String, Option<String>
 }
 
 fn web_search_details() -> &'static str {
-    "Set `web_search` to `\"live\"`, `\"cached\"`, or `\"disabled\"` at the top level (or under a profile) in config.toml."
+    "请在 config.toml 顶层（或 profile 下）将 `web_search` 设置为 `\"live\"`、`\"cached\"` 或 `\"disabled\"`。"
 }
 
 /// Keys accepted in `[features]` tables.
@@ -630,7 +630,7 @@ pub fn maybe_push_unstable_features_warning(
         .display()
         .to_string();
     let message = format!(
-        "Under-development features enabled: {under_development_feature_keys}. Under-development features are incomplete and may behave unpredictably. To suppress this warning, set `suppress_unstable_features_warning = true` in {config_path}."
+        "已启用“开发中”的功能开关：{under_development_feature_keys}。开发中功能可能不完整并且行为不可预期。若要关闭此警告，请在 {config_path} 中设置 `suppress_unstable_features_warning = true`。"
     );
     post_session_configured_events.push(Event {
         id: "".to_owned(),
